@@ -1,0 +1,28 @@
+:root{
+  --bg:#0c1630;
+  --panel:#f3f5f7;
+  --panel2:#dfe4e8;
+  --border:#5d6874;
+  --text:#18202a;
+  --muted:#65717e;
+  --accent:#2f63b5;
+  --task:#1d2d4f;
+  --danger:#9a2c2c;
+  --ok:#2c6f48;
+  --terminal:#8cff78;
+  --terminal-dim:#4d8a48;
+  --terminal-bg:#020802;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Tahoma,Arial,sans-serif;background:#081326;color:var(--text)}
+button,input{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+#game{min-height:100vh}
+.boot-screen{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(145deg,#0b1937,#234a82)}
+.boot-card{width:min(420px,100%);padding:28px;background:#edf1f4;border:2px solid #fff;box-shadow:0 0 0 1px #738198,0 12px 40px #0008}
+.boot-logo{font-size:32px;font-weight:800;letter-spacing:2px;color:#173d78}
+.alias-form{display:grid;gap:12px;margin-top:26px}
+.alias-form input{padding:13px;border:1px solid #7e8996;font-size:16px}
+.alias-form button{padding:12px;background:#2f63b5;color:white;border:1px solid #1e447d}
