@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0c1630" />
+  <title>BLACKBOX — v0.1.1</title>
+  <link rel="stylesheet" href="./css/base.css" />
+  <link rel="stylesheet" href="./css/desktop.css" />
+  <link rel="stylesheet" href="./css/apps.css" />
+  <link rel="stylesheet" href="./css/terminal.css" />
+  <link rel="stylesheet" href="./css/transitions.css" />
+  <link rel="stylesheet" href="./css/mobile.css" />
+</head>
+<body>
+  <div id="game" aria-live="polite">
+    <section id="boot-screen" class="boot-screen">
+      <div class="boot-card">
+        <div class="boot-logo">NEXUS/OS</div>
+        <p class="muted">Personal Computing Environment // v0.1.1</p>
+        <form id="alias-form" class="alias-form">
+          <label for="alias-input">Create your user alias</label>
+          <input id="alias-input" name="alias" maxlength="18" autocomplete="off" placeholder="ghost" required />
+          <button type="submit">Begin</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="desktop" class="desktop hidden" aria-label="Desktop">
+      <div class="desktop-icons" id="desktop-icons"></div>
+      <div id="window-layer" class="window-layer"></div>
+
+      <aside id="notifications" class="notifications" aria-live="polite"></aside>
+
+      <nav class="taskbar">
+        <button id="start-button" class="taskbar-button">◈ Start</button>
+        <div id="taskbar-apps" class="taskbar-apps"></div>
+        <button id="clock-button" class="clock-button" title="Game time">
+          <span id="clock-time">--:--</span>
+          <span id="clock-date">----</span>
+        </button>
+      </nav>
+
+      <div id="start-menu" class="start-menu hidden">
+        <div class="start-user">
+          <strong id="start-alias">user</strong>
+          <span>Local account</span>
+        </div>
+        <div id="start-app-list" class="start-app-list"></div>
+        <div class="start-footer">
+          <button id="save-button">Save</button>
+          <button id="blackbox-button">Enter BLACKBOX</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="blackbox-transition" class="blackbox-transition hidden" aria-hidden="true">
+      <div id="transition-lines" class="transition-lines"></div>
+      <button id="skip-transition" class="skip-transition hidden">Skip</button>
+    </section>
+
+    <section id="blackbox" class="blackbox hidden" aria-label="BLACKBOX terminal">
+      <div class="crt-overlay" aria-hidden="true"></div>
+      <header class="blackbox-header">
+        <div>
+          <strong>BLACKBOX SECURE ENVIRONMENT</strong>
+          <span id="bb-session-label">LOCAL SESSION</span>
+        </div>
+        <div class="bb-status">
+          <span>LINK <b id="bb-link">LOCAL</b></span>
+          <span>TRACE <b id="bb-trace">0%</b></span>
+        </div>
+      </header>
+
+      <main class="terminal-shell">
+        <div id="terminal-output" class="terminal-output"></div>
+        <form id="terminal-form" class="terminal-form" autocomplete="off">
+          <span id="terminal-prompt" class="terminal-prompt">user@home:~$</span>
+          <input id="terminal-input" class="terminal-input" spellcheck="false" autocomplete="off" />
+        </form>
+      </main>
+
+      <footer class="blackbox-footer">
+        <span>BLACKBOX/0.1.1</span>
+        <span>Type <b>help</b> for commands · <b>exit</b> to return</span>
+      </footer>
+    </section>
+  </div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
