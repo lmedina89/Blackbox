@@ -22,6 +22,12 @@ function initializeGameUI(){
   document.querySelector("#start-alias").textContent=getState().player.alias;
   desktop.classList.remove("hidden");
   boot.classList.add("hidden");
+  // iOS Safari occasionally paints the icon labels before the glyphs on first reveal.
+  // Force a layout/repaint on the next frame without changing the visual scale.
+  requestAnimationFrame(()=>{
+    desktop.classList.add("desktop-ready");
+    void desktop.offsetWidth;
+  });
   startClock();
 
   on("mission:started",()=>saveGame());
@@ -37,8 +43,16 @@ async function enterBlackbox(){
 
 async function exitBlackbox(){
   saveGame();
+  const terminalInput=document.querySelector("#terminal-input");
+  terminalInput?.blur();
   await exitBlackboxTransition({desktop,blackbox});
   desktopUI.refresh();
+  // Recover cleanly from iOS Safari's text-input zoom/scroll state.
+  requestAnimationFrame(()=>{
+    window.scrollTo({top:0,left:0,behavior:"auto"});
+    document.documentElement.scrollLeft=0;
+    document.body.scrollLeft=0;
+  });
 }
 
 initMissions();

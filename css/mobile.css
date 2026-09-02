@@ -1,1 +1,56 @@
 @media (max-width:700px){.desktop-icons{grid-template-columns:repeat(3,1fr);width:auto;right:10px;gap:5px}.desktop-icon{font-size:11px;min-height:65px}.app-window{left:2%!important;top:3%!important;width:96%;height:85%;min-height:430px}.mail-layout,.chat-layout{grid-template-columns:1fr}.sidebar{border-right:0;border-bottom:1px solid #c8ced5;max-height:140px}.system-grid{grid-template-columns:1fr}.blackbox-header{align-items:flex-start}.bb-status{justify-content:flex-end}.blackbox-footer{display:none}.terminal-shell{min-height:calc(100vh - 54px);padding:10px}.terminal-output,.terminal-input{font-size:12.5px}.taskbar-apps{display:none}.site-head{align-items:flex-start}.site-logo{font-size:22px}.site-head span{display:none}.blackbox-launch{align-items:flex-start;flex-direction:column}.notepad{min-height:500px}.window-titlebar{touch-action:none}}
+
+@media (max-width:700px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  .desktop,.blackbox{width:100%;max-width:100%;overflow-x:hidden}
+  .desktop-icons{top:14px}
+  .desktop-ready .desktop-icons{visibility:visible}
+  .app-window{max-width:96%;overflow:hidden}
+  .window-content{overflow-x:hidden}
+  .app-body,.content-pane{max-width:100%;overflow-wrap:anywhere}
+  .browser-toolbar{
+    display:flex;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    overflow-y:hidden;
+    gap:6px;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .browser-toolbar::-webkit-scrollbar{display:none}
+  .browser-toolbar button{
+    flex:0 0 auto;
+    min-width:max-content;
+    max-width:none;
+    white-space:nowrap;
+    padding-inline:12px;
+  }
+  .browser-toolbar input{
+    flex:0 0 160px;
+    min-width:160px;
+  }
+  .terminal-input{
+    font-size:16px !important;
+    line-height:1.4;
+  }
+  .blackbox-header{
+    padding-left:max(12px,env(safe-area-inset-left));
+    padding-right:max(12px,env(safe-area-inset-right));
+  }
+  .terminal-shell{
+    padding-left:max(12px,env(safe-area-inset-left));
+    padding-right:max(12px,env(safe-area-inset-right));
+  }
+  .bb-desktop-button{
+    min-height:34px;
+    padding:5px 8px;
+    font-family:inherit;
+    font-size:11px;
+    letter-spacing:.5px;
+    color:var(--terminal);
+    background:#041004;
+    border:1px solid #396337;
+  }
+  .terminal-form{align-items:flex-start}
+  .terminal-prompt{padding-top:2px}
+}

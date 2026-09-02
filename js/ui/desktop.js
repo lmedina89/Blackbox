@@ -58,7 +58,7 @@ export function initDesktopUI({enterBlackbox}){
 
   function renderBrowser(el){
     const s=getState();
-    el.innerHTML=`<div class="browser-chrome"><div class="browser-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Favorites&nbsp;&nbsp; Help</div><div class="app-toolbar"><button data-nav="back">←</button><button data-site="news">News</button><button data-site="social">FriendSpace</button><button data-site="forum">NightWire</button><button data-site="shop">ByteBarn</button><input value="nexus://${s.ui.lastBrowserSite||"news"}" aria-label="Address"></div></div><div class="app-body browser-page" id="browser-body"></div>`;
+    el.innerHTML=`<div class="browser-chrome"><div class="browser-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Favorites&nbsp;&nbsp; Help</div><div class="app-toolbar browser-toolbar"><button data-nav="back">←</button><button data-site="news">News</button><button data-site="social">FriendSpace</button><button data-site="forum">NightWire</button><button data-site="shop">ByteBarn</button><input value="nexus://${s.ui.lastBrowserSite||"news"}" aria-label="Address"></div></div><div class="app-body browser-page" id="browser-body"></div>`;
     const body=el.querySelector("#browser-body"),addr=el.querySelector("input");
     const show=site=>{s.ui.lastBrowserSite=site;addr.value=`nexus://${site}`;
       if(site==="news")body.innerHTML=`<div class="site-head"><div class="site-logo">METROWIRE</div><span>LOCAL // TECHNOLOGY // BUSINESS</span></div>${NEWS.filter(visible).map(n=>`<article class="news-story"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · Day ${s.world.day}</span></article>`).join("")}`;

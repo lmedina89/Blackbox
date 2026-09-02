@@ -1,8 +1,8 @@
-# BLACKBOX — v0.1.1 Desktop Life & BLACKBOX Polish
+# BLACKBOX — v0.1.1.1 Desktop Life & BLACKBOX Polish
 
 This build continues directly from v0.1.0 and preserves the modular, data-driven architecture.
 
-## What changed in v0.1.1
+## What changed in v0.1.1.1
 
 - Desktop feels more like a real personal computer rather than a menu shell.
 - Desktop apps are now defined in `js/data/apps.js`.
@@ -42,3 +42,14 @@ This build continues directly from v0.1.0 and preserves the modular, data-driven
 ## Run
 
 Serve the folder through a web server because ES modules are used. GitHub Pages is supported.
+
+## v0.1.1.1 mobile hotfix
+
+- iPhone terminal autocapitalization/autocorrect disabled where supported.
+- Terminal command names are case-insensitive.
+- First job now teaches `scan` then `connect ARCHIVES-01`.
+- Added touch-friendly BLACKBOX `DESKTOP` control.
+- Improved iOS terminal input zoom/exit recovery.
+- BLACKBOX banner narrowed so the right border closes on mobile.
+- Nexus Explorer toolbar is horizontally scrollable on narrow screens.
+- Added overflow/safe-area handling and first-paint stabilization for mobile.

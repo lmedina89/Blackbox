@@ -1,6 +1,6 @@
 {
-  "version": "0.1.1",
-  "name": "BLACKBOX \u2014 Desktop Life & BLACKBOX Polish",
+  "version": "0.1.1.1",
+  "name": "BLACKBOX \u2014 Mobile Hotfix",
   "files": [
     "README.md",
     "build-manifest.json",
@@ -39,5 +39,15 @@
     "js/ui/transitions.js"
   ],
   "saveVersion": 2,
-  "worldSchema": 2
+  "worldSchema": 2,
+  "hotfixes": [
+    "iOS terminal input/autocapitalize",
+    "case-insensitive commands",
+    "first-mission shell guidance",
+    "touch desktop exit",
+    "Safari zoom recovery",
+    "responsive BLACKBOX frame",
+    "desktop first-paint stabilization",
+    "mobile browser toolbar overflow"
+  ]
 }
