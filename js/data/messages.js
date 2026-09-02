@@ -1,23 +1,30 @@
 export const THREADS = [
   {
-    id:"maya",npcId:"maya",messages:[
-      {id:"m1",from:"maya",text:"yo, you finally got that machine running?",visibleWhen:[]},
-      {id:"m2",from:"player",text:"barely. it sounds like a jet engine.",visibleWhen:[]},
-      {id:"m3",from:"maya",text:"lol. check your email. someone sent you something weird.",visibleWhen:["alias_created"]},
-      {id:"m4",from:"maya",text:"wait... did you actually do it?",visibleWhen:["mission_first_complete"]},
-      {id:"m5",from:"maya",text:"sam says that archive wasn't the only old Northstar machine. he posted something else on NightWire. want me to send you down that rabbit hole?",visibleWhen:["mission_first_complete"]},
-      {id:"m6",from:"maya",text:"lol knew you'd look. Sam put the details in a new NightWire thread.",visibleWhen:["second_lead_accepted"]},
-      {id:"m7",from:"maya",text:"so it was just an old relay? honestly that's kind of a relief.",visibleWhen:["mission_second_complete"]}
-    ],
-    choices:[
+    id:"maya",
+    npcId:"maya",
+    messages:[
+      {id:"m1",from:"maya",time:"18:38",text:"yo, you finally got that machine running?",visibleWhen:[]},
+      {id:"m2",from:"player",time:"18:39",text:"barely. it sounds like a jet engine.",visibleWhen:[]},
+      {id:"m3",from:"maya",time:"18:39",text:"lol. check your email. someone sent you something weird.",visibleWhen:["alias_created"]},
+      {id:"m4",from:"maya",time:"19:01",text:"wait... did you actually do it?",visibleWhen:["mission_first_complete"]},
       {
-        id:"maya_second_lead",afterMessageId:"m5",visibleWhen:["mission_first_complete"],hiddenWhen:["second_lead_accepted"],
-        prompt:"Reply to Maya",
-        options:[
-          {id:"accept_curious",label:"Yeah. What did Sam find?",playerText:"Yeah. What did Sam find?",flags:["second_lead_accepted"],relationship:{maya:1},eventTarget:"maya_second_lead"},
-          {id:"accept_direct",label:"Send it. I'll take a look.",playerText:"Send it. I'll take a look.",flags:["second_lead_accepted"],relationship:{maya:0},eventTarget:"maya_second_lead"}
-        ]
-      }
+        id:"m5",
+        from:"maya",
+        time:"19:03",
+        text:"Sam says another one of those old Northstar mirror boxes is still online. He wants somebody to check what it's serving.",
+        visibleWhen:["mission_first_complete"],
+        choice:{
+          id:"mirror_offer",
+          options:[
+            {id:"mirror_send",text:"Send me what he found.",setFlags:["mirror_lead_accepted"],relationship:{maya:1}},
+            {id:"mirror_why",text:"What exactly did he find?",setFlags:["mirror_lead_accepted","asked_about_mirror"],relationship:{maya:1}}
+          ]
+        }
+      },
+      {id:"m6",from:"player",time:"19:04",text:"Send me what he found.",visibleWhen:["choice_mirror_send"]},
+      {id:"m7",from:"player",time:"19:04",text:"What exactly did he find?",visibleWhen:["choice_mirror_why"]},
+      {id:"m8",from:"maya",time:"19:05",text:"Check Sam's FriendSpace. He posted the hostname and address before he went offline.",visibleWhen:["mirror_lead_accepted"]},
+      {id:"m9",from:"maya",time:"19:18",text:"Sam says the mirror looks normal again. Whatever you found, that helped.",visibleWhen:["mission_mirror_complete"]}
     ]
   }
 ];

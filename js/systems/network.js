@@ -2,31 +2,42 @@ import { HOSTS } from "../data/hosts.js";
 import { getState } from "../core/state.js";
 import { emit } from "../core/events.js";
 
-export function rememberHost(hostId){
-  const s=getState();s.player.discoveredHosts??=[];
-  if(HOSTS[hostId]&&!s.player.discoveredHosts.includes(hostId))s.player.discoveredHosts.push(hostId);
+function routeVisible(hostId){
+  const s=getState();
+  if(hostId==="home")return true;
+  if(hostId==="archives01")return s.player.discoveredHosts.includes("archives01")||
+    s.world.readForumPosts.includes("f1")||s.world.flags.includes("mission_first_started");
+  if(hostId==="mirror02")return s.player.discoveredHosts.includes("mirror02")||
+    s.world.readSocialPosts.includes("s5");
+  return false;
 }
+
 export function scan(){
-  const s=getState();
-  return [HOSTS.home,...(s.player.discoveredHosts||[]).map(id=>HOSTS[id]).filter(Boolean)];
+  return Object.values(HOSTS).filter(h=>routeVisible(h.id));
 }
-export function resolveTarget(target){
-  const s=getState(),raw=String(target??"").trim();
-  if(/^\d+$/.test(raw)){
-    const hostId=(s.player.discoveredHosts||[])[Number(raw)];
-    if(hostId&&HOSTS[hostId])return HOSTS[hostId];
-  }
-  const lower=raw.toLowerCase();
-  return Object.values(HOSTS).find(h=>h.id.toLowerCase()===lower||h.hostname.toLowerCase()===lower||h.address===raw)||null;
-}
+
 export function connect(target){
-  const wanted=resolveTarget(target);if(!wanted)throw new Error("Host not found");
-  if(wanted.id==="home")return wanted;
+  const wanted=Object.values(HOSTS).find(h=>
+    h.id.toLowerCase()===String(target).toLowerCase()||
+    h.hostname.toLowerCase()===String(target).toLowerCase()||
+    h.address===String(target)
+  );
+  if(!wanted)throw new Error("Host not found");
+  if(!routeVisible(wanted.id))throw new Error("No route to host");
+
   const s=getState();
-  if(!(s.player.discoveredHosts||[]).includes(wanted.id))throw new Error("No route to host. Discover it first.");
-  s.terminal.hostId=wanted.id;s.terminal.user=wanted.access?.mode==="guest"?"guest":"user";s.terminal.cwd="/";
-  emit("host:connected",{hostId:wanted.id});return wanted;
+  if(wanted.id==="home")return wanted;
+  s.terminal.hostId=wanted.id;
+  s.terminal.user=wanted.access?.mode==="guest"?"guest":"user";
+  s.terminal.cwd=wanted.homeDir||"/";
+  emit("host:connected",{hostId:wanted.id});
+  return wanted;
 }
+
 export function disconnect(){
-  const s=getState();s.terminal.hostId="home";s.terminal.user="user";s.terminal.cwd="/home";emit("host:connected",{hostId:"home"});
+  const s=getState();
+  s.terminal.hostId="home";
+  s.terminal.user="user";
+  s.terminal.cwd=HOSTS.home.homeDir||"/home";
+  emit("host:connected",{hostId:"home"});
 }

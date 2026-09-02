@@ -12,8 +12,16 @@ const migrations={
   3(save){
     save.player.discoveredClues ??= [];
     save.player.discoveredHosts ??= [];
-    save.player.relationships ??= {maya:0,zero:0};
-    save.world.chatChoices ??= {};
+    save.player.relationships ??= {maya:1,sam:0,zero:0};
+    save.communications ??= {choicesMade:[]};
+    save.communications.choicesMade ??= [];
+    save.terminal.sessionOpen ??= false;
+    save.terminal.suspended ??= false;
+    return save;
+  },
+  4(save){
+    save.meta.identityId ??= `identity-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
+    save.terminal.pendingAction ??= null;
     return save;
   }
 };
@@ -25,7 +33,9 @@ export function migrateSave(save){
   while(current<SAVE_VERSION){
     const next=current+1,fn=migrations[next];
     if(typeof fn!=="function")throw new Error(`Missing save migration ${next}`);
-    save=fn(save);current=next;save.meta.saveVersion=current;
+    save=fn(save);
+    current=next;
+    save.meta.saveVersion=current;
   }
   save.meta.worldSchema=WORLD_SCHEMA;
   return save;

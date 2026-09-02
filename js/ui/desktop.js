@@ -11,8 +11,9 @@ import { buyHardware } from "../systems/hardware.js";
 import { missionView } from "../systems/missions.js";
 import { formatClock } from "../core/clock.js";
 import { saveGame } from "../core/save.js";
-import { discoverClue, discoveredClues } from "../systems/clues.js";
-import { applyChatChoice } from "../systems/communications.js";
+import { makeChoice, choiceMade } from "../systems/communications.js";
+import { getKnownClues } from "../systems/clues.js";
+import { HOSTS } from "../data/hosts.js";
 
 function visible(item){
   if((item.visibleWhen||[]).some(f=>!hasFlag(f))) return false;
@@ -41,7 +42,7 @@ export function initDesktopUI({enterBlackbox}){
   on("mission:completed",({mission})=>{toast(`Job complete. ${mission.rewards.credits} credits transferred.`);renderOpenApps();setTimeout(()=>openApp("mail"),650);});
   on("hardware:purchased",({item})=>{toast(`${item.name} installed.`);renderOpenApps();});
   on("clue:discovered",({clue})=>{toast(`Clue recorded: ${clue.title}`);renderOpenApps();});
-  on("chat:choice",()=>{renderOpenApps();});
+  on("communications:changed",()=>renderOpenApps());
 
   function createWindow(id,title){
     const existing=layer.querySelector(`[data-window="${id}"]`);if(existing){existing.classList.remove("hidden");existing.style.zIndex=String(++z);return existing.querySelector(".window-content");}
@@ -66,10 +67,19 @@ export function initDesktopUI({enterBlackbox}){
     const body=el.querySelector("#browser-body"),addr=el.querySelector("input");
     const show=site=>{s.ui.lastBrowserSite=site;addr.value=`nexus://${site}`;
       if(site==="news")body.innerHTML=`<div class="site-head"><div class="site-logo">METROWIRE</div><span>LOCAL // TECHNOLOGY // BUSINESS</span></div>${NEWS.filter(visible).map(n=>`<article class="news-story"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · Day ${s.world.day}</span></article>`).join("")}`;
-      if(site==="social")body.innerHTML=`<div class="site-head friendspace"><div class="site-logo">FriendSpace</div><span>${s.player.alias}'s feed</span></div>${SOCIAL_POSTS.filter(visible).map(x=>`<article class="social-post"><div class="avatar">${x.name[0]}</div><div><h3>${x.name} <span>@${x.author}</span></h3><p>${x.body}</p><small>${x.time}</small></div></article>`).join("")}`;
+      if(site==="social"){
+        body.innerHTML=`<div class="site-head friendspace"><div class="site-logo">FriendSpace</div><span>${s.player.alias}'s feed</span></div>${SOCIAL_POSTS.filter(visible).map(x=>`<article class="social-post"><div class="avatar">${x.name[0]}</div><div><h3>${x.name} <span>@${x.author}</span></h3><p>${x.body}</p><small>${x.time}</small>${x.clueId?`<button class="save-clue" data-social="${x.id}">${s.world.readSocialPosts.includes(x.id)?"Saved to BLACKBOX":"Save technical info"}</button>`:""}</div></article>`).join("")}`;
+        body.querySelectorAll("[data-social]").forEach(btn=>btn.addEventListener("click",()=>{
+          const id=btn.dataset.social;
+          if(!s.world.readSocialPosts.includes(id))s.world.readSocialPosts.push(id);
+          emit("social:read",{postId:id});
+          btn.textContent="Saved to BLACKBOX";
+          btn.disabled=true;
+        }));
+      }
       if(site==="forum"){
         body.innerHTML=`<div class="site-head nightwire"><div class="site-logo">NIGHTWIRE</div><span>underground computing board</span></div><div class="forum-banner">READ THE RULES // NO REAL-WORLD TARGETS // KEEP IT IN THE LAB</div>${FORUM_POSTS.filter(visible).map(p=>`<button class="forum-thread" data-post="${p.id}"><b>${p.title}</b><span>by ${p.author}</span><p>${p.body}</p></button>`).join("")}`;
-        body.querySelectorAll("[data-post]").forEach(btn=>btn.addEventListener("click",()=>{const id=btn.dataset.post,post=FORUM_POSTS.find(x=>x.id===id);if(!s.world.readForumPosts.includes(id))s.world.readForumPosts.push(id);for(const clueId of post?.clues||[])discoverClue(clueId,`forum:${id}`);emit("forum:read",{postId:id});btn.classList.add("read");toast(post?.clues?.length?"New target saved to BLACKBOX and Case Notes.":"Forum post read.");}));
+        body.querySelectorAll("[data-post]").forEach(btn=>btn.addEventListener("click",()=>{const id=btn.dataset.post;if(!s.world.readForumPosts.includes(id))s.world.readForumPosts.push(id);emit("forum:read",{postId:id});btn.classList.add("read");toast(id==="f1"?"Archive host saved to BLACKBOX targets.":"Useful information added to your notes.");}));
       }
       if(site==="shop"){
         body.innerHTML=`<div class="site-head bytebarn"><div class="site-logo">BYTEBARN</div><span>PC PARTS // SAME-DAY INSTALL</span></div><div class="store-balance">Available credits: <b>${s.player.credits}</b></div><div class="shop-grid">${HARDWARE.map(h=>`<div class="shop-item"><span class="part-type">${h.type}</span><h3>${h.name}</h3><p>${h.description}</p><strong>${h.price} cr</strong><button data-buy="${h.id}" ${s.player.installedHardware.includes(h.id)?"disabled":""}>${s.player.installedHardware.includes(h.id)?"Installed":"Order & install"}</button></div>`).join("")}</div>`;
@@ -89,34 +99,54 @@ export function initDesktopUI({enterBlackbox}){
 
   function renderChat(el){
     const s=getState(),thread=THREADS[0];
-    const messages=thread.messages.filter(m=>(m.visibleWhen||[]).every(hasFlag)&&!(m.hiddenWhen||[]).some(hasFlag));
-    const availableChoice=thread.choices?.find(c=>(c.visibleWhen||[]).every(hasFlag)&&!(c.hiddenWhen||[]).some(hasFlag)&&!s.world.chatChoices?.[c.id]);
-    const selectedByChoice=s.world.chatChoices||{};
-    let historyHtml="";
-    for(const message of messages){
-      historyHtml+=`<div class="chat-line"><span class="chat-time">${message.id==="m1"?"18:38":"19:02"}</span><b>${message.from==="player"?s.player.alias:"Maya"}:</b> ${message.text}</div>`;
-      for(const choice of thread.choices||[]){
-        const selected=selectedByChoice[choice.id];
-        if(selected&&choice.afterMessageId===message.id)historyHtml+=`<div class="chat-line player-reply"><span class="chat-time">19:03</span><b>${s.player.alias}:</b> ${selected.playerText}</div>`;
+    const messages=thread.messages.filter(m=>(m.visibleWhen||[]).every(hasFlag));
+    const pending=messages.find(m=>m.choice && !m.choice.options.some(o=>choiceMade(o.id)));
+
+    el.innerHTML=`<div class="messenger-top"><b>NEXUS Messenger</b><span><span class="online-dot"></span> Online</span></div>
+      <div class="chat-layout">
+        <div class="sidebar buddy-list">
+          <div class="buddy-group">Friends (1)</div><button class="active"><span class="online-dot"></span> Maya</button>
+          <div class="buddy-group">Offline (2)</div><button disabled>Sam K.</button><button disabled>Chris</button>
+        </div>
+        <div class="content-pane chat-pane">
+          <div class="chat-history">${messages.map(m=>`<div class="chat-line"><span class="chat-time">${m.time||""}</span><b>${m.from==="player"?s.player.alias:"Maya"}:</b> ${m.text}</div>`).join("")}</div>
+          ${pending?`<div class="chat-choices">${pending.choice.options.map(o=>`<button data-choice="${o.id}">${o.text}</button>`).join("")}</div>`:`<div class="chat-compose"><input placeholder="No reply needed right now." disabled><button disabled>Send</button></div>`}
+        </div>
+      </div>`;
+
+    el.querySelectorAll("[data-choice]").forEach(btn=>btn.addEventListener("click",()=>{
+      const result=makeChoice(btn.dataset.choice);
+      if(result.ok){
+        toast("Message sent.");
+        renderChat(el);
       }
-    }
-    el.innerHTML=`<div class="messenger-top"><b>NEXUS Messenger</b><span><span class="online-dot"></span> Online</span></div><div class="chat-layout"><div class="sidebar buddy-list"><div class="buddy-group">Friends (1)</div><button class="active"><span class="online-dot"></span> Maya</button><div class="buddy-group">Offline (2)</div><button disabled>Sam K.</button><button disabled>Chris</button></div><div class="content-pane chat-pane"><div class="chat-history">${historyHtml}</div>${availableChoice?`<div class="chat-choice"><b>${availableChoice.prompt}</b>${availableChoice.options.map(o=>`<button data-chat-choice="${availableChoice.id}" data-option="${o.id}">${o.label}</button>`).join("")}</div>`:`<div class="chat-compose"><input placeholder="No reply needed right now" disabled><button disabled>Send</button></div>`}</div></div>`;
-    el.querySelectorAll("[data-chat-choice]").forEach(btn=>btn.addEventListener("click",()=>{const choice=thread.choices.find(x=>x.id===btn.dataset.chatChoice),option=choice?.options.find(x=>x.id===btn.dataset.option);if(option&&applyChatChoice(thread.id,choice.id,option)){toast("Message sent.");renderChat(el);renderOpenApps();}}));
+    }));
   }
 
   function renderSystem(el){
     const s=getState();
-    el.innerHTML=`<div class="app-body"><div class="system-title"><div class="computer-glyph">🖥️</div><div><h2>${s.player.alias}'s Computer</h2><span>NEXUS/OS Personal Workstation</span></div></div><div class="system-grid"><div class="stat"><b>Processor</b><br>Northstar P3 733 MHz</div><div class="stat"><b>Memory</b><br>${s.player.installedHardware.includes("ram_256")?"384":"128"} MB</div><div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div><div class="stat"><b>Credits</b><br>${s.player.credits}</div><div class="stat"><b>Reputation</b><br>${s.player.reputation}</div><div class="stat"><b>BLACKBOX</b><br>0.1.2 installed</div><div class="stat"><b>Known targets</b><br>${(s.player.discoveredHosts||[]).length}</div></div><div class="card blackbox-launch"><div><h3>BLACKBOX Secure Environment</h3><p>Launch isolated simulated terminal workspace.</p></div><button id="system-blackbox">ENTER BLACKBOX</button></div></div>`;
+    const knownHosts=(s.player.discoveredHosts||[]).map(id=>HOSTS[id]).filter(Boolean);
+    const clues=getKnownClues();
+    el.innerHTML=`<div class="app-body">
+      <div class="system-title"><div class="computer-glyph">🖥️</div><div><h2>${s.player.alias}'s Computer</h2><span>NEXUS/OS Personal Workstation</span></div></div>
+      <div class="system-grid">
+        <div class="stat"><b>Processor</b><br>Northstar P3 733 MHz</div>
+        <div class="stat"><b>Memory</b><br>${s.player.installedHardware.includes("ram_256")?"384":"128"} MB</div>
+        <div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div>
+        <div class="stat"><b>Credits</b><br>${s.player.credits}</div>
+        <div class="stat"><b>Reputation</b><br>${s.player.reputation}</div>
+        <div class="stat"><b>BLACKBOX</b><br>0.1.3 installed</div>
+      </div>
+      <div class="card"><h3>Known BLACKBOX targets</h3>${knownHosts.length?knownHosts.map((h,i)=>`<div class="target-row"><b>[${i}] ${h.hostname}</b><span>${h.address}</span></div>`).join(""):"<p>No remote targets saved.</p>"}</div>
+      <div class="card"><h3>Recorded clues</h3>${clues.length?clues.map(c=>`<div class="clue-row"><b>${c.title}</b><span>${c.summary}</span></div>`).join(""):"<p>No clues recorded.</p>"}</div>
+      <div class="card blackbox-launch"><div><h3>BLACKBOX Secure Environment</h3><p>Launch or resume the isolated simulated terminal workspace.</p></div><button id="system-blackbox">ENTER BLACKBOX</button></div>
+    </div>`;
     el.querySelector("#system-blackbox").addEventListener("click",enterBlackbox);
   }
 
   function renderMissions(el){const active=missionView();el.innerHTML=`<div class="app-body"><h2>Jobs</h2>${active.length?active.map(m=>`<div class="card mission-box"><div class="mission-title"><h3>${m.title}</h3><span>ACTIVE</span></div><p>${m.description}</p><div class="objective-list">${m.objectives.map(o=>`<div class="${m.progress[o.id]?"done":""}">${m.progress[o.id]?"☑":"☐"} ${o.label}</div>`).join("")}</div></div>`).join(""):`<div class="empty-state">No active jobs.<br>Check your email and messages.</div>`}`;}
 
-  function renderNotes(el){
-    const s=getState(),clues=discoveredClues();
-    el.innerHTML=`<div class="notepad-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; Format&nbsp;&nbsp; Help</div><div class="case-notes"><h3>Auto-collected clues</h3>${clues.length?clues.map(c=>`<div class="clue-row"><b>${c.title}</b><span>${c.summary}</span></div>`).join(""):`<p class="muted">Nothing recorded yet.</p>`}</div><textarea id="player-notes" class="notepad" spellcheck="false" placeholder="Write anything else you want to remember...">${s.player.notes||""}</textarea>`;const ta=el.querySelector("#player-notes");ta.addEventListener("input",()=>{s.player.notes=ta.value;});
-  }
-
+  function renderNotes(el){const s=getState();el.innerHTML=`<div class="notepad-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; Format&nbsp;&nbsp; Help</div><textarea id="player-notes" class="notepad" spellcheck="false" placeholder="Write anything you want to remember...">${s.player.notes||""}</textarea>`;const ta=el.querySelector("#player-notes");ta.addEventListener("input",()=>{s.player.notes=ta.value;});}
 
   return {openApp,toast,refresh:renderOpenApps};
 }

@@ -1,16 +1,36 @@
+import { THREADS } from "../data/messages.js";
 import { getState, setFlag } from "../core/state.js";
 import { emit } from "../core/events.js";
 
-export function applyChatChoice(threadId,choiceId,option){
+export function makeChoice(choiceId){
   const s=getState();
-  s.world.chatChoices ??= {};
-  if(s.world.chatChoices[choiceId])return false;
-  s.world.chatChoices[choiceId]={threadId,optionId:option.id,playerText:option.playerText||option.label};
-  for(const flag of option.flags||[])setFlag(flag);
-  for(const [npc,delta] of Object.entries(option.relationship||{})){
-    s.player.relationships ??= {};
-    s.player.relationships[npc]=(s.player.relationships[npc]||0)+Number(delta||0);
+  if(s.communications.choicesMade.includes(choiceId))return {ok:false,message:"Already answered."};
+
+  let option=null;
+  for(const thread of THREADS){
+    for(const message of thread.messages){
+      option=message.choice?.options?.find(x=>x.id===choiceId);
+      if(option)break;
+    }
+    if(option)break;
   }
-  emit("chat:choice",{threadId,choiceId,optionId:option.id,target:option.eventTarget||choiceId});
-  return true;
+  if(!option)return {ok:false,message:"Choice unavailable."};
+
+  s.communications.choicesMade.push(choiceId);
+  setFlag(`choice_${choiceId}`);
+  for(const flag of option.setFlags||[])setFlag(flag);
+
+  if(option.relationship){
+    for(const [npc,amount] of Object.entries(option.relationship)){
+      s.player.relationships[npc]=(s.player.relationships[npc]||0)+amount;
+    }
+  }
+
+  emit("dialogue:choice",{choiceId});
+  emit("communications:changed",{choiceId});
+  return {ok:true};
+}
+
+export function choiceMade(choiceId){
+  return getState().communications.choicesMade.includes(choiceId);
 }

@@ -54,3 +54,19 @@
   .terminal-form{align-items:flex-start}
   .terminal-prompt{padding-top:2px}
 }
+
+@media (max-width:700px){
+  .target-row,.clue-row{display:grid;gap:2px}
+  .target-row span,.clue-row span{text-align:left}
+  .chat-choices button,.save-clue{font-size:16px}
+}
+
+@media (max-width:700px){
+  .boot-card{padding:22px}
+  .archive-row{align-items:flex-start;flex-direction:column}
+  .archive-row button{width:100%}
+  .terminal-line.banner{font-size:clamp(10px,3.2vw,12.5px)}
+  .terminal-notice{font-size:12px}
+  .bb-modal-actions{display:grid;grid-template-columns:1fr;width:100%}
+  .bb-modal-actions button{width:100%}
+}

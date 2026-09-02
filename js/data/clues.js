@@ -1,18 +1,28 @@
-export const CLUES = {
-  clue_archives01:{
-    id:"clue_archives01",title:"Northstar Archive Host",kind:"host",hostId:"archives01",
-    summary:"ARCHIVES-01 — 10.14.8.22. Old Northstar training archive referenced on NightWire."
+export const CLUES = [
+  {
+    id:"northstar_archive_host",
+    title:"Northstar archive host",
+    summary:"ARCHIVES-01 — 10.14.8.22",
+    hostId:"archives01",
+    discoverOn:{event:"forum:read",target:"f1"}
   },
-  clue_marcus_carter:{
-    id:"clue_marcus_carter",title:"Marcus Carter",kind:"identity",
-    summary:"NS-4471 — Marcus Carter, inactive Field Systems employee in the Northstar archive."
+  {
+    id:"marcus_carter_record",
+    title:"Marcus Carter",
+    summary:"Inactive Northstar Field Systems employee, record NS-4471.",
+    discoverOn:{event:"file:read",target:"archives01:/archive/employees.db"}
   },
-  clue_relay02:{
-    id:"clue_relay02",title:"Northstar Relay",kind:"host",hostId:"relay02",
-    summary:"RELAY-02 — 10.14.8.31. Legacy Northstar training relay mentioned by Sam on NightWire."
+  {
+    id:"mirror02_host",
+    title:"Sam's mirror node",
+    summary:"MIRROR-02 — 10.14.8.31",
+    hostId:"mirror02",
+    discoverOn:{event:"social:read",target:"s5"}
   },
-  clue_relay_log:{
-    id:"clue_relay_log",title:"Relay Shutdown Log",kind:"record",
-    summary:"RELAY-02 was retired normally after its training image was mirrored. No obvious intrusion evidence."
+  {
+    id:"mirror02_status",
+    title:"Mirror service state",
+    summary:"MIRROR-02 is serving an old Northstar mirror image despite being marked retired.",
+    discoverOn:{event:"file:read",target:"mirror02:/var/www/status.txt"}
   }
-};
+];

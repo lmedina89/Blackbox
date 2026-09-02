@@ -1,70 +1,67 @@
-# BLACKBOX — v0.1.2.1 Desktop Life & BLACKBOX Polish
+# BLACKBOX — v0.1.3 Identity & Session Foundation
 
-This build continues directly from v0.1.0 and preserves the modular, data-driven architecture.
+Built directly from the tested v0.1.2 Desktop ↔ BLACKBOX Gameplay Foundation.
 
-## What changed in v0.1.1.1
+## v0.1.3 goals
 
-- Desktop feels more like a real personal computer rather than a menu shell.
-- Desktop apps are now defined in `js/data/apps.js`.
-- FriendSpace posts are data-driven in `js/data/social.js`.
-- Browser sites have distinct visual identities: MetroWire, FriendSpace, NightWire and ByteBarn.
-- Email now tracks unread/read presentation.
-- Messenger has a period-style buddy list and conversational history.
-- Added a persistent Notepad for player-written clues.
-- My Computer now reflects hardware upgrades in its system display.
-- BLACKBOX presentation was strengthened with CRT styling and a denser secure-shell boot header.
-- Transition sequence is faster, more technical, and remains skippable/reduced-motion friendly.
-- Terminal now supports believable shared host state for `uname`, `ps`, and `netstat` in addition to filesystem/network commands.
-- Hosts now define processes, services and active connections as data.
-- Save version raised to 2 and world schema to 2 with a migration from v0.1.0.
+This milestone hardens the player-life lifecycle and BLACKBOX session UX before broader v0.2.0 story expansion.
 
-## Playable opening
+### Profile / identity lifecycle
 
-1. Create an alias.
-2. Read normal communications and browse the fake internet.
-3. Read the `small job. easy money.` email.
-4. Use NightWire to discover ARCHIVES-01.
-5. Enter BLACKBOX.
-6. Use `scan`, `connect ARCHIVES-01`, `cd /archive`, `ls`, and `cat employees.db`.
-7. The mission resolves through emitted world events, pays 250 credits, and changes desktop content.
-8. Spend credits at ByteBarn or explore the richer shell state.
+- The old single flat save is now wrapped in a profile container.
+- A profile can hold one active identity plus archived identities.
+- Existing v0.1.2 saves migrate automatically into the active identity slot.
+- Startup now offers Continue, New Identity, and Archived Identities when applicable.
+- Starting a new identity archives the existing active identity first instead of deleting it.
+- Restoring an archived identity moves it back into the active slot.
 
-## Architecture rule
+### `purge identity`
 
-**Systems contain rules. Data contains the world. UI displays state. Events connect systems. Saves preserve state.**
+From the local BLACKBOX shell:
 
-## Save compatibility
+```text
+purge identity
+```
 
-- SAVE_VERSION: 2
-- WORLD_SCHEMA: 2
-- v0.1.0 saves migrate automatically.
+BLACKBOX displays the destructive-action warning and requires:
 
-## Run
+```text
+CONFIRM PURGE
+```
 
-Serve the folder through a web server because ES modules are used. GitHub Pages is supported.
+The active life is archived, not deleted, then BLACKBOX performs an immersive purge sequence and returns to the startup menu. `cancel` aborts a pending purge. Purging is blocked while connected to a remote host.
 
-## v0.1.1.1 mobile hotfix
+### Session-safe DESKTOP control
 
-- iPhone terminal autocapitalization/autocorrect disabled where supported.
-- Terminal command names are case-insensitive.
-- First job now teaches `scan` then `connect ARCHIVES-01`.
-- Added touch-friendly BLACKBOX `DESKTOP` control.
-- Improved iOS terminal input zoom/exit recovery.
-- BLACKBOX banner narrowed so the right border closes on mobile.
-- Nexus Explorer toolbar is horizontally scrollable on narrow screens.
-- Added overflow/safe-area handling and first-paint stabilization for mobile.
+- Local BLACKBOX session: DESKTOP suspends BLACKBOX and returns to NEXUS/OS.
+- Remote session: DESKTOP opens a confirmation instead of bypassing the remote session.
+- `DISCONNECT & RETURN` uses the normal remote `exit` path before suspending BLACKBOX.
+- `CANCEL` keeps the player on the remote host.
 
+### Mission clarity
 
-## v0.1.2 — Desktop ↔ BLACKBOX Gameplay Foundation
+Terminal actions that complete mission objectives now generate a visible in-shell objective notice. Final objectives are followed by a job-complete notice and payment information. These notices do not force the player out of BLACKBOX, so optional exploration remains possible.
 
-- Working BLACKBOX DESKTOP return from local or remote sessions.
-- Case-insensitive terminal command names for mobile keyboards.
-- Persistent discovered target system with numbered `targets` / `hosts` list.
-- `scan` exposes touch-friendly USE actions that preload `connect #` commands.
-- Data-driven clue registry shared between desktop investigations and BLACKBOX.
-- Case Notes automatically collect discovered hosts and records while preserving player notes.
-- Messenger now supports data-driven reply choices and relationship state.
-- Added a second playable investigation, **Loose Ends**, beginning through Maya after the first job.
-- Added RELAY-02 as a second simulated host with its own services, processes, connections and filesystem.
-- Added reactive news/social content after the second investigation.
-- Save version 3 / world schema 3 with migration from v0.1.1.1.
+### BLACKBOX banner
+
+The shell banner is wider again and uses responsive sizing so it keeps the stronger original presence without clipping on narrow mobile displays.
+
+## Compatibility
+
+- SAVE_VERSION: 4
+- WORLD_SCHEMA: 4
+- Profile format: 1
+- v0.1.2 flat saves: automatic migration supported
+- v0.1.1.x saves: supported through the existing save migrations and then wrapped into the profile format
+
+## Release layout
+
+The GitHub release ZIP is root-ready and contains:
+
+```text
+index.html
+README.md
+build-manifest.json
+css/
+js/
+```

@@ -1,6 +1,9 @@
 {
-  "version": "0.1.2",
-  "name": "BLACKBOX \u2014 Desktop \u2194 BLACKBOX Gameplay Foundation",
+  "name": "BLACKBOX \u2014 Identity & Session Foundation",
+  "version": "0.1.3",
+  "saveVersion": 4,
+  "worldSchema": 4,
+  "baseline": "v0.1.2 GitHub checkpoint (SHA-256 6543d2a909c89ab35a484deb9c1d5d71065d1816552da4c41870d44530dfed3e)",
   "files": [
     "README.md",
     "build-manifest.json",
@@ -41,27 +44,13 @@
     "js/ui/terminalUI.js",
     "js/ui/transitions.js"
   ],
-  "saveVersion": 3,
-  "worldSchema": 3,
-  "hotfixes": [
-    "iOS terminal input/autocapitalize",
-    "case-insensitive commands",
-    "first-mission shell guidance",
-    "touch desktop exit",
-    "Safari zoom recovery",
-    "responsive BLACKBOX frame",
-    "desktop first-paint stabilization",
-    "mobile browser toolbar overflow"
-  ],
   "features": [
-    "working desktop return",
-    "case-insensitive terminal commands",
-    "persistent target memory",
-    "touch-friendly target actions",
-    "data-driven clue registry",
-    "interactive Messenger choices",
-    "second investigation Loose Ends",
-    "RELAY-02 simulated host",
-    "reactive world content"
+    "profile container with active and archived identities",
+    "v0.1.2 flat-save migration into active identity",
+    "startup Continue/New Identity/Archived Identities flow",
+    "purge identity terminal command with confirmation and archive",
+    "remote-session-safe DESKTOP confirmation",
+    "in-terminal objective and job completion notices",
+    "responsive wider BLACKBOX shell banner"
   ]
 }

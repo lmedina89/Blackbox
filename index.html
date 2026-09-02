@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0c1630" />
-  <title>BLACKBOX — v0.1.2</title>
+  <title>BLACKBOX — v0.1.3</title>
   <link rel="stylesheet" href="./css/base.css" />
   <link rel="stylesheet" href="./css/desktop.css" />
   <link rel="stylesheet" href="./css/apps.css" />
@@ -17,12 +17,31 @@
     <section id="boot-screen" class="boot-screen">
       <div class="boot-card">
         <div class="boot-logo">NEXUS/OS</div>
-        <p class="muted">Personal Computing Environment // v0.1.2</p>
-        <form id="alias-form" class="alias-form">
-          <label for="alias-input">Create your user alias</label>
-          <input id="alias-input" name="alias" maxlength="18" autocomplete="off" placeholder="ghost" required />
-          <button type="submit">Begin</button>
-        </form>
+        <p class="muted">Personal Computing Environment // v0.1.3</p>
+
+        <div id="boot-home" class="boot-home">
+          <div id="active-identity-summary" class="identity-summary hidden"></div>
+          <button id="continue-button" class="boot-action hidden" type="button">Continue</button>
+          <button id="new-identity-button" class="boot-action" type="button">New Identity</button>
+          <button id="archives-button" class="boot-action hidden" type="button">Archived Identities</button>
+          <p id="boot-status" class="boot-status muted"></p>
+        </div>
+
+        <div id="new-identity-panel" class="hidden">
+          <button id="new-identity-back" class="boot-back" type="button">← Back</button>
+          <form id="alias-form" class="alias-form">
+            <label for="alias-input">Create your user alias</label>
+            <input id="alias-input" name="alias" maxlength="18" autocomplete="off" autocapitalize="none" placeholder="ghost" required />
+            <p id="new-identity-warning" class="boot-status muted"></p>
+            <button type="submit">Create Identity</button>
+          </form>
+        </div>
+
+        <div id="archives-panel" class="hidden">
+          <button id="archives-back" class="boot-back" type="button">← Back</button>
+          <h2 class="boot-section-title">Archived Identities</h2>
+          <div id="archives-list" class="archives-list"></div>
+        </div>
       </div>
     </section>
 
@@ -81,8 +100,20 @@
         </form>
       </main>
 
+
+      <div id="bb-remote-modal" class="bb-modal hidden" role="dialog" aria-modal="true" aria-labelledby="bb-remote-title">
+        <div class="bb-modal-card">
+          <strong id="bb-remote-title">REMOTE SESSION ACTIVE</strong>
+          <p>Disconnect before returning to NEXUS/OS?</p>
+          <div class="bb-modal-actions">
+            <button id="bb-remote-return" type="button">DISCONNECT &amp; RETURN</button>
+            <button id="bb-remote-cancel" type="button">CANCEL</button>
+          </div>
+        </div>
+      </div>
+
       <footer class="blackbox-footer">
-        <span>BLACKBOX/0.1.2</span>
+        <span>BLACKBOX/0.1.3</span>
         <span>Type <b>help</b> for commands · <b>exit</b> to return</span>
       </footer>
     </section>
