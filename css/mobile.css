@@ -70,3 +70,11 @@
   .bb-modal-actions{display:grid;grid-template-columns:1fr;width:100%}
   .bb-modal-actions button{width:100%}
 }
+
+@media (max-width:700px){
+  .bb-notifications{
+    top:74px;
+    right:max(10px,env(safe-area-inset-right));
+    width:min(260px,calc(100% - 20px));
+  }
+}

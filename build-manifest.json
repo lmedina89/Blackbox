@@ -1,9 +1,9 @@
 {
-  "name": "Network Realism & Restore Polish",
-  "version": "0.2.1",
-  "saveVersion": 6,
-  "worldSchema": 6,
-  "baseline": "v0.2.0 Network & Underground Expansion",
+  "name": "Targeting & Terminal Polish",
+  "version": "0.2.2",
+  "saveVersion": 7,
+  "worldSchema": 7,
+  "baseline": "v0.2.1 Network Realism & Restore Polish (exact tested ZIP SHA-256 8ce03b4736ebe737c9da6a633c5ceeb67128813f41daa248a869ff984274f2dc)",
   "files": [
     "README.md",
     "build-manifest.json",
@@ -40,6 +40,7 @@
     "js/systems/missions.js",
     "js/systems/network.js",
     "js/systems/progression.js",
+    "js/systems/targets.js",
     "js/systems/terminal.js",
     "js/ui/desktop.js",
     "js/ui/terminalUI.js",
@@ -60,14 +61,14 @@
     "evidence downloads with storage capacity"
   ],
   "changes": [
-    "Archived identity restore normalization fixes blank Messenger state regression",
-    "purge identity help description shortened to archive & reset with no layout change",
-    "Persistent ambient HOME-PC network population",
-    "Topology-driven scans independent of mission spawning",
-    "Separate reachable, discovered, identified, and shell-accessible host concepts",
-    "UNKNOWN hosts can be discovered before their identity is learned",
-    "Reachable ambient hosts can refuse remote shell connections",
-    "HELIX internal subnet populated with gateway, printer, log node, and unidentified telemetry host",
-    "Internal HELIX subnet remains unreachable and invisible from HOME-PC"
+    "Separate seen hosts from persistent saved targets",
+    "Temporary per-scan result indexes",
+    "Manual target add/remove/info commands",
+    "Automatic saving of active-mission targets when found",
+    "Evidence-based host identification remains separate from discovery",
+    "Deliberate mobile-friendly multi-line scan records",
+    "Remote services inspection with FastLink-gated port detail",
+    "Compact proficiency popups outside terminal history",
+    "Contextual/unique learning actions prevent proficiency farming"
   ]
 }

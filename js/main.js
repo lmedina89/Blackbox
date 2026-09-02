@@ -141,7 +141,7 @@ function purgeIdentity(){
 initClues();
 initMissions();
 
-for(const eventName of ["mission:started","mission:completed","mission:progress","hardware:purchased","clue:discovered","dialogue:choice","proficiency:changed","file:downloaded"]){
+for(const eventName of ["mission:started","mission:completed","mission:progress","hardware:purchased","clue:discovered","dialogue:choice","proficiency:changed","file:downloaded","target:saved","target:removed"]){
   on(eventName,()=>saveGame());
 }
 

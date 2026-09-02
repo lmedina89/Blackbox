@@ -2,14 +2,21 @@ import { CLUES } from "../data/clues.js";
 import { getState } from "../core/state.js";
 import { on, emit } from "../core/events.js";
 import { identifyHost } from "./network.js";
+import { autoSaveMissionTarget } from "./targets.js";
+import { HOSTS } from "../data/hosts.js";
+
+function HOST_KNOWN(hostId,state){
+  return HOSTS[hostId]?.identity==="known"||(state.player.identifiedHosts||[]).includes(hostId);
+}
 
 function discover(clue){
   const s=getState();
   if(s.player.discoveredClues.includes(clue.id))return false;
   s.player.discoveredClues.push(clue.id);
   if(clue.hostId){
-    if(!s.player.discoveredHosts.includes(clue.hostId))s.player.discoveredHosts.push(clue.hostId);
+    discoverHost(clue.hostId);
     identifyHost(clue.hostId);
+    autoSaveMissionTarget(clue.hostId);
   }
   emit("clue:discovered",{clue});
   return true;
@@ -30,7 +37,10 @@ export function initClues(){
 
 export function discoverHost(hostId){
   const s=getState();
-  if(!s.player.discoveredHosts.includes(hostId))s.player.discoveredHosts.push(hostId);
+  s.player.seenHosts ??=[];
+  if(!s.player.seenHosts.includes(hostId))s.player.seenHosts.push(hostId);
+  // discoveredHosts is legacy compatibility state. New discovery lives in seenHosts.
+  autoSaveMissionTarget(hostId);
 }
 
 export function getKnownClues(){

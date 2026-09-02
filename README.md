@@ -1,62 +1,73 @@
-# BLACKBOX v0.2.1 — Network Realism & Restore Polish
+# BLACKBOX v0.2.2 — Targeting & Terminal Polish
 
-Built directly from the tested v0.1.2 Desktop ↔ BLACKBOX Gameplay Foundation.
+Built directly from the exact tested v0.2.1 — Network Realism & Restore Polish release.
 
-## v0.2.1 goals
+## Purpose
 
-This milestone hardens the player-life lifecycle and BLACKBOX session UX before broader v0.2.1 story expansion.
+v0.2.2 refines the larger simulated network introduced in v0.2.1 without adding another story chapter. The network may contain many ambient systems, while the player's working target list remains intentional and useful.
 
-### Profile / identity lifecycle
+## Target and discovery architecture
 
-- The old single flat save is now wrapped in a profile container.
-- A profile can hold one active identity plus archived identities.
-- Existing v0.1.2 saves migrate automatically into the active identity slot.
-- Startup now offers Continue, New Identity, and Archived Identities when applicable.
-- Starting a new identity archives the existing active identity first instead of deleting it.
-- Restoring an archived identity moves it back into the active slot.
+BLACKBOX now separates:
+- `seenHosts`: systems observed by a scan or clue.
+- `identifiedHosts`: systems whose identity the player has legitimately learned.
+- `savedTargets`: the player's persistent working shortlist.
+- `terminal.lastScanResults`: temporary indexes from the most recent scan.
 
-### `purge identity`
+Ordinary scan results are not automatically saved. Active-mission hosts are saved automatically when the player finds them, including when a mission starts after the host was already seen. Mission completion does not remove saved targets.
 
-From the local BLACKBOX shell:
-
-```text
-purge identity
-```
-
-BLACKBOX displays the destructive-action warning and requires:
+Commands:
 
 ```text
-CONFIRM PURGE
+targets
+target add <host|scan #>
+target remove <#>
+target info <#>
 ```
 
-The active life is archived, not deleted, then BLACKBOX performs an immersive purge sequence and returns to the startup menu. `cancel` aborts a pending purge. Purging is blocked while connected to a remote host.
+A scan number is temporary. A saved-target number remains stable until a target is removed.
 
-### Session-safe DESKTOP control
+## Scan presentation
 
-- Local BLACKBOX session: DESKTOP suspends BLACKBOX and returns to NEXUS/OS.
-- Remote session: DESKTOP opens a confirmation instead of bypassing the remote session.
-- `DISCONNECT & RETURN` uses the normal remote `exit` path before suspending BLACKBOX.
-- `CANCEL` keeps the player on the remote host.
+Scan records use deliberate multi-line mobile formatting instead of relying on narrow-screen wrapping:
 
-### Mission clarity
+```text
+[2] 10.18.3.41
+    UNKNOWN · 1 service
+```
 
-Terminal actions that complete mission objectives now generate a visible in-shell objective notice. Final objectives are followed by a job-complete notice and payment information. These notices do not force the player out of BLACKBOX, so optional exploration remains possible.
+With FastLink 100 installed, service/port detail is also displayed.
 
-### BLACKBOX banner
+## Services and access
 
-The shell banner is wider again and uses responsive sizing so it keeps the stronger original presence without clipping on narrow mobile displays.
+`services [host]` distinguishes reachability from shell access. A reachable gateway, printer, web server, or unknown device can expose network services while still refusing `connect`.
+
+Remote service detail is gated by the FastLink 100 hardware upgrade. The base setup reports a service count; FastLink exposes port/service detail.
+
+## Proficiency feedback
+
+Routine proficiency gains no longer occupy terminal history. They appear as small temporary BLACKBOX notifications. Crossing a proficiency tier produces a larger milestone notification.
+
+Repeatedly spamming the same command does not grant endless proficiency. Learning actions are unique or contextual, such as first use on a new host, discovering a new network context, or applying a command to a new investigation environment.
+
+The `skills` command remains the detailed progression view.
+
+## Mission behavior
+
+The existing v0.2.0/v0.2.1 mission content is preserved. Mission targets are automatically added to Saved Targets when discovered during an active investigation. Random ambient hosts are not added to Case Notes or Saved Targets unless the player chooses to save them.
 
 ## Compatibility
 
-- SAVE_VERSION: 4
-- WORLD_SCHEMA: 4
+- SAVE_VERSION: 7
+- WORLD_SCHEMA: 7
 - Profile format: 1
-- v0.1.2 flat saves: automatic migration supported
-- v0.1.1.x saves: supported through the existing save migrations and then wrapped into the profile format
+- v0.2.1 identities migrate automatically.
+- Archived identities are migrated/normalized on load and restore.
+- Existing Messenger archive/restore hardening from v0.2.1 is preserved.
 
 ## Release layout
 
-The GitHub release ZIP is root-ready and contains:
+The GitHub ZIP is root-ready:
 
 ```text
 index.html
@@ -66,21 +77,4 @@ css/
 js/
 ```
 
-
-## v0.2.1 direction
-BLACKBOX now rewards correct real-world CLI and networking knowledge inside a fully fictional simulated environment. Networking is host-contextual and graph-based: each machine sees only the systems reachable from its own interfaces. The release adds identity-aware prompts, `ip`, `ping`, `traceroute`, `grep`, `find`, `head`, `tail`, `services`, and `download`; use-based Systems/Network/Analysis/Social proficiency; four additional investigations; meaningful evidence storage and scan-detail hardware effects; Packet Underground and DeadDrop; reactive world content; and subtle ORBIT/BBX breadcrumbs.
-
-All targets, addresses, organizations, credentials, routes, and services are fictional/simulated game data.
-
-
-## v0.2.1 focus
-This maintenance/realism release preserves the v0.2.0 mission set and UI while strengthening two areas discovered during on-device QA.
-
-- Archived identities are normalized on restore so Messenger communication state, choices, relationships, and other identity-owned state rebuild correctly.
-- `purge identity` remains the literal command; its help description is shortened to `archive & reset`.
-- Scans are topology-driven rather than mission-target-driven. Reachable ambient systems can exist before a mission mentions them.
-- Reachability, discovery, identification, and shell accessibility are separate concepts.
-- Some discovered hosts intentionally appear as `UNKNOWN` until the player learns their identity from a clue.
-- A reachable machine can answer `ping` while refusing `connect`, teaching that network reachability does not imply a remote shell.
-- HOME-PC has believable local/background infrastructure.
-- HELIX-EDGE exposes a populated internal subnet that remains invisible from HOME-PC.
+All networking remains a fictional in-game simulation. BLACKBOX does not scan or connect to real systems.

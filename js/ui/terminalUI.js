@@ -17,6 +17,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
   const remoteModal=document.querySelector("#bb-remote-modal");
   const remoteCancel=document.querySelector("#bb-remote-cancel");
   const remoteReturn=document.querySelector("#bb-remote-return");
+  const bbNotifications=document.querySelector("#bb-notifications");
   let running=false;
   const queuedNotices=[];
 
@@ -36,6 +37,18 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     box.innerHTML=`<b>${title}</b><span>${body}</span>${next?`<small>${next}</small>`:""}`;
     output.appendChild(box);
     output.scrollTop=output.scrollHeight;
+  }
+
+  function skillToast({label,value,amount=1,beforeLevel,afterLevel,milestone=false}){
+    if(!isVisible())return;
+    const box=document.createElement("div");
+    box.className=`bb-toast${milestone?" milestone":""}`;
+    box.innerHTML=milestone
+      ? `<b>${label.toUpperCase()} PROFICIENCY</b><span>${beforeLevel} → ${afterLevel}</span><small>Experience ${value}</small>`
+      : `<b>${label.toUpperCase()} +${amount}</b><span>${afterLevel}</span>`;
+    bbNotifications.appendChild(box);
+    setTimeout(()=>box.classList.add("bb-toast-out"),milestone?4200:2200);
+    setTimeout(()=>box.remove(),milestone?4700:2700);
   }
 
   function deliverOrQueue(item){
@@ -146,11 +159,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
       next:next?`NEXT: ${next.label}`:"Information added to Case Notes."
     });
   });
-  on("proficiency:changed",({label,value})=>deliverOrQueue({
-    title:"[ PROFICIENCY ]",
-    body:`${label} understanding increased.`,
-    next:`Experience: ${value}. Use "skills" to review.`
-  }));
+  on("proficiency:changed",payload=>skillToast(payload));
   on("mission:completed",({mission})=>deliverOrQueue({
     title:"[ JOB COMPLETE ]",
     body:mission.title,
@@ -175,7 +184,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
         output.innerHTML="";
         print("┌──────────────────────────────────────────┐","banner");
         print("│       B L A C K B O X   S E C U R E      │","banner");
-        print("│         INTERACTIVE SHELL 0.2.1          │","banner");
+        print("│         INTERACTIVE SHELL 0.2.2          │","banner");
         print("└──────────────────────────────────────────┘","banner");
         print("");
         print(`SESSION ${String(s.terminal.sessionCount).padStart(4,"0")} // LOCAL ENVIRONMENT`);

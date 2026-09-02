@@ -33,6 +33,17 @@ const migrations={
   6(save){
     save.player.identifiedHosts ??= ["home",...(save.player.discoveredHosts||[])];
     return save;
+  },
+  7(save){
+    const legacySeen=[...(save.player.discoveredHosts||[])];
+    save.player.seenHosts ??= legacySeen;
+    const missionHosts=new Set(["archives01","mirror02","meridian01","helixedge","helixlog","axiomrelay"]);
+    save.player.savedTargets ??= legacySeen
+      .filter(id=>missionHosts.has(id))
+      .map(id=>({hostId:id,source:"legacy",missionId:null,savedAt:Date.now()}));
+    save.terminal ??= {};
+    save.terminal.lastScanResults=[];
+    return save;
   }
 };
 
@@ -45,6 +56,8 @@ function normalize(save){
   save.player.relationships ??= {maya:1,sam:0,zero:0};
   save.player.discoveredClues ??= [];
   save.player.discoveredHosts ??= [];
+  save.player.seenHosts ??= [...save.player.discoveredHosts];
+  save.player.savedTargets ??= [];
   save.player.identifiedHosts ??= ["home"];
   if(!save.player.identifiedHosts.includes("home"))save.player.identifiedHosts.unshift("home");
   save.player.proficiencies ??= {systems:0,network:0,analysis:0,social:0};
@@ -71,6 +84,7 @@ function normalize(save){
   save.terminal.sessionOpen ??= false;
   save.terminal.suspended ??= false;
   save.terminal.pendingAction ??= null;
+  save.terminal.lastScanResults ??= [];
   return save;
 }
 

@@ -1,5 +1,5 @@
-export const SAVE_VERSION=6;
-export const WORLD_SCHEMA=6;
+export const SAVE_VERSION=7;
+export const WORLD_SCHEMA=7;
 
 function id(prefix="id"){
   const value=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
@@ -16,7 +16,9 @@ export const baseState=()=>({
     installedHardware:["base_pc"],
     discoveredClues:[],
     discoveredHosts:[],
+    seenHosts:[],
     identifiedHosts:["home"],
+    savedTargets:[],
     relationships:{maya:1,sam:0,zero:0},
     proficiencies:{systems:0,network:0,analysis:0,social:0},
     learnedActions:[],
@@ -45,7 +47,8 @@ export const baseState=()=>({
     sessionCount:0,
     sessionOpen:false,
     suspended:false,
-    pendingAction:null
+    pendingAction:null,
+    lastScanResults:[]
   },
   ui:{openApps:[],lastBrowserSite:"news"}
 });

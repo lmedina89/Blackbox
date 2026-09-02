@@ -1,6 +1,7 @@
 import { MISSIONS } from "../data/missions.js";
 import { getState, setFlag, addCredits } from "../core/state.js";
 import { on, emit } from "../core/events.js";
+import { autoSaveSeenTargetsForMission } from "./targets.js";
 
 function mission(id){return MISSIONS.find(m=>m.id===id);}
 function startByEvent(eventName,target){
@@ -26,6 +27,7 @@ export function startMission(id){
   if(!m||s.missions.active.includes(id)||s.world.completedMissions.includes(id))return;
   s.missions.active.push(id);s.missions.progress[id]={};
   for(const f of m.flagsOnStart||[])setFlag(f);
+  autoSaveSeenTargetsForMission(m);
   emit("mission:started",{mission:m});
 }
 function recordObjective(type,target){

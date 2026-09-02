@@ -149,7 +149,7 @@ export function initDesktopUI({enterBlackbox}){
 
   function renderSystem(el){
     const s=getState();
-    const knownHosts=(s.player.discoveredHosts||[]).map(id=>HOSTS[id]).filter(Boolean);
+    const knownHosts=(s.player.savedTargets||[]).map(entry=>HOSTS[entry.hostId]).filter(Boolean);
     const clues=getKnownClues();
     el.innerHTML=`<div class="app-body">
       <div class="system-title"><div class="computer-glyph">🖥️</div><div><h2>${s.player.alias}'s Computer</h2><span>NEXUS/OS Personal Workstation</span></div></div>
@@ -159,7 +159,7 @@ export function initDesktopUI({enterBlackbox}){
         <div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div>
         <div class="stat"><b>Credits</b><br>${s.player.credits}</div>
         <div class="stat"><b>Reputation</b><br>${s.player.reputation}</div>
-        <div class="stat"><b>BLACKBOX</b><br>0.2.1 installed</div>
+        <div class="stat"><b>BLACKBOX</b><br>0.2.2 installed</div>
       </div>
       <div class="card"><h3>BLACKBOX proficiencies</h3><div class="system-grid">${Object.entries(s.player.proficiencies||{}).map(([skill,value])=>`<div class="stat"><b>${skill[0].toUpperCase()+skill.slice(1)}</b><br>${proficiencyLabel(value)} (${value})</div>`).join("")}</div><p class="muted">Proficiency grows by using real CLI and investigation concepts, not by spending skill points.</p></div>
       <div class="card"><h3>Known BLACKBOX targets</h3>${knownHosts.length?knownHosts.map((h,i)=>`<div class="target-row"><b>[${i}] ${displayName(h.id)}</b><span>${h.address}</span></div>`).join(""):"<p>No remote targets saved.</p>"}</div>
