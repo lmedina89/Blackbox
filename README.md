@@ -1,10 +1,10 @@
-# BLACKBOX v0.2.3.3 — App Cue Balance Hotfix
+# BLACKBOX v0.2.3.4 — iPhone App Cue Hotfix
 
-Built directly from **v0.2.3.2 — Mobile Audio Feedback Hotfix**.
+Built directly from **v0.2.3.3 — App Cue Balance Hotfix**.
 
 ## Purpose
 
-v0.2.3.3 is the final narrow audio-balance hotfix following direct iPhone testing. It preserves the v0.2.3.2 gameplay/world state and raises only the app open/close cues that remained too quiet on a phone speaker.
+v0.2.3.4 is a narrow iPhone app-cue hotfix following direct confirmation that v0.2.3.3 loaded correctly but its soft single-note app cues still did not cut through the phone speaker. It preserves the v0.2.3.3 gameplay/world state and replaces only those two cues with stronger layered electronic sounds.
 
 The underlying v0.2.3 release turns the simulated network into a world the player can investigate even when no job is active. Formal missions remain intact, but they are no longer the only reason for a machine to exist.
 
@@ -117,4 +117,11 @@ All hosts, IPs, people, companies, credentials, services, and networks are ficti
 
 - Raised and slightly lengthened only the NEXUS app open and close cues after direct iPhone testing.
 - All approved BLACKBOX, terminal, connection, mission, clue, download, hardware, and mute-feedback sounds are unchanged.
+- Gameplay, mission data, SAVE_VERSION 8, and WORLD_SCHEMA 8 remain unchanged.
+
+## v0.2.3.4 iPhone App Cue Hotfix
+
+- Replaced the soft single-note app-open cue with a layered square/sine/noise electronic chime.
+- Replaced the soft single-note app-close cue with a distinct layered descending electronic chime.
+- All other approved sound cues and the visual mute feedback remain unchanged.
 - Gameplay, mission data, SAVE_VERSION 8, and WORLD_SCHEMA 8 remain unchanged.

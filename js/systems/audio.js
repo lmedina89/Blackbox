@@ -49,8 +49,16 @@ function noise({duration=.08,delay=0,gain=.05,highpass=900}={}){
 }
 
 const SOUNDS={
-  ui_open(){tone({freq:500,endFreq:760,duration:.11,type:"sine",gain:.25});},
-  ui_close(){tone({freq:680,endFreq:340,duration:.12,type:"sine",gain:.24});},
+  ui_open(){
+    tone({freq:420,endFreq:640,duration:.12,type:"square",gain:.24});
+    tone({freq:720,endFreq:960,duration:.14,delay:.075,type:"sine",gain:.24});
+    noise({duration:.075,gain:.035,highpass:1700});
+  },
+  ui_close(){
+    tone({freq:760,endFreq:460,duration:.13,type:"square",gain:.24});
+    tone({freq:390,endFreq:230,duration:.15,delay:.08,type:"sine",gain:.23});
+    noise({duration:.07,gain:.03,highpass:1500});
+  },
   terminal_enter(){tone({freq:900,endFreq:700,duration:.05,type:"square",gain:.13});},
   terminal_error(){tone({freq:190,endFreq:105,duration:.16,type:"sawtooth",gain:.15});},
   connect(){tone({freq:360,endFreq:540,duration:.09,type:"square",gain:.14});tone({freq:620,endFreq:820,duration:.10,delay:.095,type:"sine",gain:.15});},
