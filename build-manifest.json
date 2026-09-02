@@ -1,6 +1,6 @@
 {
-  "name": "Mobile Audio Feedback Hotfix",
-  "version": "0.2.3.2",
+  "name": "App Cue Balance Hotfix",
+  "version": "0.2.3.3",
   "saveVersion": 8,
   "worldSchema": 8,
   "baseline": "v0.2.3 Free Exploration & Emergent Leads (exact tested ZIP SHA-256 673381d7defc02b124e3423d542f786645bd8778f00237b68ff4691b1bee4391)",
@@ -66,7 +66,8 @@
     "multiple Messenger friend threads",
     "case clue and world intel separation",
     "centralized Web Audio sound-effects system with iOS-safe first-interaction unlock and persistent mute control",
-    "phone-audible everyday cues and unmistakable visual mute feedback"
+    "phone-audible everyday cues and unmistakable visual mute feedback",
+    "direct-iPhone-tested app open and close cue balance"
   ],
   "changes": [
     "Added centralized synthesized Web Audio sound effects with no external audio-file dependency",
@@ -86,6 +87,8 @@
     "Save migration 7 to 8 adds persistent readNewsStories state while preserving v0.2.2 identities",
     "Raised and lengthened quiet everyday sound cues for phone speakers",
     "Added a red muted-state treatment, diagonal slash, and immediate enabled/muted toast feedback",
-    "No gameplay, mission, save-version, or world-schema changes in v0.2.3.2"
+    "No gameplay, mission, save-version, or world-schema changes in v0.2.3.2",
+    "Raised and slightly lengthened only the app open and close sound cues following direct iPhone testing",
+    "No gameplay, mission, save-version, or world-schema changes in v0.2.3.3"
   ]
 }

@@ -1,10 +1,10 @@
-# BLACKBOX v0.2.3.2 — Mobile Audio Feedback Hotfix
+# BLACKBOX v0.2.3.3 — App Cue Balance Hotfix
 
-Built directly from **v0.2.3.1 — Audio Foundation**.
+Built directly from **v0.2.3.2 — Mobile Audio Feedback Hotfix**.
 
 ## Purpose
 
-v0.2.3.2 is a narrow mobile-audio feedback hotfix. It preserves the v0.2.3.1 gameplay/world state, raises and lengthens quiet everyday effects for phone speakers, and makes the mute state unmistakable.
+v0.2.3.3 is the final narrow audio-balance hotfix following direct iPhone testing. It preserves the v0.2.3.2 gameplay/world state and raises only the app open/close cues that remained too quiet on a phone speaker.
 
 The underlying v0.2.3 release turns the simulated network into a world the player can investigate even when no job is active. Formal missions remain intact, but they are no longer the only reason for a machine to exist.
 
@@ -112,3 +112,9 @@ All hosts, IPs, people, companies, credentials, services, and networks are ficti
 - Muted state now uses a red button treatment with a visible diagonal red slash.
 - Tapping the speaker now displays an immediate `Sound effects enabled` or `Sound effects muted` notification.
 - Gameplay, mission data, SAVE_VERSION 8, and WORLD_SCHEMA 8 are unchanged.
+
+## v0.2.3.3 App Cue Balance Hotfix
+
+- Raised and slightly lengthened only the NEXUS app open and close cues after direct iPhone testing.
+- All approved BLACKBOX, terminal, connection, mission, clue, download, hardware, and mute-feedback sounds are unchanged.
+- Gameplay, mission data, SAVE_VERSION 8, and WORLD_SCHEMA 8 remain unchanged.
