@@ -1,9 +1,9 @@
 {
-  "name": "Free Exploration & Emergent Leads",
-  "version": "0.2.3",
+  "name": "Audio Foundation",
+  "version": "0.2.3.1",
   "saveVersion": 8,
   "worldSchema": 8,
-  "baseline": "v0.2.2 Targeting & Terminal Polish (exact tested ZIP SHA-256 e94018a6618c16d7e3372774d123cf6d12bd591296586a7fd0974bd998c54e6f)",
+  "baseline": "v0.2.3 Free Exploration & Emergent Leads (exact tested ZIP SHA-256 673381d7defc02b124e3423d542f786645bd8778f00237b68ff4691b1bee4391)",
   "files": [
     "README.md",
     "build-manifest.json",
@@ -44,7 +44,8 @@
     "js/systems/terminal.js",
     "js/ui/desktop.js",
     "js/ui/terminalUI.js",
-    "js/ui/transitions.js"
+    "js/ui/transitions.js",
+    "js/systems/audio.js"
   ],
   "features": [
     "profile container with active and archived identities",
@@ -63,9 +64,15 @@
     "emergent world leads from desktop media and friends",
     "optional corporate pivot network",
     "multiple Messenger friend threads",
-    "case clue and world intel separation"
+    "case clue and world intel separation",
+    "centralized Web Audio sound-effects system with iOS-safe first-interaction unlock and persistent mute control"
   ],
   "changes": [
+    "Added centralized synthesized Web Audio sound effects with no external audio-file dependency",
+    "Added subtle NEXUS window open/close, terminal entry/error, network connect/disconnect, notification, success, download, BLACKBOX transition, and job-complete cues",
+    "Added taskbar speaker mute/unmute control; preference persists independently in localStorage",
+    "AudioContext is unlocked by the first pointer or keyboard interaction for iPhone/Safari compatibility",
+    "No save-version or world-schema change; v0.2.3 gameplay/state remains intact",
     "Four new optional public-facing exploration hosts: EVAN-BOX, VANTA-WEB, COBALT-BBS, and ORCHID-NAS",
     "Vanta Dynamics optional internal subnet with DEV-02, PRINT-07, and DB-01 reachable only through VANTA-WEB",
     "Emergent leads can originate from MetroWire news, NightWire, FriendSpace, Messenger, and files found on optional hosts",

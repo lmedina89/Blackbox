@@ -7,6 +7,7 @@ import { initDesktopUI } from "./ui/desktop.js";
 import { initTerminalUI } from "./ui/terminalUI.js";
 import { enterBlackboxTransition, exitBlackboxTransition } from "./ui/transitions.js";
 import { on } from "./core/events.js";
+import { initAudio, playSound } from "./systems/audio.js";
 
 const boot=document.querySelector("#boot-screen");
 const desktop=document.querySelector("#desktop");
@@ -103,6 +104,7 @@ function initializeGameUI(){
 }
 
 async function enterBlackbox(){
+  playSound("blackbox_boot");
   saveGame();
   const resume=!!getState().terminal.sessionOpen;
   await enterBlackboxTransition({desktop,transition,blackbox,lines,skipButton,resume});
@@ -110,6 +112,7 @@ async function enterBlackbox(){
 }
 
 async function returnToDesktop(){
+  playSound("blackbox_exit");
   const terminalInput=document.querySelector("#terminal-input");
   terminalInput?.blur();
   await exitBlackboxTransition({desktop,blackbox});
@@ -138,6 +141,7 @@ function purgeIdentity(){
   window.location.reload();
 }
 
+initAudio();
 initClues();
 initMissions();
 

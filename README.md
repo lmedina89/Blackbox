@@ -1,10 +1,12 @@
-# BLACKBOX v0.2.3 — Free Exploration & Emergent Leads
+# BLACKBOX v0.2.3.1 — Audio Foundation
 
 Built directly from the exact tested **v0.2.2 — Targeting & Terminal Polish** release.
 
 ## Purpose
 
-v0.2.3 turns the simulated network into a world the player can investigate even when no job is active. Formal missions remain intact, but they are no longer the only reason for a machine to exist.
+v0.2.3.1 is a controlled audio-foundation update built directly from the tested v0.2.3 Free Exploration & Emergent Leads release. It preserves the v0.2.3 gameplay/world state and adds a centralized, synthesized Web Audio sound system with an iPhone-safe unlock path and persistent mute control.
+
+The underlying v0.2.3 release turns the simulated network into a world the player can investigate even when no job is active. Formal missions remain intact, but they are no longer the only reason for a machine to exist.
 
 The player can now notice an address in MetroWire, NightWire, FriendSpace, Messenger, or a file on another computer and decide independently whether to investigate it. Optional exploration never creates a mission objective or guaranteed reward.
 
@@ -93,3 +95,13 @@ js/
 ```
 
 All hosts, IPs, people, companies, credentials, services, and networks are fictional in-game simulation data. BLACKBOX performs no real network scanning or access.
+
+
+## v0.2.3.1 Audio Foundation
+
+- Centralized `js/systems/audio.js` Web Audio system.
+- Synthesized cues require no external MP3/WAV assets.
+- Subtle cues for NEXUS window open/close, terminal entry/error, connect/disconnect, BLACKBOX transitions, clues/alerts, downloads, success, and job completion.
+- Taskbar speaker control toggles sound and remembers the preference in local storage.
+- First pointer/keyboard interaction safely unlocks Web Audio on iPhone/Safari.
+- Save version remains 8; world schema remains 8.

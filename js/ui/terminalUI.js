@@ -2,6 +2,7 @@ import { executeCommand, getPrompt } from "../systems/terminal.js";
 import { getState } from "../core/state.js";
 import { HOSTS } from "../data/hosts.js";
 import { on } from "../core/events.js";
+import { playSound } from "../systems/audio.js";
 
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
@@ -92,7 +93,9 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
   async function run(raw){
     running=true;
     print(`${getPrompt()} ${raw}`,"command");
+    playSound("terminal_enter");
     const result=await executeCommand(raw);
+    if((result.lines||[]).some(line=>line.type==="error"))playSound("terminal_error");
     if(result.clear)output.innerHTML="";
     for(const line of result.lines||[])print(line.text,line.type||"");
     refreshPrompt();
@@ -184,7 +187,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
         output.innerHTML="";
         print("┌──────────────────────────────────────────┐","banner");
         print("│       B L A C K B O X   S E C U R E      │","banner");
-        print("│         INTERACTIVE SHELL 0.2.3          │","banner");
+        print("│         INTERACTIVE SHELL 0.2.3.1          │","banner");
         print("└──────────────────────────────────────────┘","banner");
         print("");
         print(`SESSION ${String(s.terminal.sessionCount).padStart(4,"0")} // LOCAL ENVIRONMENT`);
