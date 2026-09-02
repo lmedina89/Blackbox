@@ -1,10 +1,16 @@
-export const SAVE_VERSION=2;
-export const WORLD_SCHEMA=2;
+export const SAVE_VERSION=3;
+export const WORLD_SCHEMA=3;
 
 const baseState=()=>({
   meta:{saveVersion:SAVE_VERSION,worldSchema:WORLD_SCHEMA,createdAt:Date.now(),updatedAt:Date.now()},
-  player:{alias:"",credits:0,reputation:0,inventory:[],installedHardware:["base_pc"],discoveredClues:[],notes:""},
-  world:{minute:18*60+42,day:1,flags:[],readEmails:[],readForumPosts:[],readSocialPosts:[],notifications:[],completedMissions:[]},
+  player:{
+    alias:"",credits:0,reputation:0,inventory:[],installedHardware:["base_pc"],
+    discoveredClues:[],discoveredHosts:[],notes:"",relationships:{maya:0,zero:0}
+  },
+  world:{
+    minute:18*60+42,day:1,flags:[],readEmails:[],readForumPosts:[],readSocialPosts:[],
+    chatChoices:{},notifications:[],completedMissions:[]
+  },
   missions:{active:[],progress:{}},
   terminal:{hostId:"home",user:"user",cwd:"/home",history:[],historyIndex:0,trace:0,sessionCount:0},
   ui:{openApps:[],lastBrowserSite:"news"}

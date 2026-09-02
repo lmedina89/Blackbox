@@ -8,6 +8,13 @@ const migrations={
     save.ui ??= {};
     save.ui.lastBrowserSite ??= "news";
     return save;
+  },
+  3(save){
+    save.player.discoveredClues ??= [];
+    save.player.discoveredHosts ??= [];
+    save.player.relationships ??= {maya:0,zero:0};
+    save.world.chatChoices ??= {};
+    return save;
   }
 };
 

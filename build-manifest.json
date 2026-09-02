@@ -1,6 +1,6 @@
 {
-  "version": "0.1.1.1",
-  "name": "BLACKBOX \u2014 Mobile Hotfix",
+  "version": "0.1.2",
+  "name": "BLACKBOX \u2014 Desktop \u2194 BLACKBOX Gameplay Foundation",
   "files": [
     "README.md",
     "build-manifest.json",
@@ -17,6 +17,7 @@
     "js/core/save.js",
     "js/core/state.js",
     "js/data/apps.js",
+    "js/data/clues.js",
     "js/data/emails.js",
     "js/data/filesystems.js",
     "js/data/forums.js",
@@ -29,6 +30,8 @@
     "js/data/social.js",
     "js/data/websites.js",
     "js/main.js",
+    "js/systems/clues.js",
+    "js/systems/communications.js",
     "js/systems/filesystem.js",
     "js/systems/hardware.js",
     "js/systems/missions.js",
@@ -38,8 +41,8 @@
     "js/ui/terminalUI.js",
     "js/ui/transitions.js"
   ],
-  "saveVersion": 2,
-  "worldSchema": 2,
+  "saveVersion": 3,
+  "worldSchema": 3,
   "hotfixes": [
     "iOS terminal input/autocapitalize",
     "case-insensitive commands",
@@ -49,5 +52,16 @@
     "responsive BLACKBOX frame",
     "desktop first-paint stabilization",
     "mobile browser toolbar overflow"
+  ],
+  "features": [
+    "working desktop return",
+    "case-insensitive terminal commands",
+    "persistent target memory",
+    "touch-friendly target actions",
+    "data-driven clue registry",
+    "interactive Messenger choices",
+    "second investigation Loose Ends",
+    "RELAY-02 simulated host",
+    "reactive world content"
   ]
 }

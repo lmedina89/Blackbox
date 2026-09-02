@@ -1,4 +1,4 @@
-# BLACKBOX — v0.1.1.1 Desktop Life & BLACKBOX Polish
+# BLACKBOX — v0.1.2.1 Desktop Life & BLACKBOX Polish
 
 This build continues directly from v0.1.0 and preserves the modular, data-driven architecture.
 
@@ -53,3 +53,18 @@ Serve the folder through a web server because ES modules are used. GitHub Pages 
 - BLACKBOX banner narrowed so the right border closes on mobile.
 - Nexus Explorer toolbar is horizontally scrollable on narrow screens.
 - Added overflow/safe-area handling and first-paint stabilization for mobile.
+
+
+## v0.1.2 — Desktop ↔ BLACKBOX Gameplay Foundation
+
+- Working BLACKBOX DESKTOP return from local or remote sessions.
+- Case-insensitive terminal command names for mobile keyboards.
+- Persistent discovered target system with numbered `targets` / `hosts` list.
+- `scan` exposes touch-friendly USE actions that preload `connect #` commands.
+- Data-driven clue registry shared between desktop investigations and BLACKBOX.
+- Case Notes automatically collect discovered hosts and records while preserving player notes.
+- Messenger now supports data-driven reply choices and relationship state.
+- Added a second playable investigation, **Loose Ends**, beginning through Maya after the first job.
+- Added RELAY-02 as a second simulated host with its own services, processes, connections and filesystem.
+- Added reactive news/social content after the second investigation.
+- Save version 3 / world schema 3 with migration from v0.1.1.1.
