@@ -1,90 +1,84 @@
-# BLACKBOX v0.2.3.4 — iPhone App Cue Hotfix
+# BLACKBOX v0.3.0 — The Wider Net
 
-Built directly from **v0.2.3.3 — App Cue Balance Hotfix**.
+**RC2 candidate:** fixes DNS progression gates, the Quartz optional chain, command-spam time advancement, migrated Messenger unread state, event-driven Messenger timestamps, and Resolver Pro diagnostics.
 
-## Purpose
+Built from the exact stable **v0.2.3.4** iPhone-tested package. v0.3.0 is a major playable expansion that preserves the original six-investigation sequence and expands BLACKBOX into a larger, changing fictional network.
 
-v0.2.3.4 is a narrow iPhone app-cue hotfix following direct confirmation that v0.2.3.3 loaded correctly but its soft single-note app cues still did not cut through the phone speaker. It preserves the v0.2.3.3 gameplay/world state and replaces only those two cues with stronger layered electronic sounds.
+## What is new
 
-The underlying v0.2.3 release turns the simulated network into a world the player can investigate even when no job is active. Formal missions remain intact, but they are no longer the only reason for a machine to exist.
+- **Dynamic scans:** each scan can reorder its results, while optional membership rotates on a saved world cadence. Current mission targets are pinned only when the active objective requires them.
+- **36-host world:** the persistent simulation now contains public infrastructure, internal pivots, hobby systems, home labs, resolvers, mail nodes, archives, ordinary devices, and harmless dead ends. One scan never dumps the whole world.
+- **Explicit target syntax:** use `connect scan <#>` for a recent scan result and `connect target <#>` for Saved Targets. Ambiguous bare numbers produce an explanation instead of silently selecting the wrong list.
+- **Simulated DNS:** `nslookup` supports fictional A, CNAME, and MX records. Case-specific records are gated to the appropriate contract/network context; DNS can identify an UNKNOWN host, but it does not grant reachability or shell access.
+- **NEXUS ThreatDesk:** a normal-desktop app with a Threat Feed, fictional Lookup Tools, concise Field Notes, and three optional Training Labs.
+- **Three investigations:** False Name, Quiet Hours, and Glass Harbor apply DNS, scanning, interfaces, internal routes, log filtering, evidence reading, and downloads.
+- **Living world:** eleven persistent events pace new contracts, replies, stories, messages, advisories, and optional leads through meaningful actions and game time. Harmless terminal toggling does not fast-forward the world clock.
+- **Progression:** FastLink 100 widens scans and service detail; the RAM upgrade unlocks LogScope; the CPU upgrade unlocks Resolver Pro; storage still expands evidence capacity.
+- **Unread feedback:** relevant desktop apps show visible numeric badges, while important changes also remain available after the notification disappears.
 
-The player can now notice an address in MetroWire, NightWire, FriendSpace, Messenger, or a file on another computer and decide independently whether to investigate it. Optional exploration never creates a mission objective or guaranteed reward.
+## Core sequence
 
-## Free exploration
+The original progression remains intact:
 
-HOME-PC now has additional ambient routes to several optional systems:
+1. Easy Money
+2. Old Mirror
+3. Recovery Index
+4. Ghost Account
+5. Dead Drop
+6. The Relay
+7. False Name
+8. Quiet Hours
+9. Glass Harbor
 
-- **EVAN-BOX / 10.33.8.44** — an old personal server mentioned casually by friends.
-- **VANTA-WEB / 10.72.4.20** — a Vanta Dynamics public support mirror with a second interface into a development subnet.
-- **COBALT-BBS / 10.91.6.23** — a surviving hobby BBS with a visitor shell and old board files.
-- **ORCHID-NAS / 10.55.2.19** — a small media studio public transfer node that can be discovered through another optional machine.
+The three new cases arrive gradually after The Relay. Existing v0.2.3.4 identities resume from their real completion, choice, read, target, clue, download, and relationship state; completed work is not replayed.
 
-These machines are present whether or not the player reads the lead first. A raw scan may therefore show an `UNKNOWN` address that becomes meaningful later.
-
-## Vanta Dynamics exploration chain
-
-VANTA-WEB is a fully optional corporate exploration path. It has both a public interface and an internal development interface. From HOME-PC the internal Vanta subnet is invisible.
-
-After reaching VANTA-WEB, real CLI/networking habits reveal more:
+## Useful commands
 
 ```text
-ip
 scan
+connect scan 0
+targets
+connect target 0
+target add scan 0
+nslookup updates.lumen.test
+nslookup lumen.test MX
+ip
+services
 netstat
-ls
-cat /var/www/deploy.txt
+traceroute <host>
+grep <text> <file>
+download <file>
 ```
 
-The public mirror can expose the existence of **DEV-02 / 172.31.8.24**. From that development node, additional evidence can identify **DB-01 / 172.31.8.40**. **PRINT-07** is also present as ordinary infrastructure.
+The resolver never contacts real DNS. Every address, hostname, organization, person, service, and network in the game is fictional simulation data.
 
-Nothing in this chain becomes a formal mission. There is no quest marker telling the player to map the network.
+## Save compatibility
 
-## Emergent leads
-
-Optional host information can now originate from multiple parts of NEXUS/OS:
-
-- MetroWire news can contain a technical detail worth noticing.
-- NightWire can mention a machine without offering a contract.
-- FriendSpace can expose a hostname or address through normal conversation.
-- Messenger now has selectable threads for Maya, Sam, and Chris; casual messages can reveal optional systems.
-- Files found on one optional computer can point toward another.
-
-The player decides whether to run `scan`, inspect `services`, save a target, connect, or ignore the lead.
-
-## Case clues vs world intel
-
-Formal investigation information remains **Case clues**.
-
-Optional information is stored separately as **World intel**. World intel records only information the player actually learned from a source; it does not turn every scanned host into a case note and does not generate objectives.
-
-The `clues` command groups already-learned information into Case Clues and World Intel. My Computer displays the same separation.
-
-## Saved targets
-
-v0.2.2 target behavior is preserved:
-
-- ordinary ambient hosts do not auto-save;
-- active mission targets auto-save when found;
-- optional/free-exploration hosts must be manually saved with `target add` if the player wants them kept in the working target list;
-- temporary scan indexes remain temporary.
-
-## Networking and progression
-
-The v0.2.2 networking/proficiency rules remain in force. Reachability does not imply shell access, FastLink 100 controls remote service detail, and repeated command spam does not farm proficiency.
-
-The new optional environments provide additional contexts in which the player can naturally practice `ip`, `scan`, `services`, `netstat`, `traceroute`, `ls`, `cd`, `cat`, `grep`, `find`, `head`, and `tail`.
-
-## Compatibility
-
-- SAVE_VERSION: **8**
-- WORLD_SCHEMA: **8**
+- SAVE_VERSION: **9**
+- WORLD_SCHEMA: **9**
 - Profile format: **1**
-- v0.2.2 identities migrate automatically from save 7 → 8.
-- Existing archived-identity and Messenger-state hardening remains preserved.
+- Automatic migration: v0.2.3.4 save 8 → v0.3.0 save 9
+- Stable IDs prevent event redelivery after save, reload, app reopening, or identity restoration.
 
-## Release layout
+The original v0.2.3.4 ZIP is not modified by this release and remains the rollback checkpoint.
 
-The GitHub ZIP remains root-ready:
+## Verification
+
+Run the deterministic gameplay suite with:
+
+```text
+node tests/smoke.mjs
+```
+
+It verifies migration, unique host addressing, filesystem coverage, scan variation, mission-target reliability, explicit numeric namespaces, anti-spam time behavior, all six established investigations, and all three new investigation paths.
+
+Automated JavaScript syntax checks and the gameplay suite pass in the release workspace. Direct iPhone/Safari feel and layout testing should still be performed on the deployed candidate before replacing the stable public build.
+
+## Explicitly deferred
+
+Packet capture/sniffing simulation, multiplayer, procedural missions, free-form AI conversations, real network access, and IPv6 are not part of v0.3.0. Packet analysis remains a strong candidate for a later investigation-focused update.
+
+## Root-ready layout
 
 ```text
 index.html
@@ -92,36 +86,5 @@ README.md
 build-manifest.json
 css/
 js/
+tests/
 ```
-
-All hosts, IPs, people, companies, credentials, services, and networks are fictional in-game simulation data. BLACKBOX performs no real network scanning or access.
-
-
-## v0.2.3.1 Audio Foundation
-
-- Centralized `js/systems/audio.js` Web Audio system.
-- Synthesized cues require no external MP3/WAV assets.
-- Subtle cues for NEXUS window open/close, terminal entry/error, connect/disconnect, BLACKBOX transitions, clues/alerts, downloads, success, and job completion.
-- Taskbar speaker control toggles sound and remembers the preference in local storage.
-- First pointer/keyboard interaction safely unlocks Web Audio on iPhone/Safari.
-- Save version remains 8; world schema remains 8.
-
-## v0.2.3.2 Mobile Audio Feedback Hotfix
-
-- Raised and lengthened app, terminal, connection, notification, success, and download cues for phone speakers.
-- Muted state now uses a red button treatment with a visible diagonal red slash.
-- Tapping the speaker now displays an immediate `Sound effects enabled` or `Sound effects muted` notification.
-- Gameplay, mission data, SAVE_VERSION 8, and WORLD_SCHEMA 8 are unchanged.
-
-## v0.2.3.3 App Cue Balance Hotfix
-
-- Raised and slightly lengthened only the NEXUS app open and close cues after direct iPhone testing.
-- All approved BLACKBOX, terminal, connection, mission, clue, download, hardware, and mute-feedback sounds are unchanged.
-- Gameplay, mission data, SAVE_VERSION 8, and WORLD_SCHEMA 8 remain unchanged.
-
-## v0.2.3.4 iPhone App Cue Hotfix
-
-- Replaced the soft single-note app-open cue with a layered square/sine/noise electronic chime.
-- Replaced the soft single-note app-close cue with a distinct layered descending electronic chime.
-- All other approved sound cues and the visual mute feedback remain unchanged.
-- Gameplay, mission data, SAVE_VERSION 8, and WORLD_SCHEMA 8 remain unchanged.

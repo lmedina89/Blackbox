@@ -8,6 +8,8 @@ import { emit } from "../core/events.js";
 import { missionView } from "./missions.js";
 import { learn, proficiencyLabel } from "./progression.js";
 import { saveTarget, removeTarget, getSavedTargets, missionTitle, activeMissionForHost } from "./targets.js";
+import { advanceWorld } from "./timeline.js";
+import { lookupDns, formatDnsResult } from "./dns.js";
 
 const commands=new Map(),aliases=new Map();
 const line=t=>({lines:[{text:t}]});
@@ -70,7 +72,17 @@ export async function executeCommand(raw){
   s.terminal.historyIndex=s.terminal.history.length;
   const [rawHead,...args]=text.split(/\s+/),head=rawHead.toLowerCase(),name=aliases.get(head)||head,cmd=commands.get(name);
   if(!cmd)return {lines:[{text:`${rawHead}: command not found`,type:"error"}]};
-  try{const result=await cmd.execute({state:s,args})||{lines:[]};emitCommand(name,args);return result;}
+  try{
+    const result=await cmd.execute({state:s,args})||{lines:[]};
+    emitCommand(name,args);
+    const meaningful=new Set(["scan","connect","ip","services","netstat","ping","nslookup","traceroute","cat","head","tail","grep","find","download"]);
+    if(meaningful.has(name)){
+      const hostId=s.terminal.hostId;
+      const semanticArgs=name==="grep"?args.slice(1):name==="find"?args.slice(0,1):args;
+      advanceWorld(`cmd:${name}:${hostId}:${semanticArgs.join(":")}`,{minutes:name==="scan"?4:3,once:true});
+    }
+    return result;
+  }
   catch(err){return {lines:[{text:err.message||"Command failed",type:"error"}]};}
 }
 
@@ -100,12 +112,15 @@ registerCommand({name:"help",aliases:["?"],execute(){return line([
 "NETWORK",
 "  ip                inspect network interfaces",
 "  ping <host>       test current-host reachability",
+"  nslookup <name> [type] simulated DNS lookup",
 "  scan              discover hosts reachable FROM this machine",
 "  targets           saved target list",
 "  target add <host|#> save scan result/host",
 "  target remove <#>   remove saved target",
 "  target info <#>     inspect known target data",
-"  connect <host|scan#> connect to host/scan result",
+"  connect scan <#>   connect to recent scan result",
+"  connect target <#> connect to saved target",
+"  connect <host|ip>  connect by known name/address",
 "  traceroute <host> show simulated route","",
 "GAME",
 "  missions          active objectives",
@@ -144,12 +159,18 @@ registerCommand({name:"cd",execute({state,args}){const path=normalizePath(state.
 registerCommand({name:"cat",execute({state,args}){if(!args[0])throw new Error("cat: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path});learn("cat","systems");return line(body);}});
 registerCommand({name:"head",execute({state,args}){if(!args[0])throw new Error("head: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path});learn(`head:${state.terminal.hostId}`,"analysis");return line(body.split("\n").slice(0,5).join("\n"));}});
 registerCommand({name:"tail",execute({state,args}){if(!args[0])throw new Error("tail: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path});learn(`tail:${state.terminal.hostId}`,"analysis");return line(body.split("\n").slice(-5).join("\n"));}});
-registerCommand({name:"grep",execute({state,args}){if(args.length<2)throw new Error("usage: grep <text> <file>");const needle=args[0],{path,body}=fileText(state,args[1]),matches=body.split("\n").filter(x=>x.toLowerCase().includes(needle.toLowerCase()));emit("file:searched",{hostId:state.terminal.hostId,path,query:needle});learn(`grep:${state.terminal.hostId}`,"analysis",2);return line(matches.length?matches.join("\n"):"grep: no matches");}});
+registerCommand({name:"grep",execute({state,args}){if(args.length<2)throw new Error("usage: grep <text> <file>");const needle=args[0],{path,body}=fileText(state,args[1]),matches=body.split("\n").filter(x=>x.toLowerCase().includes(needle.toLowerCase()));emit("file:searched",{hostId:state.terminal.hostId,path,query:needle});learn(`grep:${state.terminal.hostId}`,"analysis",2);const result=matches.length?matches.join("\n"):"grep: no matches";return line((state.player.installedSoftware||[]).includes("logscope")?`${result}\n\nLogScope: ${matches.length} matching line${matches.length===1?"":"s"}; query recorded for correlation.`:result);}});
 function walk(node,path,out,needle){if(node.type==="file"){if(path.toLowerCase().includes(needle.toLowerCase()))out.push(path);return;}for(const [name,child] of Object.entries(node.children||{}))walk(child,`${path==="/"?"/":path+"/"}${name}`,out,needle);}
 registerCommand({name:"find",execute({state,args}){if(!args.length)throw new Error("usage: find [path] <name>");const needle=args.at(-1),base=args.length>1?normalizePath(state.terminal.cwd,args[0],state.terminal.hostId):state.terminal.cwd,node=getNode(state.terminal.hostId,base);if(!node)throw new Error("find: path not found");const out=[];walk(node,base,out,needle);learn(`find:${state.terminal.hostId}`,"analysis");return line(out.length?out.join("\n"):"find: no matches");}});
 registerCommand({name:"download",execute({state,args}){if(state.terminal.hostId==="home")throw new Error("download: already on HOME-PC");if(!args[0])throw new Error("download: missing file operand");const {path}=fileText(state,args[0]);const capacity=state.player.installedHardware.includes("hdd_20gb")?8:2;if(state.player.downloads.length>=capacity)throw new Error(`download: local evidence storage full (${capacity} files)`);const id=`${state.terminal.hostId}:${path}`;if(!state.player.downloads.includes(id))state.player.downloads.push(id);emit("file:downloaded",{hostId:state.terminal.hostId,path});learn("download","systems");return line(`Transferred ${path} -> HOME-PC:/home/downloads/\nEvidence stored locally.`);}});
 
 registerCommand({name:"ip",execute({state}){const h=HOSTS[state.terminal.hostId];learn(`ip:${state.terminal.hostId}`,"network",2);return line(["INTERFACES",...h.interfaces.map(i=>`${i.name.padEnd(6)} ${i.address}/${i.cidr}${i.gateway?`  gateway ${i.gateway}`:""}`)].join("\n"));}});
+registerCommand({name:"nslookup",execute({state,args}){
+  if(!args[0])throw new Error("usage: nslookup <fictional-name> [A|CNAME|MX]");
+  const result=lookupDns(args[0],args[1]||"ANY");
+  learn(`nslookup:${result.name}`,"network",2);
+  return line(formatDnsResult(result,{detailed:(state.player.installedSoftware||[]).includes("resolver_pro")}));
+}});
 registerCommand({name:"scan",execute({state}){
   const rows=scan();
   state.terminal.lastScanResults=rows.map(h=>h.id);
@@ -163,7 +184,7 @@ registerCommand({name:"scan",execute({state}){
     ...(rows.length?rows.map((h,i)=>scanRecord(h,i)):["No additional reachable hosts from this interface."]),
     "",
     'Numbers above are temporary scan results.',
-    'Use "connect <#>" now, or "target add <#>" to save one.',
+    'Use "connect scan <#>" now, or "target add scan <#>" to save one.',
     "Scan complete."
   ].join("\n"));
 }});
@@ -175,13 +196,16 @@ registerCommand({name:"targets",aliases:["hosts"],execute({state}){
     const h=HOSTS[entry.hostId],mission=missionTitle(entry.missionId);
     const source=entry.source==="mission"?(mission?`${mission} · mission`:"mission"):"manual";
     return `[${i}] ${displayName(h.id)}\n    ${h.address} · ${source}`;
-  })].join("\n"));
+  }),"",'Use "connect target <#>" to open a saved host.'].join("\n"));
 }});
 
 registerCommand({name:"target",execute({state,args}){
-  const action=String(args[0]||"").toLowerCase(),value=args[1];
+  const action=String(args[0]||"").toLowerCase();
+  let value=args[1];
   if(action==="add"){
-    if(value===undefined)throw new Error("usage: target add <host|scan #>");
+    if(value===undefined)throw new Error("usage: target add <host|ip> | target add scan <#>");
+    if(String(value).toLowerCase()==="scan")value=args[2];
+    if(value===undefined)throw new Error("usage: target add scan <#>");
     const h=scanTarget(state,value);
     if(!h)throw new Error("target: unknown host or scan result");
     if(h.id==="home")throw new Error("target: HOME-PC cannot be saved as a target");
@@ -236,22 +260,30 @@ registerCommand({name:"traceroute",aliases:["tracepath"],execute({state,args}){
 }});
 
 registerCommand({name:"connect",execute({state,args}){
-  if(!args[0])throw new Error("connect: specify hostname, address, or scan result number");
-  let target=args[0];
-  if(/^\d+$/.test(target)){
-    const h=state.terminal.lastScanResults?.length?scanTarget(state,target):savedTarget(state,target);
-    if(!h)throw new Error('connect: target number not found; run "scan" or review "targets"');
+  if(!args[0])throw new Error("connect: use a hostname/IP, scan <#>, or target <#>");
+  let target=args[0],h=null;
+  const mode=String(args[0]).toLowerCase();
+  if(mode==="scan"||mode==="target"){
+    if(args[1]===undefined||!/^\d+$/.test(args[1]))throw new Error(`usage: connect ${mode} <#>`);
+    h=mode==="scan"?scanTarget(state,args[1]):savedTarget(state,args[1]);
+    if(!h)throw new Error(`connect: ${mode} number not found`);
+    target=h.id;
+  }else if(/^\d+$/.test(target)){
+    const scanHit=scanTarget(state,target),savedHit=savedTarget(state,target);
+    if(scanHit&&savedHit&&scanHit.id!==savedHit.id)throw new Error(`connect: number ${target} is ambiguous; use "connect scan ${target}" or "connect target ${target}"`);
+    h=scanHit||savedHit;
+    if(!h)throw new Error('connect: number not found; run "scan" or review "targets"');
     target=h.id;
   }else{
-    const known=scanTarget(state,target);
-    if(!known)throw new Error("connect: host is not known to BLACKBOX");
-    target=known.id;
+    h=scanTarget(state,target);
+    if(!h)throw new Error("connect: host is not known to BLACKBOX");
+    target=h.id;
   }
   const from=HOSTS[state.terminal.hostId].hostname;
-  const h=connect(target);
-  discoverHost(h.id);
-  learn(`connect:${h.id}`,"network");
-  return line(`Resolving ${args[0]}...\nRoute found from ${from}.\nNegotiating session...\nIdentity: ${state.terminal.user}\nHandshake accepted.\nConnected to ${h.hostname} (${h.address}).`);
+  const connected=connect(target);
+  discoverHost(connected.id);
+  learn(`connect:${connected.id}`,"network");
+  return line(`Resolving ${connected.hostname}...\nRoute found from ${from}.\nNegotiating session...\nIdentity: ${state.terminal.user}\nHandshake accepted.\nConnected to ${connected.hostname} (${connected.address}).`);
 }});
 
 registerCommand({name:"missions",aliases:["jobs"],execute(){const a=missionView();if(!a.length)return line("No active jobs.");return line(a.map(m=>`${m.title}\n${m.objectives.map(o=>`${m.progress[o.id]?"[x]":"[ ]"} ${o.label}`).join("\n")}`).join("\n\n"));}});

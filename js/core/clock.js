@@ -1,5 +1,6 @@
 import { getState } from "./state.js";
 import { emit } from "./events.js";
+import { processTimeline } from "../systems/timeline.js";
 
 let timer=null;
 
@@ -9,6 +10,7 @@ export function startClock(){
     const s=getState();
     s.world.minute+=1;
     if(s.world.minute>=1440){ s.world.minute=0; s.world.day+=1; }
+    processTimeline();
     emit("clock:tick",{minute:s.world.minute,day:s.world.day});
   },60000);
 }

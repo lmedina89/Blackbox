@@ -112,6 +112,77 @@ export const FILESYSTEMS = {
       }}}},
       var:{type:"dir",children:{log:{type:"dir",children:{"sync.log":{type:"file",content:"18:00 sync source=10.91.6.23 status=ok\n18:30 public share indexed\n19:00 archive volume offline"}}}}}
     }}
+  },
+  lumenedge:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{review:{type:"dir",children:{"brief.txt":{type:"file",content:"LUMEN REVIEW\nCompare the public update hostname with the authoritative resolver response. The approved public node is LUMEN-EDGE."}}}}},
+      var:{type:"dir",children:{www:{type:"dir",children:{"dns-audit.txt":{type:"file",content:"DNS CHANGE REVIEW\nupdates.lumen.test -> staging-cache.lumen.test\nstaging-cache.lumen.test -> 10.84.2.20\nREQUESTOR: legacy-deploy\nSTATUS: alias removed; public record restored"}}},log:{type:"dir",children:{"access.log":{type:"file",content:"22:04 GET /updates 200\n22:06 resolver check ns1=10.84.2.53\n22:08 legacy alias disabled"}}}}},
+      etc:{type:"dir",children:{"issue":{type:"file",content:"Lumen Civic Systems public update gateway"}}}
+    }}
+  },
+  irisgate:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{monitor:{type:"dir",children:{"motd.txt":{type:"file",content:"IRIS overnight monitoring gateway. Inspect interfaces before following operations traffic."}}}}},
+      etc:{type:"dir",children:{"interfaces.conf":{type:"file",content:"eth0 10.48.6.12/24 public\nops0 172.26.5.5/24 operations"}}},
+      var:{type:"dir",children:{log:{type:"dir",children:{"beacon.log":{type:"file",content:"00:11 ops collector 172.26.5.18 connected\n00:16 legacy heartbeat repeated\n00:21 route stable"}}}}}
+    }}
+  },
+  irisops:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{audit:{type:"dir",children:{"readme.txt":{type:"file",content:"IRIS operations audit node. Use grep to isolate repeated identifiers in overnight.log."}}}}},
+      var:{type:"dir",children:{log:{type:"dir",children:{"overnight.log":{type:"file",content:"00:02 route-check id=ops-main status=ok\n00:07 heartbeat id=beacon-legacy source=172.26.5.44\n00:12 heartbeat id=beacon-legacy source=172.26.5.44\n00:17 heartbeat id=beacon-legacy source=172.26.5.44\n00:22 route-check id=ops-main status=ok"}}}}},
+      etc:{type:"dir",children:{"accounts.txt":{type:"file",content:"ops-main ACTIVE\nbeacon-legacy RETIRED / DEVICE STILL SCHEDULED\naudit READ-ONLY"}}}
+    }}
+  },
+  irisarchive:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{reader:{type:"dir",children:{"welcome.txt":{type:"file",content:"IRIS public schedule archive."}}}}},
+      public:{type:"dir",children:{"retirement.txt":{type:"file",content:"DEVICE RETIREMENT CALENDAR\nbeacon-legacy removal was scheduled for last quarter. Operations scheduler cleanup remains pending."},"routes.txt":{type:"file",content:"Archive copies are informational and do not control live transit systems."}}}
+    }}
+  },
+  harboredge:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{response:{type:"dir",children:{"brief.txt":{type:"file",content:"HARBOR MUTUAL INCIDENT 17\nAn internal claims alias resolves beyond the edge subnet. Inspect interfaces and the internal resolver; preserve the final incident record."}}}}},
+      etc:{type:"dir",children:{"resolver.conf":{type:"file",content:"resolver=172.29.14.53\nsearch=harbor.test\ninternal-zone=harbor-int.test"},"interfaces.conf":{type:"file",content:"eth0 10.66.4.16/24 public\ncore0 172.29.14.4/24 internal"}}},
+      var:{type:"dir",children:{log:{type:"dir",children:{"proxy.log":{type:"file",content:"01:04 claims.harbor.test lookup requested\n01:05 resolver 172.29.14.53 response cached\n01:06 vault route not present on edge"}}}}}
+    }}
+  },
+  harborresolver:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{dnsops:{type:"dir",children:{"note.txt":{type:"file",content:"Authoritative internal records live under /var/named. Follow aliases carefully; the edge cannot directly reach every returned network."}}}}},
+      var:{type:"dir",children:{named:{type:"dir",children:{"harbor.zone":{type:"file",content:"claims.harbor.test CNAME vault-int.harbor.test TTL 300\nvault-int.harbor.test A 172.29.22.40 TTL 300\nmail.harbor.test MX 10 mail-gw.harbor.test TTL 600"}}},log:{type:"dir",children:{"queries.log":{type:"file",content:"01:04 query claims.harbor.test type=CNAME\n01:04 answer vault-int.harbor.test\n01:05 query vault-int.harbor.test type=A\n01:05 answer 172.29.22.40"}}}}}
+    }}
+  },
+  harborvault:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{auditor:{type:"dir",children:{"instructions.txt":{type:"file",content:"Read incident-17.txt and download resolution.txt for the case archive."}}}}},
+      cases:{type:"dir",children:{"incident-17.txt":{type:"file",content:"INCIDENT 17\nA retired claims alias remained in an internal DNS zone. The alias pointed to the evidence vault after the public route was removed. No customer records were exposed."},"resolution.txt":{type:"file",content:"RESOLUTION\nRemoved claims.harbor.test CNAME. Preserved resolver logs. Confirmed HARBOR-VAULT remained internal-only. Case closed."}}},
+      etc:{type:"dir",children:{"issue":{type:"file",content:"Harbor Mutual evidence vault — authorized simulation archive"}}}
+    }}
+  },
+  quartzbbs:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{visitor:{type:"dir",children:{"welcome.txt":{type:"file",content:"QUARTZ BBS visitor shell. Old boards, public notes, no contracts."}}}}},
+      var:{type:"dir",children:{bbs:{type:"dir",children:{"relay-thread.txt":{type:"file",content:"[glasswire] the old board cache still answers\n[packetmoth] label was RELAY-CACHE / 10.73.9.28\n[glasswire] public mirror only; do not confuse it with a job"},"motd.txt":{type:"file",content:"QUARTZ HOBBY NETWORK\nCuriosity is allowed. Rewards are not guaranteed."}}}}}
+    }}
+  },
+  relaycache:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{guest:{type:"dir",children:{"readme.txt":{type:"file",content:"Public cache shell. Content mirrors old community documentation."}}}}},
+      cache:{type:"dir",children:{"index.txt":{type:"file",content:"CACHE INDEX\nquartz-board-2004.txt\nresolver-notes.txt\nstatus: read-only"},"resolver-notes.txt":{type:"file",content:"Historic note: a hostname is useful evidence, but resolution, reachability, services, and access are separate questions."}}}
+    }}
+  },
+  junoarchive:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{public:{type:"dir",children:{"about.txt":{type:"file",content:"Juno Open Research public technical archive."}}}}},
+      papers:{type:"dir",children:{"dns-history.txt":{type:"file",content:"FIELD NOTE\nA records map names to IPv4 addresses. CNAME records create aliases. MX records identify mail exchangers. TTL describes how long a result may be cached."},"ethics.txt":{type:"file",content:"All examples in this archive use fictional simulation networks."}}}
+    }}
+  },
+  cedarnode:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{guest:{type:"dir",children:{"welcome.txt":{type:"file",content:"CEDAR-NODE home lab guest area."},"uptime.txt":{type:"file",content:"The server wakes for evening backups and may be absent from some scans. Saved targets remain useful when a host rotates out of discovery."}}}}},
+      shared:{type:"dir",children:{"lab-map.txt":{type:"file",content:"HOME LAB\nrouter 10.39.7.1\nserver CEDAR-NODE 10.39.7.41\nbackup window 19:00-23:00"}}}
+    }}
   }
 
 };

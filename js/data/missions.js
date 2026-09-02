@@ -57,5 +57,42 @@ export const MISSIONS = [
       {id:"relay_trace",type:"command_used",target:"traceroute",label:"Use traceroute to inspect the relay path"},
       {id:"relay_config",type:"file_read",target:"axiomrelay:/etc/relay.conf",label:"Read the relay configuration"}
     ],rewards:{credits:350,reputation:6},flagsOnStart:["mission_relay_started"],flagsOnComplete:["mission_relay_complete"]
+  },
+  {
+    id:"mission_dns",title:"False Name",description:"Investigate a legacy DNS alias affecting Lumen's public update gateway.",
+    startWhen:{event:"email:read",target:"lumen_job"},
+    objectives:[
+      {id:"lumen_advisory",type:"threat_read",target:"td_lumen",label:"Read the Lumen advisory in NEXUS ThreatDesk"},
+      {id:"lumen_resolve",type:"dns_lookup",target:"updates.lumen.test",label:"Resolve updates.lumen.test with nslookup"},
+      {id:"lumen_connect",type:"host_connected",target:"lumenedge",label:"Connect to LUMEN-EDGE"},
+      {id:"lumen_audit",type:"file_read",target:"lumenedge:/var/www/dns-audit.txt",label:"Read the DNS change audit"}
+    ],rewards:{credits:420,reputation:7},flagsOnStart:["mission_dns_started"],flagsOnComplete:["mission_dns_complete"]
+  },
+  {
+    id:"mission_beacon",title:"Quiet Hours",description:"Trace a retired device heartbeat through Iris Transit Cooperative's overnight operations network.",
+    startWhen:{event:"email:read",target:"iris_job"},
+    objectives:[
+      {id:"iris_advisory",type:"threat_read",target:"td_iris",label:"Review the Iris heartbeat advisory"},
+      {id:"iris_connect",type:"host_connected",target:"irisgate",label:"Connect to IRIS-GATE"},
+      {id:"iris_interfaces",type:"command_used_at",target:"irisgate:ip",label:"Inspect IRIS-GATE interfaces"},
+      {id:"iris_scan",type:"command_used_at",target:"irisgate:scan",label:"Scan the Iris operations network"},
+      {id:"iris_ops",type:"host_connected",target:"irisops",label:"Connect to IRIS-OPS"},
+      {id:"iris_filter",type:"file_searched",target:"irisops:/var/log/overnight.log:beacon-legacy",label:"Filter overnight.log for beacon-legacy"}
+    ],rewards:{credits:520,reputation:8},flagsOnStart:["mission_beacon_started"],flagsOnComplete:["mission_beacon_complete"]
+  },
+  {
+    id:"mission_cascade",title:"Glass Harbor",description:"Follow a retired Harbor claims alias across an internal resolver boundary and preserve the incident resolution.",
+    startWhen:{event:"email:read",target:"harbor_job"},
+    objectives:[
+      {id:"harbor_advisory",type:"threat_read",target:"td_harbor",label:"Review the Harbor alias case"},
+      {id:"harbor_edge",type:"host_connected",target:"harboredge",label:"Connect to HARBOR-EDGE"},
+      {id:"harbor_interfaces",type:"command_used_at",target:"harboredge:ip",label:"Inspect HARBOR-EDGE interfaces"},
+      {id:"harbor_resolver",type:"host_connected",target:"harborresolver",label:"Connect to HARBOR-NS"},
+      {id:"harbor_zone",type:"file_read",target:"harborresolver:/var/named/harbor.zone",label:"Read the authoritative Harbor zone"},
+      {id:"harbor_lookup",type:"dns_lookup",target:"claims.harbor.test",label:"Resolve claims.harbor.test"},
+      {id:"harbor_vault",type:"host_connected",target:"harborvault",label:"Connect to HARBOR-VAULT through the resolver route"},
+      {id:"harbor_record",type:"file_read",target:"harborvault:/cases/incident-17.txt",label:"Read Incident 17"},
+      {id:"harbor_download",type:"file_downloaded",target:"harborvault:/cases/resolution.txt",label:"Download the incident resolution"}
+    ],rewards:{credits:700,reputation:10},flagsOnStart:["mission_cascade_started"],flagsOnComplete:["mission_cascade_complete"]
   }
 ];

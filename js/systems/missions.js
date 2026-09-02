@@ -16,6 +16,9 @@ export function initMissions(){
   on("forum:read",({postId})=>{startByEvent("forum:read",postId);recordObjective("forum_read",postId);});
   on("social:read",({postId})=>{startByEvent("social:read",postId);recordObjective("social_read",postId);});
   on("dialogue:choice",({choiceId})=>{startByEvent("dialogue:choice",choiceId);recordObjective("dialogue_choice",choiceId);});
+  on("threat:read",({threatId})=>{startByEvent("threat:read",threatId);recordObjective("threat_read",threatId);});
+  on("dns:lookup",({dnsName})=>recordObjective("dns_lookup",dnsName));
+  on("lab:completed",({labId})=>recordObjective("lab_completed",labId));
   on("host:connected",({hostId})=>recordObjective("host_connected",hostId));
   on("file:read",({hostId,path})=>recordObjective("file_read",`${hostId}:${path}`));
   on("file:downloaded",({hostId,path})=>recordObjective("file_downloaded",`${hostId}:${path}`));

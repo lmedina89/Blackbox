@@ -1,5 +1,5 @@
-export const SAVE_VERSION=8;
-export const WORLD_SCHEMA=8;
+export const SAVE_VERSION=9;
+export const WORLD_SCHEMA=9;
 
 function id(prefix="id"){
   const value=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
@@ -23,6 +23,7 @@ export const baseState=()=>({
     proficiencies:{systems:0,network:0,analysis:0,social:0},
     learnedActions:[],
     downloads:[],
+    installedSoftware:["resolver_basic"],
     notes:""
   },
   world:{
@@ -33,8 +34,18 @@ export const baseState=()=>({
     readForumPosts:[],
     readSocialPosts:[],
     readNewsStories:[],
+    readMessages:[],
+    readThreats:[],
+    completedLabs:[],
     notifications:[],
-    completedMissions:[]
+    completedMissions:[],
+    actionTick:0,
+    networkEpoch:0,
+    scanCounters:{},
+    deliveredEvents:[],
+    eventEligibleAt:{},
+    countedActions:[],
+    caseHistory:[]
   },
   missions:{active:[],progress:{}},
   communications:{choicesMade:[]},

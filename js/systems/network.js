@@ -1,6 +1,7 @@
 import { HOSTS } from "../data/hosts.js";
 import { getState } from "../core/state.js";
 import { emit } from "../core/events.js";
+import { MISSIONS } from "../data/missions.js";
 
 export function isIdentified(id){
   const s=getState(),h=HOSTS[id];
@@ -21,9 +22,53 @@ export function displayName(id){
   return isIdentified(id)?HOSTS[id]?.hostname||"UNKNOWN":"UNKNOWN";
 }
 
+function hash(value){
+  let h=2166136261;
+  for(const ch of String(value)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}
+  return h>>>0;
+}
+
+function available(host,s){
+  const flags=new Set(s.world.flags||[]);
+  if((host.visibleWhen||[]).some(x=>!flags.has(x)))return false;
+  if((host.hiddenWhen||[]).some(x=>flags.has(x)))return false;
+  return true;
+}
+
+function activeMissionHosts(s){
+  const ids=new Set();
+  for(const missionId of s.missions.active||[]){
+    const mission=MISSIONS.find(x=>x.id===missionId);if(!mission)continue;
+    const progress=s.missions.progress[missionId]||{};
+    for(const objective of mission.objectives||[]){
+      if(progress[objective.id])continue;
+      const raw=String(objective.target||"");
+      const hostId=Object.keys(HOSTS).find(id=>raw===id||raw.startsWith(`${id}:`));
+      if(hostId)ids.add(hostId);
+      // A scan objective and the host it is meant to reveal happen in the same
+      // command, so allow the immediately following host objective to be pinned.
+      if(!hostId&&((objective.type==="command_used"&&raw==="scan")||(objective.type==="command_used_at"&&raw.endsWith(":scan"))))continue;
+      break;
+    }
+  }
+  return ids;
+}
+
 export function scan(){
-  const s=getState(),current=HOSTS[s.terminal.hostId];
-  return (current.routes||[]).map(id=>HOSTS[id]).filter(Boolean);
+  const s=getState(),current=HOSTS[s.terminal.hostId],routes=(current.routes||[]).filter(id=>HOSTS[id]&&available(HOSTS[id],s));
+  s.world.scanCounters??={};
+  const count=(s.world.scanCounters[current.id]||0)+1;
+  s.world.scanCounters[current.id]=count;
+  const missionHosts=activeMissionHosts(s);
+  const pinned=routes.filter(id=>missionHosts.has(id)||HOSTS[id].visibility==="essential");
+  const base=current.id==="home"?7:6;
+  const detail=s.player.installedHardware.includes("nic_fast")?2:0;
+  const suite=(s.player.installedSoftware||[]).includes("scan_suite")?2:0;
+  const limit=Math.max(pinned.length,Math.min(routes.length,base+detail+suite));
+  const seed=`${s.meta.identityId}|${current.id}|${s.world.networkEpoch||0}`;
+  const pool=routes.filter(id=>!pinned.includes(id)).sort((a,b)=>hash(`${seed}|member|${a}`)-hash(`${seed}|member|${b}`));
+  const selected=[...new Set([...pinned,...pool.slice(0,Math.max(0,limit-pinned.length))])];
+  return selected.sort((a,b)=>hash(`${seed}|order|${count}|${a}`)-hash(`${seed}|order|${count}|${b}`)).map(id=>HOSTS[id]);
 }
 
 export function canReach(targetId){
@@ -36,6 +81,7 @@ export function connect(target){
   const wanted=Object.values(HOSTS).find(h=>h.id.toLowerCase()===String(target).toLowerCase()||h.hostname.toLowerCase()===String(target).toLowerCase()||h.address===String(target));
   if(!wanted)throw new Error("Host not found");
   if(wanted.id===current.id)throw new Error("connect: target resolves to current host");
+  if(!available(wanted,s))throw new Error("Host is not currently available in the simulated network");
   if(!canReach(wanted.id))throw new Error("No route to host");
   if(wanted.connectable===false)throw new Error("Connection refused. Remote shell service unavailable.");
   s.terminal.hostId=wanted.id;

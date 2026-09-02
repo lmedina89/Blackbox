@@ -28,5 +28,18 @@ Payment: 300 credits.`,visibleWhen:["mission_ghost_complete"]},
 
 I'm interested in the label, not the traffic.
 
-Payment: 350 credits.`,visibleWhen:["mission_deaddrop_complete"]}
+Payment: 350 credits.`,visibleWhen:["mission_deaddrop_complete"]},
+  {id:"threatdesk_welcome",from:"alerts@threatdesk.local",subject:"ThreatDesk feed activated",body:"Your NEXUS ThreatDesk access is active. Reports, field notes, simulated lookups, and training labs are available from the desktop. All targets and records are fictional.",visibleWhen:["threatdesk_online"]},
+  {id:"lumen_job",from:"response@lumen.local",subject:"contract: false name",body:`A retired deployment identity changed the alias for updates.lumen.test. Resolve the name, review the ThreatDesk advisory, and inspect the public gateway's DNS audit.
+
+Payment: 420 credits.`,visibleWhen:["lumen_contract_available"]},
+  {id:"lumen_closed",from:"response@lumen.local",subject:"Lumen alias restored",body:"The legacy alias has been removed and the public update record is authoritative again. Your evidence matched our resolver history.",visibleWhen:["lumen_world_updated"]},
+  {id:"iris_job",from:"nightops@iris-transit.local",subject:"contract: quiet hours",body:`A retired device ID continues to beacon during the overnight monitoring window. Start with ThreatDesk, enter through IRIS-GATE, inspect its interfaces, and isolate the identifier on the operations log node.
+
+Payment: 520 credits.`,visibleWhen:["iris_contract_available"]},
+  {id:"iris_closed",from:"nightops@iris-transit.local",subject:"scheduler entry removed",body:"The retired heartbeat remained in an old device schedule. Operations removed it without disrupting the live route monitor.",visibleWhen:["iris_world_updated"]},
+  {id:"harbor_job",from:"incident@harbor.local",subject:"contract: glass harbor",body:`A retired claims alias resolves beyond our edge subnet. Establish the path through the internal resolver, locate the evidence vault, and preserve the resolution record.
+
+Payment: 700 credits.`,visibleWhen:["harbor_contract_available"]},
+  {id:"harbor_closed",from:"incident@harbor.local",subject:"Incident 17 closed",body:"The alias was removed, resolver evidence was preserved, and the vault remained internal. Harbor Mutual has closed Incident 17.",visibleWhen:["harbor_world_updated"]}
 ];

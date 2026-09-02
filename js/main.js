@@ -8,6 +8,7 @@ import { initTerminalUI } from "./ui/terminalUI.js";
 import { enterBlackboxTransition, exitBlackboxTransition } from "./ui/transitions.js";
 import { on } from "./core/events.js";
 import { initAudio, playSound } from "./systems/audio.js";
+import { initTimeline } from "./systems/timeline.js";
 
 const boot=document.querySelector("#boot-screen");
 const desktop=document.querySelector("#desktop");
@@ -144,8 +145,9 @@ function purgeIdentity(){
 initAudio();
 initClues();
 initMissions();
+initTimeline();
 
-for(const eventName of ["mission:started","mission:completed","mission:progress","hardware:purchased","clue:discovered","dialogue:choice","proficiency:changed","file:downloaded","target:saved","target:removed"]){
+for(const eventName of ["mission:started","mission:completed","mission:progress","hardware:purchased","software:purchased","clue:discovered","dialogue:choice","proficiency:changed","file:downloaded","target:saved","target:removed","clock:tick","timeline:event","dns:lookup","threat:read","lab:completed","email:read","forum:read","social:read","news:read","message:read","thread:read"]){
   on(eventName,()=>saveGame());
 }
 

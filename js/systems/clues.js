@@ -33,8 +33,8 @@ export function initClues(){
   const events=[...new Set(CLUES.map(c=>c.discoverOn?.event).filter(Boolean))];
   for(const eventName of events){
     on(eventName,payload=>{
-      const target=payload.postId ?? payload.newsId ?? payload.messageId ?? payload.emailId ?? payload.choiceId ??
-        (payload.hostId&&payload.path?`${payload.hostId}:${payload.path}`:payload.hostId);
+      const target=payload.postId ?? payload.newsId ?? payload.messageId ?? payload.emailId ?? payload.choiceId ?? payload.threatId ?? payload.dnsName ??
+        (payload.hostId&&payload.path&&payload.query?`${payload.hostId}:${payload.path}:${payload.query}`:payload.hostId&&payload.path?`${payload.hostId}:${payload.path}`:payload.hostId);
       for(const clue of CLUES){
         if(clue.discoverOn?.event===eventName && clue.discoverOn.target===target)discover(clue);
       }

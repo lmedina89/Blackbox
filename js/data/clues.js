@@ -16,5 +16,15 @@ export const CLUES = [
   {kind:"world",id:"evan_box_host",title:"Evan's old server",summary:"EVAN-BOX — 10.33.8.44. Old guest-enabled home server mentioned by friends.",hostId:"evanpc",discoverOn:{event:"social:read",target:"s9"}},
   {kind:"world",id:"evan_box_im",title:"Evan's old server",summary:"EVAN-BOX — 10.33.8.44. Chris mentioned the old guest account in Messenger.",hostId:"evanpc",discoverOn:{event:"message:read",target:"c2"}},
   {kind:"world",id:"cobalt_from_im",title:"Cobalt hobby BBS",summary:"COBALT-BBS — 10.91.6.23. Sam says the visitor shell is still alive.",hostId:"cobaltbbs",discoverOn:{event:"message:read",target:"sam2"}},
-  {kind:"world",id:"orchid_nas_host",title:"Orchid public NAS",summary:"ORCHID-NAS — 10.55.2.19. Address surfaced inside the Cobalt board's messages.",hostId:"orchidnas",discoverOn:{event:"file:read",target:"cobaltbbs:/var/bbs/messages.txt"}}
+  {kind:"world",id:"orchid_nas_host",title:"Orchid public NAS",summary:"ORCHID-NAS — 10.55.2.19. Address surfaced inside the Cobalt board's messages.",hostId:"orchidnas",discoverOn:{event:"file:read",target:"cobaltbbs:/var/bbs/messages.txt"}},
+  {kind:"case",id:"lumen_dns_case",title:"Lumen DNS mismatch",summary:"updates.lumen.test followed a retired deployment alias.",hostId:"lumenedge",discoverOn:{event:"threat:read",target:"td_lumen"}},
+  {kind:"case",id:"lumen_dns_chain",title:"Lumen alias chain",summary:"updates.lumen.test aliases through staging-cache.lumen.test to 10.84.2.20.",hostId:"lumenedge",discoverOn:{event:"dns:lookup",target:"updates.lumen.test"}},
+  {kind:"case",id:"iris_beacon_case",title:"Iris overnight heartbeat",summary:"A retired beacon identity still appears on the operations network.",hostId:"irisgate",discoverOn:{event:"threat:read",target:"td_iris"}},
+  {kind:"case",id:"iris_legacy_device",title:"Legacy Iris device",summary:"beacon-legacy repeatedly reports from the Iris operations subnet.",hostId:"irisops",discoverOn:{event:"file:searched",target:"irisops:/var/log/overnight.log:beacon-legacy"}},
+  {kind:"case",id:"harbor_alias_case",title:"Harbor internal alias",summary:"claims.harbor.test resolves beyond the edge network.",hostId:"harboredge",discoverOn:{event:"threat:read",target:"td_harbor"}},
+  {kind:"case",id:"harbor_vault_record",title:"Harbor vault address",summary:"vault-int.harbor.test — 172.29.22.40.",hostId:"harborvault",discoverOn:{event:"dns:lookup",target:"claims.harbor.test"}},
+  {kind:"world",id:"cedar_home_lab",title:"Cedar home lab",summary:"CEDAR-NODE — 10.39.7.41. An intermittent evening backup server.",hostId:"cedarnode",discoverOn:{event:"social:read",target:"s11"}},
+  {kind:"world",id:"juno_archive_host",title:"Juno DNS archive",summary:"JUNO-ARCHIVE — 10.57.8.33. A public technical reference server.",hostId:"junoarchive",discoverOn:{event:"threat:read",target:"td_juno"}},
+  {kind:"world",id:"quartz_bbs_host",title:"Quartz BBS",summary:"QUARTZ-BBS — 10.73.9.19. A surviving hobby board.",hostId:"quartzbbs",discoverOn:{event:"forum:read",target:"f9"}},
+  {kind:"world",id:"relay_cache_host",title:"Quartz relay cache",summary:"RELAY-CACHE — 10.73.9.28. A public documentation mirror.",hostId:"relaycache",discoverOn:{event:"file:read",target:"quartzbbs:/var/bbs/relay-thread.txt"}}
 ];
