@@ -1,10 +1,10 @@
-# BLACKBOX v0.2.3.1 — Audio Foundation
+# BLACKBOX v0.2.3.2 — Mobile Audio Feedback Hotfix
 
-Built directly from the exact tested **v0.2.2 — Targeting & Terminal Polish** release.
+Built directly from **v0.2.3.1 — Audio Foundation**.
 
 ## Purpose
 
-v0.2.3.1 is a controlled audio-foundation update built directly from the tested v0.2.3 Free Exploration & Emergent Leads release. It preserves the v0.2.3 gameplay/world state and adds a centralized, synthesized Web Audio sound system with an iPhone-safe unlock path and persistent mute control.
+v0.2.3.2 is a narrow mobile-audio feedback hotfix. It preserves the v0.2.3.1 gameplay/world state, raises and lengthens quiet everyday effects for phone speakers, and makes the mute state unmistakable.
 
 The underlying v0.2.3 release turns the simulated network into a world the player can investigate even when no job is active. Formal missions remain intact, but they are no longer the only reason for a machine to exist.
 
@@ -105,3 +105,10 @@ All hosts, IPs, people, companies, credentials, services, and networks are ficti
 - Taskbar speaker control toggles sound and remembers the preference in local storage.
 - First pointer/keyboard interaction safely unlocks Web Audio on iPhone/Safari.
 - Save version remains 8; world schema remains 8.
+
+## v0.2.3.2 Mobile Audio Feedback Hotfix
+
+- Raised and lengthened app, terminal, connection, notification, success, and download cues for phone speakers.
+- Muted state now uses a red button treatment with a visible diagonal red slash.
+- Tapping the speaker now displays an immediate `Sound effects enabled` or `Sound effects muted` notification.
+- Gameplay, mission data, SAVE_VERSION 8, and WORLD_SCHEMA 8 are unchanged.

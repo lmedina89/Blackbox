@@ -1,6 +1,6 @@
 {
-  "name": "Audio Foundation",
-  "version": "0.2.3.1",
+  "name": "Mobile Audio Feedback Hotfix",
+  "version": "0.2.3.2",
   "saveVersion": 8,
   "worldSchema": 8,
   "baseline": "v0.2.3 Free Exploration & Emergent Leads (exact tested ZIP SHA-256 673381d7defc02b124e3423d542f786645bd8778f00237b68ff4691b1bee4391)",
@@ -65,7 +65,8 @@
     "optional corporate pivot network",
     "multiple Messenger friend threads",
     "case clue and world intel separation",
-    "centralized Web Audio sound-effects system with iOS-safe first-interaction unlock and persistent mute control"
+    "centralized Web Audio sound-effects system with iOS-safe first-interaction unlock and persistent mute control",
+    "phone-audible everyday cues and unmistakable visual mute feedback"
   ],
   "changes": [
     "Added centralized synthesized Web Audio sound effects with no external audio-file dependency",
@@ -82,6 +83,9 @@
     "Messenger now supports multiple selectable friend threads including Sam and Chris",
     "Cross-linked optional machines reward CLI/networking exploration without guaranteed mission rewards",
     "News stories can now emit discovery events when technical details are deliberately opened",
-    "Save migration 7 to 8 adds persistent readNewsStories state while preserving v0.2.2 identities"
+    "Save migration 7 to 8 adds persistent readNewsStories state while preserving v0.2.2 identities",
+    "Raised and lengthened quiet everyday sound cues for phone speakers",
+    "Added a red muted-state treatment, diagonal slash, and immediate enabled/muted toast feedback",
+    "No gameplay, mission, save-version, or world-schema changes in v0.2.3.2"
   ]
 }

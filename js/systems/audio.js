@@ -14,7 +14,9 @@ function ensureContext(){
   if(!context){
     context=new Ctx();
     master=context.createGain();
-    master.gain.value=0.16;
+    // Mobile speakers need more headroom than the original subtle mix provided.
+    // Individual effects remain conservative so layered cues do not become harsh.
+    master.gain.value=0.30;
     master.connect(context.destination);
   }
   if(context.state==="suspended")context.resume().catch(()=>{});
@@ -47,19 +49,19 @@ function noise({duration=.08,delay=0,gain=.05,highpass=900}={}){
 }
 
 const SOUNDS={
-  ui_open(){tone({freq:520,endFreq:700,duration:.045,type:"sine",gain:.09});},
-  ui_close(){tone({freq:620,endFreq:390,duration:.05,type:"sine",gain:.08});},
-  terminal_enter(){tone({freq:880,endFreq:760,duration:.025,type:"square",gain:.055});},
-  terminal_error(){tone({freq:180,endFreq:120,duration:.11,type:"sawtooth",gain:.10});},
-  connect(){tone({freq:360,endFreq:520,duration:.07,type:"square",gain:.09});tone({freq:610,endFreq:760,duration:.08,delay:.075,type:"sine",gain:.10});},
-  disconnect(){tone({freq:650,endFreq:300,duration:.12,type:"square",gain:.08});},
-  message(){tone({freq:740,endFreq:740,duration:.055,type:"sine",gain:.10});tone({freq:980,endFreq:980,duration:.07,delay:.07,type:"sine",gain:.09});},
-  alert(){tone({freq:420,endFreq:420,duration:.06,type:"square",gain:.09});tone({freq:520,endFreq:520,duration:.07,delay:.08,type:"square",gain:.08});},
-  success(){tone({freq:520,endFreq:620,duration:.07,type:"sine",gain:.09});tone({freq:780,endFreq:900,duration:.10,delay:.075,type:"sine",gain:.10});},
-  job_complete(){tone({freq:392,duration:.08,type:"sine",gain:.10});tone({freq:523,duration:.09,delay:.09,type:"sine",gain:.10});tone({freq:784,duration:.14,delay:.19,type:"sine",gain:.11});},
+  ui_open(){tone({freq:500,endFreq:760,duration:.075,type:"sine",gain:.16});},
+  ui_close(){tone({freq:680,endFreq:340,duration:.085,type:"sine",gain:.15});},
+  terminal_enter(){tone({freq:900,endFreq:700,duration:.05,type:"square",gain:.13});},
+  terminal_error(){tone({freq:190,endFreq:105,duration:.16,type:"sawtooth",gain:.15});},
+  connect(){tone({freq:360,endFreq:540,duration:.09,type:"square",gain:.14});tone({freq:620,endFreq:820,duration:.10,delay:.095,type:"sine",gain:.15});},
+  disconnect(){tone({freq:680,endFreq:280,duration:.15,type:"square",gain:.14});},
+  message(){tone({freq:740,endFreq:740,duration:.075,type:"sine",gain:.15});tone({freq:980,endFreq:980,duration:.09,delay:.09,type:"sine",gain:.14});},
+  alert(){tone({freq:420,endFreq:420,duration:.08,type:"square",gain:.14});tone({freq:540,endFreq:540,duration:.09,delay:.10,type:"square",gain:.13});},
+  success(){tone({freq:520,endFreq:650,duration:.09,type:"sine",gain:.14});tone({freq:790,endFreq:930,duration:.12,delay:.10,type:"sine",gain:.15});},
+  job_complete(){tone({freq:392,duration:.10,type:"sine",gain:.14});tone({freq:523,duration:.11,delay:.11,type:"sine",gain:.14});tone({freq:784,duration:.17,delay:.23,type:"sine",gain:.15});},
   blackbox_boot(){noise({duration:.11,gain:.035,highpass:1200});tone({freq:95,endFreq:150,duration:.22,type:"sawtooth",gain:.055});tone({freq:760,endFreq:920,duration:.08,delay:.18,type:"square",gain:.07});},
   blackbox_exit(){noise({duration:.08,gain:.025,highpass:1500});tone({freq:420,endFreq:90,duration:.18,type:"sawtooth",gain:.06});},
-  download(){tone({freq:300,endFreq:520,duration:.09,type:"square",gain:.06});noise({duration:.12,delay:.05,gain:.025,highpass:1800});}
+  download(){tone({freq:300,endFreq:560,duration:.12,type:"square",gain:.13});noise({duration:.15,delay:.06,gain:.045,highpass:1800});}
 };
 
 export function playSound(name){

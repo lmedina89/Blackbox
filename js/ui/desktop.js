@@ -43,9 +43,20 @@ export function initDesktopUI({enterBlackbox}){
   document.querySelector("#blackbox-button").addEventListener("click",()=>{startMenu.classList.add("hidden");enterBlackbox();});
   document.querySelector("#save-button").addEventListener("click",()=>{saveGame();toast("Game saved to local disk.");});
   document.querySelector("#start-alias").textContent=getState().player.alias;
-  function refreshAudioButton(){audioButton.textContent=isAudioEnabled()?"🔊":"🔇";audioButton.title=isAudioEnabled()?"Mute sound effects":"Enable sound effects";audioButton.setAttribute("aria-label",audioButton.title);}
+  function refreshAudioButton(){
+    const enabled=isAudioEnabled();
+    audioButton.textContent=enabled?"🔊":"🔇";
+    audioButton.classList.toggle("is-muted",!enabled);
+    audioButton.title=enabled?"Sound on — tap to mute":"Sound muted — tap to enable";
+    audioButton.setAttribute("aria-label",audioButton.title);
+    audioButton.setAttribute("aria-pressed",String(!enabled));
+  }
   refreshAudioButton();
-  audioButton.onclick=()=>{toggleAudio();refreshAudioButton();};
+  audioButton.onclick=()=>{
+    const enabled=toggleAudio();
+    refreshAudioButton();
+    toast(enabled?"Sound effects enabled.":"Sound effects muted.");
+  };
 
   function toast(text){const t=document.createElement("div");t.className="toast";t.innerHTML=`<b>NEXUS/OS</b><span>${text}</span>`;toastBox.appendChild(t);setTimeout(()=>t.classList.add("toast-out"),3300);setTimeout(()=>t.remove(),3800);}
   function updateClock(){const c=formatClock();document.querySelector("#clock-time").textContent=c.time;document.querySelector("#clock-date").textContent=c.date;}
@@ -182,7 +193,7 @@ export function initDesktopUI({enterBlackbox}){
         <div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div>
         <div class="stat"><b>Credits</b><br>${s.player.credits}</div>
         <div class="stat"><b>Reputation</b><br>${s.player.reputation}</div>
-        <div class="stat"><b>BLACKBOX</b><br>0.2.3.1 installed</div>
+        <div class="stat"><b>BLACKBOX</b><br>0.2.3.2 installed</div>
       </div>
       <div class="card"><h3>BLACKBOX proficiencies</h3><div class="system-grid">${Object.entries(s.player.proficiencies||{}).map(([skill,value])=>`<div class="stat"><b>${skill[0].toUpperCase()+skill.slice(1)}</b><br>${proficiencyLabel(value)} (${value})</div>`).join("")}</div><p class="muted">Proficiency grows by using real CLI and investigation concepts, not by spending skill points.</p></div>
       <div class="card"><h3>Known BLACKBOX targets</h3>${knownHosts.length?knownHosts.map((h,i)=>`<div class="target-row"><b>[${i}] ${displayName(h.id)}</b><span>${h.address}</span></div>`).join(""):"<p>No remote targets saved.</p>"}</div>
