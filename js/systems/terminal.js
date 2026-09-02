@@ -1,7 +1,7 @@
 import { getState } from "../core/state.js";
 import { HOSTS } from "../data/hosts.js";
 import { listDir, normalizePath, getNode, readFile } from "./filesystem.js";
-import { scan, connect, disconnect, resolveTarget, canReach } from "./network.js";
+import { scan, connect, disconnect, resolveTarget, canReach, displayName } from "./network.js";
 import { discoverHost } from "./clues.js";
 import { emit } from "../core/events.js";
 import { missionView } from "./missions.js";
@@ -30,8 +30,9 @@ function preprocess(raw){
 function emitCommand(name,args){emit("command:used",{name,args,hostId:getState().terminal.hostId});}
 function hostLines(h){
   const s=getState(),detail=s.player.installedHardware.includes("nic_fast");
+  const name=displayName(h.id);
   const services=detail?h.services.filter(x=>x.port).map(x=>`${x.name}:${x.port}`).join(", "):`${h.services.filter(x=>x.port).length} service(s)`;
-  return `${h.address.padEnd(15)} ${h.hostname.padEnd(14)} ${services}`;
+  return `${h.address.padEnd(15)} ${name.padEnd(14)} ${services}`;
 }
 function rememberedNumber(state,id){return (state.player.discoveredHosts||[]).indexOf(id);}
 function fileText(state,arg){
@@ -84,7 +85,7 @@ registerCommand({name:"help",aliases:["?"],execute(){return line([
 "GAME",
 "  missions          active objectives",
 "  clues             discovered information",
-"  purge identity    archive and terminate current identity",
+"  purge identity    archive & reset",
 "  exit              close remote/local session"
 ].join("\n"));}});
 
@@ -111,7 +112,7 @@ registerCommand({name:"download",execute({state,args}){if(state.terminal.hostId=
 
 registerCommand({name:"ip",execute({state}){const h=HOSTS[state.terminal.hostId];learn("ip","network",2);return line(["INTERFACES",...h.interfaces.map(i=>`${i.name.padEnd(6)} ${i.address}/${i.cidr}${i.gateway?`  gateway ${i.gateway}`:""}`)].join("\n"));}});
 registerCommand({name:"scan",execute({state}){const rows=scan();for(const h of rows)discoverHost(h.id);learn(`scan:${state.terminal.hostId}`,"network",2);const host=HOSTS[state.terminal.hostId];return line(["BLACKBOX ACTIVE DISCOVERY",`Scanning routes from ${host.hostname}...`,"",...(rows.length?rows.map(h=>{const n=rememberedNumber(state,h.id);return `[${n}] ${hostLines(h)}`;}):["No additional reachable hosts from this interface."]),"",'Use "targets" or "connect <number>" to reuse a discovered host.',"Scan complete."].join("\n"));}});
-registerCommand({name:"targets",aliases:["hosts"],execute({state}){const rows=(state.player.discoveredHosts||[]).map(id=>HOSTS[id]).filter(Boolean);if(!rows.length)return line('No remembered hosts. Investigate NEXUS/OS or run "scan".');return line(["REMEMBERED TARGETS","",...rows.map((h,i)=>`[${i}] ${h.hostname.padEnd(14)} ${h.address}`)].join("\n"));}});
+registerCommand({name:"targets",aliases:["hosts"],execute({state}){const rows=(state.player.discoveredHosts||[]).map(id=>HOSTS[id]).filter(Boolean);if(!rows.length)return line('No remembered hosts. Investigate NEXUS/OS or run "scan".');return line(["REMEMBERED TARGETS","",...rows.map((h,i)=>`[${i}] ${displayName(h.id).padEnd(14)} ${h.address}`)].join("\n"));}});
 registerCommand({name:"ping",execute({state,args}){if(!args[0])throw new Error("ping: specify host");const h=resolveTarget(args[0]);if(!h)throw new Error("ping: unknown host");if(h.id===state.terminal.hostId)return line(`PING ${h.hostname} (${h.address})\nreply from ${h.address}: time<1ms (local interface)`);learn("ping","network");return canReach(h.id)?line(`PING ${h.hostname} (${h.address})\nreply from ${h.address}: time=18ms\nreply from ${h.address}: time=17ms`):line(`PING ${h.hostname} (${h.address})\nDestination unreachable from ${HOSTS[state.terminal.hostId].hostname}.`);}});
 registerCommand({name:"traceroute",aliases:["tracepath"],execute({state,args}){if(!args[0])throw new Error("traceroute: specify host");if(state.terminal.hostId==="axiomrelay"&&args[0]==="198.51.100.27"){learn("traceroute","network",2);return line("traceroute to 198.51.100.27\n1  10.60.9.1  3 ms\n2  203.0.113.9  21 ms\n3  198.51.100.27  34 ms");}const h=resolveTarget(args[0]);if(!h)throw new Error("traceroute: unknown host");learn("traceroute","network",2);if(h.id===state.terminal.hostId)return line(`traceroute to ${h.hostname}\n1  ${h.address}  <1 ms`);if(!canReach(h.id))return line(`traceroute to ${h.hostname}\n1  * * *\nroute unavailable from current host`);const cur=HOSTS[state.terminal.hostId];return line(`traceroute to ${h.hostname} (${h.address})\n1  ${cur.interfaces[0].gateway||cur.address}  4 ms\n2  ${h.address}  18 ms`);}});
 registerCommand({name:"connect",execute({state,args}){if(!args[0])throw new Error("connect: specify hostname, address, or target number");let target=args[0];if(/^\d+$/.test(target)){const id=state.player.discoveredHosts?.[Number(target)];if(!id)throw new Error("connect: unknown target number");target=id;}const from=HOSTS[state.terminal.hostId].hostname;const h=connect(target);discoverHost(h.id);learn(`connect:${h.id}`,"network");return line(`Resolving ${args[0]}...\nRoute found from ${from}.\nNegotiating session...\nIdentity: ${state.terminal.user}\nHandshake accepted.\nConnected to ${h.hostname} (${h.address}).`);}});

@@ -1,13 +1,15 @@
 import { CLUES } from "../data/clues.js";
 import { getState } from "../core/state.js";
 import { on, emit } from "../core/events.js";
+import { identifyHost } from "./network.js";
 
 function discover(clue){
   const s=getState();
   if(s.player.discoveredClues.includes(clue.id))return false;
   s.player.discoveredClues.push(clue.id);
-  if(clue.hostId && !s.player.discoveredHosts.includes(clue.hostId)){
-    s.player.discoveredHosts.push(clue.hostId);
+  if(clue.hostId){
+    if(!s.player.discoveredHosts.includes(clue.hostId))s.player.discoveredHosts.push(clue.hostId);
+    identifyHost(clue.hostId);
   }
   emit("clue:discovered",{clue});
   return true;

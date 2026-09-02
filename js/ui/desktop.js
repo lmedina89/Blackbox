@@ -15,6 +15,7 @@ import { makeChoice, choiceMade } from "../systems/communications.js";
 import { getKnownClues } from "../systems/clues.js";
 import { HOSTS } from "../data/hosts.js";
 import { proficiencyLabel } from "../systems/progression.js";
+import { displayName } from "../systems/network.js";
 
 function visible(item){
   if((item.visibleWhen||[]).some(f=>!hasFlag(f))) return false;
@@ -24,6 +25,13 @@ function visible(item){
 
 export function initDesktopUI({enterBlackbox}){
   const icons=document.querySelector("#desktop-icons"),startList=document.querySelector("#start-app-list"),startMenu=document.querySelector("#start-menu"),layer=document.querySelector("#window-layer"),taskApps=document.querySelector("#taskbar-apps"),toastBox=document.querySelector("#notifications");
+  // Identity restore can initialize the desktop again in the same page lifetime.
+  // Clear identity-owned presentation so Messenger and every app rebuild from restored canonical state.
+  icons.replaceChildren();
+  startList.replaceChildren();
+  layer.replaceChildren();
+  taskApps.replaceChildren();
+  toastBox.replaceChildren();
   let z=20,offset=0;
 
   for(const app of DESKTOP_APPS){
@@ -151,10 +159,10 @@ export function initDesktopUI({enterBlackbox}){
         <div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div>
         <div class="stat"><b>Credits</b><br>${s.player.credits}</div>
         <div class="stat"><b>Reputation</b><br>${s.player.reputation}</div>
-        <div class="stat"><b>BLACKBOX</b><br>0.2.0 installed</div>
+        <div class="stat"><b>BLACKBOX</b><br>0.2.1 installed</div>
       </div>
       <div class="card"><h3>BLACKBOX proficiencies</h3><div class="system-grid">${Object.entries(s.player.proficiencies||{}).map(([skill,value])=>`<div class="stat"><b>${skill[0].toUpperCase()+skill.slice(1)}</b><br>${proficiencyLabel(value)} (${value})</div>`).join("")}</div><p class="muted">Proficiency grows by using real CLI and investigation concepts, not by spending skill points.</p></div>
-      <div class="card"><h3>Known BLACKBOX targets</h3>${knownHosts.length?knownHosts.map((h,i)=>`<div class="target-row"><b>[${i}] ${h.hostname}</b><span>${h.address}</span></div>`).join(""):"<p>No remote targets saved.</p>"}</div>
+      <div class="card"><h3>Known BLACKBOX targets</h3>${knownHosts.length?knownHosts.map((h,i)=>`<div class="target-row"><b>[${i}] ${displayName(h.id)}</b><span>${h.address}</span></div>`).join(""):"<p>No remote targets saved.</p>"}</div>
       <div class="card"><h3>Downloaded evidence</h3>${(s.player.downloads||[]).length?(s.player.downloads||[]).map(x=>`<div class="clue-row"><b>${x.split(":")[0].toUpperCase()}</b><span>${x.split(":").slice(1).join(":")}</span></div>`).join(""):"<p>No evidence files stored locally.</p>"}</div>
       <div class="card"><h3>Recorded clues</h3>${clues.length?clues.map(c=>`<div class="clue-row"><b>${c.title}</b><span>${c.summary}</span></div>`).join(""):"<p>No clues recorded.</p>"}</div>
       <div class="card blackbox-launch"><div><h3>BLACKBOX Secure Environment</h3><p>Launch or resume the isolated simulated terminal workspace.</p></div><button id="system-blackbox">ENTER BLACKBOX</button></div>

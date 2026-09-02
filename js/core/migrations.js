@@ -29,8 +29,50 @@ const migrations={
     save.player.learnedActions ??= [];
     save.player.downloads ??= [];
     return save;
+  },
+  6(save){
+    save.player.identifiedHosts ??= ["home",...(save.player.discoveredHosts||[])];
+    return save;
   }
 };
+
+function normalize(save){
+  save.player ??= {};
+  save.world ??= {};
+  save.missions ??= {active:[],progress:{}};
+  save.communications ??= {};
+  save.communications.choicesMade ??= [];
+  save.player.relationships ??= {maya:1,sam:0,zero:0};
+  save.player.discoveredClues ??= [];
+  save.player.discoveredHosts ??= [];
+  save.player.identifiedHosts ??= ["home"];
+  if(!save.player.identifiedHosts.includes("home"))save.player.identifiedHosts.unshift("home");
+  save.player.proficiencies ??= {systems:0,network:0,analysis:0,social:0};
+  save.player.learnedActions ??= [];
+  save.player.downloads ??= [];
+  save.world.flags ??= [];
+  save.world.readEmails ??= [];
+  save.world.readForumPosts ??= [];
+  save.world.readSocialPosts ??= [];
+  save.world.notifications ??= [];
+  save.world.completedMissions ??= [];
+  save.missions.active ??= [];
+  save.missions.progress ??= {};
+  save.ui ??= {openApps:[],lastBrowserSite:"news"};
+  save.ui.openApps ??= [];
+  save.ui.lastBrowserSite ??= "news";
+  save.terminal ??= {};
+  save.terminal.hostId ??= "home";
+  save.terminal.cwd ??= "/home";
+  save.terminal.history ??= [];
+  save.terminal.historyIndex ??= save.terminal.history.length;
+  save.terminal.trace ??= 0;
+  save.terminal.sessionCount ??= 0;
+  save.terminal.sessionOpen ??= false;
+  save.terminal.suspended ??= false;
+  save.terminal.pendingAction ??= null;
+  return save;
+}
 
 export function migrateSave(save){
   if(!save||typeof save!=="object")throw new Error("Invalid save");
@@ -44,5 +86,5 @@ export function migrateSave(save){
     save.meta.saveVersion=current;
   }
   save.meta.worldSchema=WORLD_SCHEMA;
-  return save;
+  return normalize(save);
 }
