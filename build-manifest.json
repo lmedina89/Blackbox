@@ -1,9 +1,9 @@
 {
-  "name": "BLACKBOX \u2014 Identity & Session Foundation",
-  "version": "0.1.3",
-  "saveVersion": 4,
-  "worldSchema": 4,
-  "baseline": "v0.1.2 GitHub checkpoint (SHA-256 6543d2a909c89ab35a484deb9c1d5d71065d1816552da4c41870d44530dfed3e)",
+  "name": "Network & Underground Expansion",
+  "version": "0.2.0",
+  "saveVersion": 5,
+  "worldSchema": 5,
+  "baseline": "v0.1.3 Identity & Session Foundation (tested checkpoint; ZIP SHA-256 f8e8730a54b0a5a74c34f784e6fb0a0608528cf836cf9b364991c98e0154f02c)",
   "files": [
     "README.md",
     "build-manifest.json",
@@ -39,6 +39,7 @@
     "js/systems/hardware.js",
     "js/systems/missions.js",
     "js/systems/network.js",
+    "js/systems/progression.js",
     "js/systems/terminal.js",
     "js/ui/desktop.js",
     "js/ui/terminalUI.js",
@@ -51,6 +52,22 @@
     "purge identity terminal command with confirmation and archive",
     "remote-session-safe DESKTOP confirmation",
     "in-terminal objective and job completion notices",
-    "responsive wider BLACKBOX shell banner"
+    "responsive wider BLACKBOX shell banner",
+    "host-contextual route graph",
+    "identity-aware local shell prompt",
+    "use-based proficiency model",
+    "four new investigations and three new organizations",
+    "evidence downloads with storage capacity"
+  ],
+  "changes": [
+    "Contextual graph-based networking and self-connection prevention",
+    "Identity-aware HOME-PC prompt",
+    "Real CLI-inspired ip/ping/traceroute/grep/find/head/tail/services/download commands",
+    "Use-based Systems/Network/Analysis/Social proficiency",
+    "Four additional varied investigations",
+    "New Meridian, Helix, and Axiom simulated hosts and internal network pivot",
+    "Meaningful HDD evidence capacity and FastLink scan detail",
+    "Packet Underground and DeadDrop browser destinations",
+    "Reactive news/social content and subtle ORBIT/BBX breadcrumbs"
   ]
 }

@@ -1,5 +1,5 @@
-export const SAVE_VERSION=4;
-export const WORLD_SCHEMA=4;
+export const SAVE_VERSION=5;
+export const WORLD_SCHEMA=5;
 
 function id(prefix="id"){
   const value=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
@@ -17,6 +17,9 @@ export const baseState=()=>({
     discoveredClues:[],
     discoveredHosts:[],
     relationships:{maya:1,sam:0,zero:0},
+    proficiencies:{systems:0,network:0,analysis:0,social:0},
+    learnedActions:[],
+    downloads:[],
     notes:""
   },
   world:{

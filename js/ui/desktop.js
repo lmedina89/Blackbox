@@ -14,6 +14,7 @@ import { saveGame } from "../core/save.js";
 import { makeChoice, choiceMade } from "../systems/communications.js";
 import { getKnownClues } from "../systems/clues.js";
 import { HOSTS } from "../data/hosts.js";
+import { proficiencyLabel } from "../systems/progression.js";
 
 function visible(item){
   if((item.visibleWhen||[]).some(f=>!hasFlag(f))) return false;
@@ -63,7 +64,7 @@ export function initDesktopUI({enterBlackbox}){
 
   function renderBrowser(el){
     const s=getState();
-    el.innerHTML=`<div class="browser-chrome"><div class="browser-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Favorites&nbsp;&nbsp; Help</div><div class="app-toolbar browser-toolbar"><button data-nav="back">←</button><button data-site="news">News</button><button data-site="social">FriendSpace</button><button data-site="forum">NightWire</button><button data-site="shop">ByteBarn</button><input value="nexus://${s.ui.lastBrowserSite||"news"}" aria-label="Address"></div></div><div class="app-body browser-page" id="browser-body"></div>`;
+    el.innerHTML=`<div class="browser-chrome"><div class="browser-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Favorites&nbsp;&nbsp; Help</div><div class="app-toolbar browser-toolbar"><button data-nav="back">←</button><button data-site="news">News</button><button data-site="social">FriendSpace</button><button data-site="forum">NightWire</button><button data-site="packet">Packet Underground</button><button data-site="deaddrop">DeadDrop</button><button data-site="shop">ByteBarn</button><input value="nexus://${s.ui.lastBrowserSite||"news"}" aria-label="Address"></div></div><div class="app-body browser-page" id="browser-body"></div>`;
     const body=el.querySelector("#browser-body"),addr=el.querySelector("input");
     const show=site=>{s.ui.lastBrowserSite=site;addr.value=`nexus://${site}`;
       if(site==="news")body.innerHTML=`<div class="site-head"><div class="site-logo">METROWIRE</div><span>LOCAL // TECHNOLOGY // BUSINESS</span></div>${NEWS.filter(visible).map(n=>`<article class="news-story"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · Day ${s.world.day}</span></article>`).join("")}`;
@@ -81,13 +82,28 @@ export function initDesktopUI({enterBlackbox}){
         body.innerHTML=`<div class="site-head nightwire"><div class="site-logo">NIGHTWIRE</div><span>underground computing board</span></div><div class="forum-banner">READ THE RULES // NO REAL-WORLD TARGETS // KEEP IT IN THE LAB</div>${FORUM_POSTS.filter(visible).map(p=>`<button class="forum-thread" data-post="${p.id}"><b>${p.title}</b><span>by ${p.author}</span><p>${p.body}</p></button>`).join("")}`;
         body.querySelectorAll("[data-post]").forEach(btn=>btn.addEventListener("click",()=>{const id=btn.dataset.post;if(!s.world.readForumPosts.includes(id))s.world.readForumPosts.push(id);emit("forum:read",{postId:id});btn.classList.add("read");toast(id==="f1"?"Archive host saved to BLACKBOX targets.":"Useful information added to your notes.");}));
       }
+      if(site==="packet"){
+        body.innerHTML=`<div class="site-head nightwire"><div class="site-logo">PACKET UNDERGROUND</div><span>FIELD NOTES // CLI // NETWORKING</span></div>
+        <article class="news-story"><h2>Know where you are</h2><p><b>pwd</b> prints your working directory. <b>ls</b> lists it. <b>cd ..</b> moves up one level. These are real shell habits worth learning.</p></article>
+        <article class="news-story"><h2>One host, more than one network</h2><p>Use <b>ip</b> to inspect interfaces. A remote system can have a second interface on a network HOME-PC cannot directly see.</p></article>
+        <article class="news-story"><h2>Don't read a wall of logs</h2><p>Use <b>grep text file</b> to filter matching lines. <b>head</b> and <b>tail</b> are useful when you only need the beginning or end.</p></article>`;
+      }
+      if(site==="deaddrop"){
+        const jobs=[
+          ["Recovery Index","Meridian support recovery","mission_mirror_complete","mission_recovery_complete"],
+          ["Ghost Account","Helix diagnostics review","mission_recovery_complete","mission_ghost_complete"],
+          ["Preserve a Config","Axiom relay retirement","mission_ghost_complete","mission_deaddrop_complete"],
+          ["The Relay","Axiom outbound review","mission_deaddrop_complete","mission_relay_complete"]
+        ].filter(x=>hasFlag(x[2])&&!hasFlag(x[3]));
+        body.innerHTML=`<div class="site-head nightwire"><div class="site-logo">DEADDROP</div><span>ANONYMOUS CONTRACT BOARD</span></div><div class="forum-banner">SIMULATED SYSTEMS ONLY // CONTRACTS APPEAR AS YOUR REPUTATION GROWS</div>${jobs.length?jobs.map(j=>`<article class="news-story"><h2>${j[0]}</h2><p>${j[1]}</p><span class="feed-meta">Check NEXUS Mail for contract details.</span></article>`).join(""):`<div class="empty-state">No contracts matching your current reputation.</div>`}`;
+      }
       if(site==="shop"){
         body.innerHTML=`<div class="site-head bytebarn"><div class="site-logo">BYTEBARN</div><span>PC PARTS // SAME-DAY INSTALL</span></div><div class="store-balance">Available credits: <b>${s.player.credits}</b></div><div class="shop-grid">${HARDWARE.map(h=>`<div class="shop-item"><span class="part-type">${h.type}</span><h3>${h.name}</h3><p>${h.description}</p><strong>${h.price} cr</strong><button data-buy="${h.id}" ${s.player.installedHardware.includes(h.id)?"disabled":""}>${s.player.installedHardware.includes(h.id)?"Installed":"Order & install"}</button></div>`).join("")}</div>`;
         body.querySelectorAll("[data-buy]").forEach(btn=>btn.addEventListener("click",()=>{const result=buyHardware(btn.dataset.buy);toast(result.message);show("shop");}));
       }
     };
     el.querySelectorAll("[data-site]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.site)));
-    addr.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const site=addr.value.replace(/^nexus:\/\//,"").trim().toLowerCase();if(["news","social","forum","shop"].includes(site))show(site);else{body.innerHTML=`<div class="browser-error"><h2>Page cannot be displayed</h2><p>NEXUS Explorer could not resolve <b>${site||"(blank)"}</b>.</p></div>`;}});
+    addr.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const site=addr.value.replace(/^nexus:\/\//,"").trim().toLowerCase();if(["news","social","forum","packet","deaddrop","shop"].includes(site))show(site);else{body.innerHTML=`<div class="browser-error"><h2>Page cannot be displayed</h2><p>NEXUS Explorer could not resolve <b>${site||"(blank)"}</b>.</p></div>`;}});
     show(s.ui.lastBrowserSite||"news");
   }
 
@@ -135,9 +151,11 @@ export function initDesktopUI({enterBlackbox}){
         <div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div>
         <div class="stat"><b>Credits</b><br>${s.player.credits}</div>
         <div class="stat"><b>Reputation</b><br>${s.player.reputation}</div>
-        <div class="stat"><b>BLACKBOX</b><br>0.1.3 installed</div>
+        <div class="stat"><b>BLACKBOX</b><br>0.2.0 installed</div>
       </div>
+      <div class="card"><h3>BLACKBOX proficiencies</h3><div class="system-grid">${Object.entries(s.player.proficiencies||{}).map(([skill,value])=>`<div class="stat"><b>${skill[0].toUpperCase()+skill.slice(1)}</b><br>${proficiencyLabel(value)} (${value})</div>`).join("")}</div><p class="muted">Proficiency grows by using real CLI and investigation concepts, not by spending skill points.</p></div>
       <div class="card"><h3>Known BLACKBOX targets</h3>${knownHosts.length?knownHosts.map((h,i)=>`<div class="target-row"><b>[${i}] ${h.hostname}</b><span>${h.address}</span></div>`).join(""):"<p>No remote targets saved.</p>"}</div>
+      <div class="card"><h3>Downloaded evidence</h3>${(s.player.downloads||[]).length?(s.player.downloads||[]).map(x=>`<div class="clue-row"><b>${x.split(":")[0].toUpperCase()}</b><span>${x.split(":").slice(1).join(":")}</span></div>`).join(""):"<p>No evidence files stored locally.</p>"}</div>
       <div class="card"><h3>Recorded clues</h3>${clues.length?clues.map(c=>`<div class="clue-row"><b>${c.title}</b><span>${c.summary}</span></div>`).join(""):"<p>No clues recorded.</p>"}</div>
       <div class="card blackbox-launch"><div><h3>BLACKBOX Secure Environment</h3><p>Launch or resume the isolated simulated terminal workspace.</p></div><button id="system-blackbox">ENTER BLACKBOX</button></div>
     </div>`;

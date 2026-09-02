@@ -1,8 +1,8 @@
-# BLACKBOX — v0.1.3 Identity & Session Foundation
+# BLACKBOX v0.2.0 — Network & Underground Expansion
 
 Built directly from the tested v0.1.2 Desktop ↔ BLACKBOX Gameplay Foundation.
 
-## v0.1.3 goals
+## v0.2.0 goals
 
 This milestone hardens the player-life lifecycle and BLACKBOX session UX before broader v0.2.0 story expansion.
 
@@ -65,3 +65,9 @@ build-manifest.json
 css/
 js/
 ```
+
+
+## v0.2.0 direction
+BLACKBOX now rewards correct real-world CLI and networking knowledge inside a fully fictional simulated environment. Networking is host-contextual and graph-based: each machine sees only the systems reachable from its own interfaces. The release adds identity-aware prompts, `ip`, `ping`, `traceroute`, `grep`, `find`, `head`, `tail`, `services`, and `download`; use-based Systems/Network/Analysis/Social proficiency; four additional investigations; meaningful evidence storage and scan-detail hardware effects; Packet Underground and DeadDrop; reactive world content; and subtle ORBIT/BBX breadcrumbs.
+
+All targets, addresses, organizations, credentials, routes, and services are fictional/simulated game data.

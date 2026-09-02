@@ -23,6 +23,12 @@ const migrations={
     save.meta.identityId ??= `identity-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
     save.terminal.pendingAction ??= null;
     return save;
+  },
+  5(save){
+    save.player.proficiencies ??= {systems:0,network:0,analysis:0,social:0};
+    save.player.learnedActions ??= [];
+    save.player.downloads ??= [];
+    return save;
   }
 };
 

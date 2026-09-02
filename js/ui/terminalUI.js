@@ -146,6 +146,11 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
       next:next?`NEXT: ${next.label}`:"Information added to Case Notes."
     });
   });
+  on("proficiency:changed",({label,value})=>deliverOrQueue({
+    title:"[ PROFICIENCY ]",
+    body:`${label} understanding increased.`,
+    next:`Experience: ${value}. Use "skills" to review.`
+  }));
   on("mission:completed",({mission})=>deliverOrQueue({
     title:"[ JOB COMPLETE ]",
     body:mission.title,
@@ -170,7 +175,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
         output.innerHTML="";
         print("┌──────────────────────────────────────────┐","banner");
         print("│       B L A C K B O X   S E C U R E      │","banner");
-        print("│         INTERACTIVE SHELL 0.1.3          │","banner");
+        print("│         INTERACTIVE SHELL 0.2.0          │","banner");
         print("└──────────────────────────────────────────┘","banner");
         print("");
         print(`SESSION ${String(s.terminal.sessionCount).padStart(4,"0")} // LOCAL ENVIRONMENT`);

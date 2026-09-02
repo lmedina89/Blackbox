@@ -1,6 +1,7 @@
 import { THREADS } from "../data/messages.js";
 import { getState, setFlag } from "../core/state.js";
 import { emit } from "../core/events.js";
+import { learn } from "./progression.js";
 
 export function makeChoice(choiceId){
   const s=getState();
@@ -26,6 +27,7 @@ export function makeChoice(choiceId){
     }
   }
 
+  learn(`dialogue:${choiceId}`,"social");
   emit("dialogue:choice",{choiceId});
   emit("communications:changed",{choiceId});
   return {ok:true};
