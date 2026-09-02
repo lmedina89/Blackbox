@@ -2,7 +2,7 @@ export const HOSTS = {
   home:{
     id:"home",hostname:"HOME-PC",address:"192.168.1.12",owner:"Player",os:"NEXUS/OS 4.2",filesystem:"home",users:["player"],homeDir:"/home",
     interfaces:[{name:"eth0",address:"192.168.1.12",cidr:24,gateway:"192.168.1.1"}],
-    routes:["homegw","familypc","printer01","web03","mail02","archives01","mirror02","meridian01","helixedge","axiomrelay"],
+    routes:["homegw","familypc","printer01","web03","mail02","archives01","mirror02","meridian01","helixedge","axiomrelay","evanpc","vantaedge","cobaltbbs","orchidnas"],
     services:[{name:"local-shell",port:0,state:"open",pid:118},{name:"messenger",port:5222,state:"open",pid:244}],
     processes:[{pid:1,user:"system",cpu:"0.0",mem:"0.1",name:"init"},{pid:118,user:"player",cpu:"0.1",mem:"1.8",name:"blackboxd"},{pid:244,user:"player",cpu:"0.0",mem:"2.4",name:"messenger"}],
     connections:[{proto:"tcp",local:"192.168.1.12:5222",remote:"10.2.4.18:5222",state:"ESTABLISHED"}]
@@ -80,5 +80,49 @@ export const HOSTS = {
     services:[{name:"ssh",port:22,state:"open",pid:64},{name:"relay",port:2525,state:"open",pid:170}],
     processes:[{pid:1,user:"root",cpu:"0.0",mem:"0.2",name:"init"},{pid:64,user:"root",cpu:"0.0",mem:"0.7",name:"sshd"},{pid:170,user:"relay",cpu:"0.3",mem:"5.8",name:"relay-service"}],
     connections:[{proto:"tcp",local:"10.60.9.14:2525",remote:"198.51.100.27:443",state:"ESTABLISHED"}],access:{mode:"review"}
+  },
+  evanpc:{
+    id:"evanpc",hostname:"EVAN-BOX",address:"10.33.8.44",owner:"Evan Mercer",os:"NEXUS/OS Server 3.9",filesystem:"evanpc",users:["guest"],homeDir:"/home/guest",
+    interfaces:[{name:"eth0",address:"10.33.8.44",cidr:24,gateway:"10.33.8.1"}],routes:[],
+    services:[{name:"ssh",port:22,state:"open",pid:67},{name:"files",port:445,state:"open",pid:133}],
+    processes:[{pid:1,user:"system",cpu:"0.0",mem:"0.2",name:"init"},{pid:67,user:"system",cpu:"0.0",mem:"0.8",name:"sshd"},{pid:133,user:"evan",cpu:"0.1",mem:"2.6",name:"filesvc"}],
+    connections:[{proto:"tcp",local:"10.33.8.44:22",remote:"0.0.0.0:*",state:"LISTEN"}],access:{mode:"guest"},identity:"unknown"
+  },
+  vantaedge:{
+    id:"vantaedge",hostname:"VANTA-WEB",address:"10.72.4.20",owner:"Vanta Dynamics",os:"Vanta Web Appliance 4.6",filesystem:"vantaedge",users:["webguest"],homeDir:"/home/webguest",
+    interfaces:[{name:"eth0",address:"10.72.4.20",cidr:24,gateway:"10.72.4.1"},{name:"eth1",address:"172.31.8.10",cidr:24,gateway:null}],routes:["vantadev","vantaprint","vantadb"],
+    services:[{name:"ssh",port:22,state:"open",pid:72},{name:"http",port:80,state:"open",pid:140},{name:"https",port:443,state:"open",pid:141}],
+    processes:[{pid:1,user:"root",cpu:"0.0",mem:"0.2",name:"init"},{pid:72,user:"root",cpu:"0.0",mem:"0.7",name:"sshd"},{pid:140,user:"web",cpu:"0.2",mem:"4.3",name:"httpd"}],
+    connections:[{proto:"tcp",local:"172.31.8.10:443",remote:"172.31.8.24:8443",state:"ESTABLISHED"}],access:{mode:"webguest"},identity:"unknown"
+  },
+  vantadev:{
+    id:"vantadev",hostname:"DEV-02",address:"172.31.8.24",owner:"Vanta Dynamics",os:"NIX Dev Image 6.1",filesystem:"vantadev",users:["build"],homeDir:"/home/build",
+    interfaces:[{name:"eth0",address:"172.31.8.24",cidr:24,gateway:"172.31.8.10"}],routes:["vantaedge","vantaprint","vantadb"],
+    services:[{name:"ssh",port:22,state:"open",pid:83},{name:"dev-http",port:8443,state:"open",pid:177}],
+    processes:[{pid:1,user:"root",cpu:"0.0",mem:"0.2",name:"init"},{pid:83,user:"root",cpu:"0.0",mem:"0.8",name:"sshd"},{pid:177,user:"build",cpu:"0.2",mem:"5.1",name:"dev-httpd"}],
+    connections:[{proto:"tcp",local:"172.31.8.24:8443",remote:"172.31.8.10:*",state:"ESTABLISHED"}],access:{mode:"build"},identity:"unknown"
+  },
+  vantaprint:{
+    id:"vantaprint",hostname:"PRINT-07",address:"172.31.8.31",owner:"Vanta Dynamics",os:"JetPrint Embedded",filesystem:null,users:[],homeDir:"/",
+    interfaces:[{name:"eth0",address:"172.31.8.31",cidr:24,gateway:"172.31.8.10"}],routes:[],services:[{name:"ipp",port:631,state:"open",pid:0}],processes:[],connections:[],connectable:false,identity:"known"
+  },
+  vantadb:{
+    id:"vantadb",hostname:"DB-01",address:"172.31.8.40",owner:"Vanta Dynamics",os:"Unknown",filesystem:null,users:[],homeDir:"/",
+    interfaces:[{name:"eth0",address:"172.31.8.40",cidr:24,gateway:"172.31.8.10"}],routes:[],services:[{name:"database",port:5432,state:"open",pid:0}],processes:[],connections:[],connectable:false,identity:"unknown"
+  },
+  cobaltbbs:{
+    id:"cobaltbbs",hostname:"COBALT-BBS",address:"10.91.6.23",owner:"Cobalt Hobby Network",os:"NIX BBS 2.4",filesystem:"cobaltbbs",users:["visitor"],homeDir:"/home/visitor",
+    interfaces:[{name:"eth0",address:"10.91.6.23",cidr:24,gateway:"10.91.6.1"}],routes:[],
+    services:[{name:"ssh",port:22,state:"open",pid:51},{name:"bbs",port:2323,state:"open",pid:119}],
+    processes:[{pid:1,user:"root",cpu:"0.0",mem:"0.2",name:"init"},{pid:51,user:"root",cpu:"0.0",mem:"0.7",name:"sshd"},{pid:119,user:"bbs",cpu:"0.1",mem:"3.0",name:"cobaltd"}],
+    connections:[{proto:"tcp",local:"10.91.6.23:2323",remote:"0.0.0.0:*",state:"LISTEN"}],access:{mode:"visitor"},identity:"unknown"
+  },
+  orchidnas:{
+    id:"orchidnas",hostname:"ORCHID-NAS",address:"10.55.2.19",owner:"Orchid Media",os:"StoreBox 5.0",filesystem:"orchidnas",users:["public"],homeDir:"/home/public",
+    interfaces:[{name:"eth0",address:"10.55.2.19",cidr:24,gateway:"10.55.2.1"}],routes:[],
+    services:[{name:"ssh",port:22,state:"open",pid:60},{name:"files",port:445,state:"open",pid:121}],
+    processes:[{pid:1,user:"root",cpu:"0.0",mem:"0.2",name:"init"},{pid:60,user:"root",cpu:"0.0",mem:"0.7",name:"sshd"},{pid:121,user:"media",cpu:"0.1",mem:"3.2",name:"filesvc"}],
+    connections:[{proto:"tcp",local:"10.55.2.19:445",remote:"10.91.6.23:*",state:"ESTABLISHED"}],access:{mode:"public"},identity:"unknown"
   }
+
 };

@@ -4,6 +4,7 @@ const migrations={
   2(save){
     save.player.notes ??= "";
     save.world.readSocialPosts ??= [];
+  save.world.readNewsStories ??= [];
     save.terminal.sessionCount ??= 0;
     save.ui ??= {};
     save.ui.lastBrowserSite ??= "news";
@@ -44,6 +45,11 @@ const migrations={
     save.terminal ??= {};
     save.terminal.lastScanResults=[];
     return save;
+  },
+  8(save){
+    save.world ??= {};
+    save.world.readNewsStories ??= [];
+    return save;
   }
 };
 
@@ -67,6 +73,7 @@ function normalize(save){
   save.world.readEmails ??= [];
   save.world.readForumPosts ??= [];
   save.world.readSocialPosts ??= [];
+  save.world.readNewsStories ??= [];
   save.world.notifications ??= [];
   save.world.completedMissions ??= [];
   save.missions.active ??= [];

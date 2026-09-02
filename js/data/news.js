@@ -4,5 +4,7 @@ export const NEWS = [
   {id:"news3",title:"Legacy Northstar system briefly reconnects after retirement notice",body:"A retired training endpoint reportedly responded for several minutes before disappearing again. Northstar called it a monitoring artifact.",visibleWhen:["mission_first_complete"]},
   {id:"news4",title:"Meridian restores project data after cleanup fault",body:"Meridian Systems says a support recovery index prevented permanent loss of an internal project folder.",visibleWhen:["mission_recovery_complete"]},
   {id:"news5",title:"Helix disables stale diagnostics identity",body:"Helix Communications says a retired service account remained enabled on one diagnostic system after an administrative mismatch.",visibleWhen:["mission_ghost_complete"]},
-  {id:"news6",title:"Axiom completes lab relay retirement",body:"Axiom Financial has completed a scheduled retirement of legacy test infrastructure.",visibleWhen:["mission_deaddrop_complete"]}
+  {id:"news6",title:"Axiom completes lab relay retirement",body:"Axiom Financial has completed a scheduled retirement of legacy test infrastructure.",visibleWhen:["mission_deaddrop_complete"]},
+  {id:"news7",title:"Vanta support mirror remains online after portal migration",body:"Vanta Dynamics says an old public support mirror at VANTA-WEB / 10.72.4.20 will remain reachable during a staged portal migration. The company says the mirror contains no production data.",visibleWhen:[],clueId:"vanta_public_host"},
+  {id:"news8",title:"City hobby networks refuse to die",body:"Dial-up culture is mostly gone, but several enthusiast-run BBS systems still answer late at night. Operators say the old boards are kept alive for nostalgia, not business.",visibleWhen:[]}
 ];

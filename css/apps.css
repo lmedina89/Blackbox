@@ -6,3 +6,8 @@
 .target-row,.clue-row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid #d7dde2}
 .target-row:last-child,.clue-row:last-child{border-bottom:0}
 .target-row span,.clue-row span{color:#687783;text-align:right}
+
+.news-story-button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #ccd2d7;background:#fff;color:inherit;font:inherit;cursor:pointer}
+.news-story-button.read{opacity:.72}
+.news-story-button:focus-visible,.buddy-list button:focus-visible{outline:2px solid #315f8f;outline-offset:2px}
+.buddy-list button.active{background:#fff;font-weight:700}

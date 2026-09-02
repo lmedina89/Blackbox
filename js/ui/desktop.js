@@ -32,7 +32,7 @@ export function initDesktopUI({enterBlackbox}){
   layer.replaceChildren();
   taskApps.replaceChildren();
   toastBox.replaceChildren();
-  let z=20,offset=0;
+  let z=20,offset=0,activeThreadId="maya";
 
   for(const app of DESKTOP_APPS){
     const b=document.createElement("button");b.className="desktop-icon";b.dataset.appIcon=app.id;b.innerHTML=`<span class="glyph">${app.glyph}</span><span>${app.shortName}</span>`;b.addEventListener("click",()=>openApp(app.id));icons.appendChild(b);
@@ -50,7 +50,7 @@ export function initDesktopUI({enterBlackbox}){
   on("mission:progress",({objective})=>{toast(`Objective complete: ${objective.label}`);renderOpenApps();});
   on("mission:completed",({mission})=>{toast(`Job complete. ${mission.rewards.credits} credits transferred.`);renderOpenApps();setTimeout(()=>openApp("mail"),650);});
   on("hardware:purchased",({item})=>{toast(`${item.name} installed.`);renderOpenApps();});
-  on("clue:discovered",({clue})=>{toast(`Clue recorded: ${clue.title}`);renderOpenApps();});
+  on("clue:discovered",({clue})=>{toast(clue.kind==="world"?`World intel learned: ${clue.title}`:`Clue recorded: ${clue.title}`);renderOpenApps();});
   on("communications:changed",()=>renderOpenApps());
 
   function createWindow(id,title){
@@ -75,7 +75,16 @@ export function initDesktopUI({enterBlackbox}){
     el.innerHTML=`<div class="browser-chrome"><div class="browser-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Favorites&nbsp;&nbsp; Help</div><div class="app-toolbar browser-toolbar"><button data-nav="back">←</button><button data-site="news">News</button><button data-site="social">FriendSpace</button><button data-site="forum">NightWire</button><button data-site="packet">Packet Underground</button><button data-site="deaddrop">DeadDrop</button><button data-site="shop">ByteBarn</button><input value="nexus://${s.ui.lastBrowserSite||"news"}" aria-label="Address"></div></div><div class="app-body browser-page" id="browser-body"></div>`;
     const body=el.querySelector("#browser-body"),addr=el.querySelector("input");
     const show=site=>{s.ui.lastBrowserSite=site;addr.value=`nexus://${site}`;
-      if(site==="news")body.innerHTML=`<div class="site-head"><div class="site-logo">METROWIRE</div><span>LOCAL // TECHNOLOGY // BUSINESS</span></div>${NEWS.filter(visible).map(n=>`<article class="news-story"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · Day ${s.world.day}</span></article>`).join("")}`;
+      if(site==="news"){
+        body.innerHTML=`<div class="site-head"><div class="site-logo">METROWIRE</div><span>LOCAL // TECHNOLOGY // BUSINESS</span></div>${NEWS.filter(visible).map(n=>n.clueId?`<button class="news-story news-story-button ${s.world.readNewsStories.includes(n.id)?"read":""}" data-news="${n.id}"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · Day ${s.world.day} · open story</span></button>`:`<article class="news-story"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · Day ${s.world.day}</span></article>`).join("")}`;
+        body.querySelectorAll("[data-news]").forEach(btn=>btn.addEventListener("click",()=>{
+          const id=btn.dataset.news;
+          if(!s.world.readNewsStories.includes(id))s.world.readNewsStories.push(id);
+          emit("news:read",{newsId:id});
+          btn.classList.add("read");
+          toast("You noticed technical details in the story.");
+        }));
+      }
       if(site==="social"){
         body.innerHTML=`<div class="site-head friendspace"><div class="site-logo">FriendSpace</div><span>${s.player.alias}'s feed</span></div>${SOCIAL_POSTS.filter(visible).map(x=>`<article class="social-post"><div class="avatar">${x.name[0]}</div><div><h3>${x.name} <span>@${x.author}</span></h3><p>${x.body}</p><small>${x.time}</small>${x.clueId?`<button class="save-clue" data-social="${x.id}">${s.world.readSocialPosts.includes(x.id)?"Saved to BLACKBOX":"Save technical info"}</button>`:""}</div></article>`).join("")}`;
         body.querySelectorAll("[data-social]").forEach(btn=>btn.addEventListener("click",()=>{
@@ -88,7 +97,7 @@ export function initDesktopUI({enterBlackbox}){
       }
       if(site==="forum"){
         body.innerHTML=`<div class="site-head nightwire"><div class="site-logo">NIGHTWIRE</div><span>underground computing board</span></div><div class="forum-banner">READ THE RULES // NO REAL-WORLD TARGETS // KEEP IT IN THE LAB</div>${FORUM_POSTS.filter(visible).map(p=>`<button class="forum-thread" data-post="${p.id}"><b>${p.title}</b><span>by ${p.author}</span><p>${p.body}</p></button>`).join("")}`;
-        body.querySelectorAll("[data-post]").forEach(btn=>btn.addEventListener("click",()=>{const id=btn.dataset.post;if(!s.world.readForumPosts.includes(id))s.world.readForumPosts.push(id);emit("forum:read",{postId:id});btn.classList.add("read");toast(id==="f1"?"Archive host saved to BLACKBOX targets.":"Useful information added to your notes.");}));
+        body.querySelectorAll("[data-post]").forEach(btn=>btn.addEventListener("click",()=>{const id=btn.dataset.post;if(!s.world.readForumPosts.includes(id))s.world.readForumPosts.push(id);emit("forum:read",{postId:id});btn.classList.add("read");toast(id==="f1"?"Northstar host identified.":"Thread read. BLACKBOX will remember any technical details you actually learned.");}));
       }
       if(site==="packet"){
         body.innerHTML=`<div class="site-head nightwire"><div class="site-logo">PACKET UNDERGROUND</div><span>FIELD NOTES // CLI // NETWORKING</span></div>
@@ -122,28 +131,36 @@ export function initDesktopUI({enterBlackbox}){
   }
 
   function renderChat(el){
-    const s=getState(),thread=THREADS[0];
+    const s=getState();
+    const thread=THREADS.find(x=>x.id===activeThreadId)||THREADS[0];
+    activeThreadId=thread.id;
     const messages=thread.messages.filter(m=>(m.visibleWhen||[]).every(hasFlag));
     const pending=messages.find(m=>m.choice && !m.choice.options.some(o=>choiceMade(o.id)));
+
+    for(const m of messages){
+      if(m.clueId)emit("message:read",{messageId:m.id,threadId:thread.id});
+    }
+
+    const online=THREADS.filter(x=>x.status==="online");
+    const others=THREADS.filter(x=>x.status!=="online");
+    const buddy=(x)=>`<button data-thread="${x.id}" class="${x.id===thread.id?"active":""}">${x.status==="online"?'<span class="online-dot"></span>':""}${x.name}</button>`;
 
     el.innerHTML=`<div class="messenger-top"><b>NEXUS Messenger</b><span><span class="online-dot"></span> Online</span></div>
       <div class="chat-layout">
         <div class="sidebar buddy-list">
-          <div class="buddy-group">Friends (1)</div><button class="active"><span class="online-dot"></span> Maya</button>
-          <div class="buddy-group">Offline (2)</div><button disabled>Sam K.</button><button disabled>Chris</button>
+          <div class="buddy-group">Friends (${online.length})</div>${online.map(buddy).join("")}
+          <div class="buddy-group">Away / Offline (${others.length})</div>${others.map(buddy).join("")}
         </div>
         <div class="content-pane chat-pane">
-          <div class="chat-history">${messages.map(m=>`<div class="chat-line"><span class="chat-time">${m.time||""}</span><b>${m.from==="player"?s.player.alias:"Maya"}:</b> ${m.text}</div>`).join("")}</div>
+          <div class="chat-history">${messages.map(m=>`<div class="chat-line"><span class="chat-time">${m.time||""}</span><b>${m.from==="player"?s.player.alias:thread.name}:</b> ${m.text}</div>`).join("")}</div>
           ${pending?`<div class="chat-choices">${pending.choice.options.map(o=>`<button data-choice="${o.id}">${o.text}</button>`).join("")}</div>`:`<div class="chat-compose"><input placeholder="No reply needed right now." disabled><button disabled>Send</button></div>`}
         </div>
       </div>`;
 
+    el.querySelectorAll("[data-thread]").forEach(btn=>btn.addEventListener("click",()=>{activeThreadId=btn.dataset.thread;renderChat(el);}));
     el.querySelectorAll("[data-choice]").forEach(btn=>btn.addEventListener("click",()=>{
       const result=makeChoice(btn.dataset.choice);
-      if(result.ok){
-        toast("Message sent.");
-        renderChat(el);
-      }
+      if(result.ok){toast("Message sent.");renderChat(el);}
     }));
   }
 
@@ -151,6 +168,7 @@ export function initDesktopUI({enterBlackbox}){
     const s=getState();
     const knownHosts=(s.player.savedTargets||[]).map(entry=>HOSTS[entry.hostId]).filter(Boolean);
     const clues=getKnownClues();
+    const caseClues=clues.filter(c=>c.kind!=="world"),worldIntel=clues.filter(c=>c.kind==="world");
     el.innerHTML=`<div class="app-body">
       <div class="system-title"><div class="computer-glyph">🖥️</div><div><h2>${s.player.alias}'s Computer</h2><span>NEXUS/OS Personal Workstation</span></div></div>
       <div class="system-grid">
@@ -159,12 +177,13 @@ export function initDesktopUI({enterBlackbox}){
         <div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div>
         <div class="stat"><b>Credits</b><br>${s.player.credits}</div>
         <div class="stat"><b>Reputation</b><br>${s.player.reputation}</div>
-        <div class="stat"><b>BLACKBOX</b><br>0.2.2 installed</div>
+        <div class="stat"><b>BLACKBOX</b><br>0.2.3 installed</div>
       </div>
       <div class="card"><h3>BLACKBOX proficiencies</h3><div class="system-grid">${Object.entries(s.player.proficiencies||{}).map(([skill,value])=>`<div class="stat"><b>${skill[0].toUpperCase()+skill.slice(1)}</b><br>${proficiencyLabel(value)} (${value})</div>`).join("")}</div><p class="muted">Proficiency grows by using real CLI and investigation concepts, not by spending skill points.</p></div>
       <div class="card"><h3>Known BLACKBOX targets</h3>${knownHosts.length?knownHosts.map((h,i)=>`<div class="target-row"><b>[${i}] ${displayName(h.id)}</b><span>${h.address}</span></div>`).join(""):"<p>No remote targets saved.</p>"}</div>
       <div class="card"><h3>Downloaded evidence</h3>${(s.player.downloads||[]).length?(s.player.downloads||[]).map(x=>`<div class="clue-row"><b>${x.split(":")[0].toUpperCase()}</b><span>${x.split(":").slice(1).join(":")}</span></div>`).join(""):"<p>No evidence files stored locally.</p>"}</div>
-      <div class="card"><h3>Recorded clues</h3>${clues.length?clues.map(c=>`<div class="clue-row"><b>${c.title}</b><span>${c.summary}</span></div>`).join(""):"<p>No clues recorded.</p>"}</div>
+      <div class="card"><h3>Case clues</h3>${caseClues.length?caseClues.map(c=>`<div class="clue-row"><b>${c.title}</b><span>${c.summary}</span></div>`).join(""):"<p>No case clues recorded.</p>"}</div>
+      <div class="card"><h3>World intel</h3>${worldIntel.length?worldIntel.map(c=>`<div class="clue-row"><b>${c.title}</b><span>${c.summary}</span></div>`).join(""):"<p>No optional world intel learned yet.</p>"}</div>
       <div class="card blackbox-launch"><div><h3>BLACKBOX Secure Environment</h3><p>Launch or resume the isolated simulated terminal workspace.</p></div><button id="system-blackbox">ENTER BLACKBOX</button></div>
     </div>`;
     el.querySelector("#system-blackbox").addEventListener("click",enterBlackbox);

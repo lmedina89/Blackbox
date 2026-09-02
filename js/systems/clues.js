@@ -12,6 +12,13 @@ function HOST_KNOWN(hostId,state){
 function discover(clue){
   const s=getState();
   if(s.player.discoveredClues.includes(clue.id))return false;
+  if(clue.kind==="world"&&clue.hostId){
+    const duplicate=s.player.discoveredClues.map(id=>CLUES.find(c=>c.id===id)).find(c=>c?.kind==="world"&&c.hostId===clue.hostId);
+    if(duplicate){
+      identifyHost(clue.hostId);
+      return false;
+    }
+  }
   s.player.discoveredClues.push(clue.id);
   if(clue.hostId){
     discoverHost(clue.hostId);
@@ -26,7 +33,7 @@ export function initClues(){
   const events=[...new Set(CLUES.map(c=>c.discoverOn?.event).filter(Boolean))];
   for(const eventName of events){
     on(eventName,payload=>{
-      const target=payload.postId ?? payload.emailId ?? payload.choiceId ??
+      const target=payload.postId ?? payload.newsId ?? payload.messageId ?? payload.emailId ?? payload.choiceId ??
         (payload.hostId&&payload.path?`${payload.hostId}:${payload.path}`:payload.hostId);
       for(const clue of CLUES){
         if(clue.discoverOn?.event===eventName && clue.discoverOn.target===target)discover(clue);

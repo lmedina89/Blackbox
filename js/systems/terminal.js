@@ -1,5 +1,6 @@
 import { getState } from "../core/state.js";
 import { HOSTS } from "../data/hosts.js";
+import { CLUES } from "../data/clues.js";
 import { listDir, normalizePath, getNode, readFile } from "./filesystem.js";
 import { scan, connect, disconnect, resolveTarget, canReach, displayName } from "./network.js";
 import { discoverHost } from "./clues.js";
@@ -254,7 +255,15 @@ registerCommand({name:"connect",execute({state,args}){
 }});
 
 registerCommand({name:"missions",aliases:["jobs"],execute(){const a=missionView();if(!a.length)return line("No active jobs.");return line(a.map(m=>`${m.title}\n${m.objectives.map(o=>`${m.progress[o.id]?"[x]":"[ ]"} ${o.label}`).join("\n")}`).join("\n\n"));}});
-registerCommand({name:"clues",execute({state}){if(!state.player.discoveredClues.length)return line("No clues recorded.");return line(["DISCOVERED CLUES","",...state.player.discoveredClues.map((id,i)=>`${String(i+1).padStart(2,"0")}  ${id.replaceAll("_"," ")}`)].join("\n"));}});
+registerCommand({name:"clues",execute({state}){
+  const known=state.player.discoveredClues.map(id=>CLUES.find(c=>c.id===id)).filter(Boolean);
+  if(!known.length)return line("No case clues or world intel recorded.");
+  const cases=known.filter(c=>c.kind!=="world"),world=known.filter(c=>c.kind==="world");
+  const out=["DISCOVERED INFORMATION",""];
+  if(cases.length)out.push("CASE CLUES",...cases.map((c,i)=>`${String(i+1).padStart(2,"0")}  ${c.title}`),"");
+  if(world.length)out.push("WORLD INTEL",...world.map((c,i)=>`${String(i+1).padStart(2,"0")}  ${c.title}`),"", "World intel is optional. It does not create a mission or objective.");
+  return line(out.join("\n"));
+}});
 registerCommand({name:"purge",execute({state,args}){if(String(args[0]||"").toLowerCase()!=="identity")throw new Error("usage: purge identity");if(state.terminal.hostId!=="home")throw new Error("purge: disconnect from the remote host first");state.terminal.pendingAction="purge_identity";return line(["BLACKBOX IDENTITY PURGE","",`Current alias: ${state.player.alias}`,`Current day: ${state.world.day}`,"","WARNING: This will terminate the active identity.","The life will be archived. No archived save will be deleted.","","Type: CONFIRM PURGE",'Or type "cancel" to abort.'].join("\n"));}});
 registerCommand({name:"confirm",execute({state,args}){if(String(args[0]||"").toLowerCase()!=="purge"||state.terminal.pendingAction!=="purge_identity")throw new Error("confirm: no identity purge is pending");state.terminal.pendingAction=null;return {purgeIdentity:true,lines:[{text:"PURGE AUTHORIZATION ACCEPTED",type:"dim"}]};}});
 registerCommand({name:"cancel",execute({state}){if(!state.terminal.pendingAction)return line("Nothing pending.");state.terminal.pendingAction=null;return line("Pending action cancelled.");}});

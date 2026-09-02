@@ -6,5 +6,7 @@ export const SOCIAL_POSTS = [
   {id:"s5",author:"samk91",name:"Sam K.",time:"19:05",body:"That old mirror is answering again. MIRROR-02 / 10.14.8.31. I don't have time to dig through it tonight.",visibleWhen:["mirror_lead_accepted"],clueId:"mirror02_host"},
   {id:"s6",author:"samk91",name:"Sam K.",time:"19:19",body:"Mirror finally stopped serving the stale image. Weird night.",visibleWhen:["mission_mirror_complete"]},
   {id:"s7",author:"byteghost",name:"byteghost",time:"20:12",body:"Pro tip: if a box has two interfaces, stop assuming it lives in one neighborhood.",visibleWhen:["mission_route_started"]},
-  {id:"s8",author:"maya_r",name:"Maya",time:"21:04",body:"You have been staring at that green screen for HOURS.",visibleWhen:["mission_ghost_complete"]}
+  {id:"s8",author:"maya_r",name:"Maya",time:"21:04",body:"You have been staring at that green screen for HOURS.",visibleWhen:["mission_ghost_complete"]},
+  {id:"s9",author:"chrisv",name:"Chris",time:"18:21",body:"Evan swears he shut down that ancient box. I can still see EVAN-BOX / 10.33.8.44 answering though. Dude never finishes anything.",visibleWhen:[],clueId:"evan_box_host"},
+  {id:"s10",author:"orchidtech",name:"Orchid Tech",time:"18:55",body:"Moving the public transfer share tonight. If anyone still has the old ORCHID-NAS address bookmarked, it'll be around for a bit longer.",visibleWhen:[]}
 ];
