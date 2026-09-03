@@ -12,6 +12,7 @@ import { advanceWorld } from "./timeline.js";
 import { lookupDns, formatDnsResult } from "./dns.js";
 
 const commands=new Map(),aliases=new Map();
+const MEANINGFUL_COMMANDS=new Set(["scan","connect","ip","services","netstat","ping","nslookup","traceroute","cat","head","tail","grep","find","download"]);
 const line=t=>({lines:[{text:t}]});
 
 export function registerCommand(def){
@@ -31,7 +32,7 @@ function preprocess(raw){
   if(/^cd\/$/i.test(trimmed))return "cd /";
   return trimmed;
 }
-function emitCommand(name,args){emit("command:used",{name,args,hostId:getState().terminal.hostId});}
+function emitCommand(name,args,actionKey){emit("command:used",{name,args,hostId:getState().terminal.hostId,actionKey});}
 function scanRecord(h,index){
   const s=getState(),detail=s.player.installedHardware.includes("nic_fast");
   const name=displayName(h.id);
@@ -64,6 +65,41 @@ function fileText(state,arg){
   return {path,body:readFile(state.terminal.hostId,path)};
 }
 
+function canonicalToken(value){return String(value||"").trim().toLowerCase().replace(/\.$/,"");}
+function resolvedHostId(state,value){
+  return (scanTarget(state,value)||savedTarget(state,value)||resolveTarget(value))?.id||canonicalToken(value);
+}
+function connectTargetId(state,args){
+  const mode=canonicalToken(args[0]);
+  if(mode==="scan")return scanTarget(state,args[1])?.id||canonicalToken(args[1]);
+  if(mode==="target")return savedTarget(state,args[1])?.id||canonicalToken(args[1]);
+  if(/^\d+$/.test(String(args[0]||""))){
+    const scanHit=scanTarget(state,args[0]),savedHit=savedTarget(state,args[0]);
+    return (scanHit||savedHit)?.id||canonicalToken(args[0]);
+  }
+  return scanTarget(state,args[0])?.id||canonicalToken(args[0]);
+}
+
+export function semanticActionKey(name,args,state=getState()){
+  const hostId=state.terminal.hostId;
+  if(name==="connect")return `cmd:connect:${connectTargetId(state,args)}`;
+  if(name==="nslookup"){
+    const dnsName=canonicalToken(args[0]),type=String(args[1]||"ANY").trim().toUpperCase();
+    return `cmd:nslookup:${hostId}:${dnsName}:${type}`;
+  }
+  if(name==="services")return `cmd:services:${hostId}:${args[0]?resolvedHostId(state,args[0]):hostId}`;
+  if(name==="ping"||name==="traceroute")return `cmd:${name}:${hostId}:${resolvedHostId(state,args[0])}`;
+  if(["cat","head","tail","download"].includes(name)){
+    return `cmd:${name}:${hostId}:${normalizePath(state.terminal.cwd,args[0],hostId)}`;
+  }
+  if(name==="grep")return `cmd:grep:${hostId}:${normalizePath(state.terminal.cwd,args[1],hostId)}`;
+  if(name==="find"){
+    const base=args.length>1?normalizePath(state.terminal.cwd,args[0],hostId):state.terminal.cwd;
+    return `cmd:find:${hostId}:${base}`;
+  }
+  return `cmd:${name}:${hostId}`;
+}
+
 export async function executeCommand(raw){
   const s=getState(),text=preprocess(raw);
   if(!text)return {lines:[]};
@@ -73,14 +109,11 @@ export async function executeCommand(raw){
   const [rawHead,...args]=text.split(/\s+/),head=rawHead.toLowerCase(),name=aliases.get(head)||head,cmd=commands.get(name);
   if(!cmd)return {lines:[{text:`${rawHead}: command not found`,type:"error"}]};
   try{
+    const actionKey=MEANINGFUL_COMMANDS.has(name)?semanticActionKey(name,args,s):null;
     const result=await cmd.execute({state:s,args})||{lines:[]};
-    emitCommand(name,args);
-    const meaningful=new Set(["scan","connect","ip","services","netstat","ping","nslookup","traceroute","cat","head","tail","grep","find","download"]);
-    if(meaningful.has(name)){
-      const hostId=s.terminal.hostId;
-      const semanticArgs=name==="grep"?args.slice(1):name==="find"?args.slice(0,1):args;
-      advanceWorld(`cmd:${name}:${hostId}:${semanticArgs.join(":")}`,{minutes:name==="scan"?4:3,once:true});
-    }
+    emitCommand(name,args,actionKey);
+    const advancedWorld=actionKey?advanceWorld(actionKey,{minutes:name==="scan"?4:3,once:true}):false;
+    emit("command:committed",{name,args,hostId:s.terminal.hostId,actionKey,advancedWorld});
     return result;
   }
   catch(err){return {lines:[{text:err.message||"Command failed",type:"error"}]};}
@@ -159,7 +192,7 @@ registerCommand({name:"cd",execute({state,args}){const path=normalizePath(state.
 registerCommand({name:"cat",execute({state,args}){if(!args[0])throw new Error("cat: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path});learn("cat","systems");return line(body);}});
 registerCommand({name:"head",execute({state,args}){if(!args[0])throw new Error("head: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path});learn(`head:${state.terminal.hostId}`,"analysis");return line(body.split("\n").slice(0,5).join("\n"));}});
 registerCommand({name:"tail",execute({state,args}){if(!args[0])throw new Error("tail: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path});learn(`tail:${state.terminal.hostId}`,"analysis");return line(body.split("\n").slice(-5).join("\n"));}});
-registerCommand({name:"grep",execute({state,args}){if(args.length<2)throw new Error("usage: grep <text> <file>");const needle=args[0],{path,body}=fileText(state,args[1]),matches=body.split("\n").filter(x=>x.toLowerCase().includes(needle.toLowerCase()));emit("file:searched",{hostId:state.terminal.hostId,path,query:needle});learn(`grep:${state.terminal.hostId}`,"analysis",2);const result=matches.length?matches.join("\n"):"grep: no matches";return line((state.player.installedSoftware||[]).includes("logscope")?`${result}\n\nLogScope: ${matches.length} matching line${matches.length===1?"":"s"}; query recorded for correlation.`:result);}});
+registerCommand({name:"grep",execute({state,args}){if(args.length<2)throw new Error("usage: grep <text> <file>");const needle=args[0],canonicalQuery=needle.toLowerCase(),{path,body}=fileText(state,args[1]),matches=body.split("\n").filter(x=>x.toLowerCase().includes(canonicalQuery));emit("file:searched",{hostId:state.terminal.hostId,path,query:canonicalQuery,canonicalQuery,rawQuery:needle});learn(`grep:${state.terminal.hostId}`,"analysis",2);const result=matches.length?matches.join("\n"):"grep: no matches";return line((state.player.installedSoftware||[]).includes("logscope")?`${result}\n\nLogScope: ${matches.length} matching line${matches.length===1?"":"s"}; query recorded for correlation.`:result);}});
 function walk(node,path,out,needle){if(node.type==="file"){if(path.toLowerCase().includes(needle.toLowerCase()))out.push(path);return;}for(const [name,child] of Object.entries(node.children||{}))walk(child,`${path==="/"?"/":path+"/"}${name}`,out,needle);}
 registerCommand({name:"find",execute({state,args}){if(!args.length)throw new Error("usage: find [path] <name>");const needle=args.at(-1),base=args.length>1?normalizePath(state.terminal.cwd,args[0],state.terminal.hostId):state.terminal.cwd,node=getNode(state.terminal.hostId,base);if(!node)throw new Error("find: path not found");const out=[];walk(node,base,out,needle);learn(`find:${state.terminal.hostId}`,"analysis");return line(out.length?out.join("\n"):"find: no matches");}});
 registerCommand({name:"download",execute({state,args}){if(state.terminal.hostId==="home")throw new Error("download: already on HOME-PC");if(!args[0])throw new Error("download: missing file operand");const {path}=fileText(state,args[0]);const capacity=state.player.installedHardware.includes("hdd_20gb")?8:2;if(state.player.downloads.length>=capacity)throw new Error(`download: local evidence storage full (${capacity} files)`);const id=`${state.terminal.hostId}:${path}`;if(!state.player.downloads.includes(id))state.player.downloads.push(id);emit("file:downloaded",{hostId:state.terminal.hostId,path});learn("download","systems");return line(`Transferred ${path} -> HOME-PC:/home/downloads/\nEvidence stored locally.`);}});

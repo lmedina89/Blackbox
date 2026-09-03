@@ -22,8 +22,12 @@ export function initMissions(){
   on("host:connected",({hostId})=>recordObjective("host_connected",hostId));
   on("file:read",({hostId,path})=>recordObjective("file_read",`${hostId}:${path}`));
   on("file:downloaded",({hostId,path})=>recordObjective("file_downloaded",`${hostId}:${path}`));
-  on("file:searched",({hostId,path,query})=>recordObjective("file_searched",`${hostId}:${path}:${query}`));
-  on("command:used",({name,hostId})=>{recordObjective("command_used",name);recordObjective("command_used_at",`${hostId}:${name}`);});
+  on("file:searched",({hostId,path,query,canonicalQuery})=>recordObjective("file_searched",`${hostId}:${path}:${canonicalQuery??query}`));
+  on("command:used",({name,hostId,args=[]})=>{
+    recordObjective("command_used",name);
+    recordObjective("command_used_at",`${hostId}:${name}`);
+    if(name==="traceroute"&&args[0])recordObjective("command_used_at",`${hostId}:${name}:${String(args[0]).trim().toLowerCase().replace(/\.$/,"")}`);
+  });
 }
 export function startMission(id){
   const s=getState(),m=mission(id);

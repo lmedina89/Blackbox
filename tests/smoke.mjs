@@ -1,14 +1,18 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { baseState, getState, resetState, replaceState, setFlag } from "../js/core/state.js";
 import { migrateSave } from "../js/core/migrations.js";
-import { emit } from "../js/core/events.js";
+import { emit, on } from "../js/core/events.js";
 import { initClues } from "../js/systems/clues.js";
 import { initMissions } from "../js/systems/missions.js";
-import { initTimeline, advanceWorld } from "../js/systems/timeline.js";
+import { initTimeline, advanceWorld, processTimeline } from "../js/systems/timeline.js";
 import { executeCommand } from "../js/systems/terminal.js";
 import { HOSTS } from "../js/data/hosts.js";
 import { THREADS } from "../js/data/messages.js";
 import { FILESYSTEMS } from "../js/data/filesystems.js";
+import { escapeHtml } from "../js/ui/safeText.js";
+import { AUTOSAVE_EVENTS, initAutosave } from "../js/core/autosave.js";
+import { beginNewIdentity, clearSave, loadProfile } from "../js/core/save.js";
 
 const output=result=>(result.lines||[]).map(x=>x.text).join("\n");
 const run=async command=>output(await executeCommand(command));
@@ -39,13 +43,15 @@ initTimeline();
   assert(!migrated.world.readMessages.includes("m9"),"future mirror completion was incorrectly migrated as read");
 }
 
-// Every host with a shell has a filesystem and addresses are unique.
+// Every host with a shell has a filesystem, addresses are unique, and service PIDs resolve.
 {
   const addresses=new Set();
   for(const host of Object.values(HOSTS)){
     assert(!addresses.has(host.address),`duplicate address ${host.address}`);
     addresses.add(host.address);
     if(host.connectable!==false)assert(FILESYSTEMS[host.filesystem],`missing filesystem for ${host.id}`);
+    const processIds=new Set(host.processes.map(process=>process.pid));
+    for(const service of host.services)if(service.pid)assert(processIds.has(service.pid),`${host.id} ${service.name} references missing PID ${service.pid}`);
   }
   assert.equal(Object.keys(HOSTS).length,36);
 }
@@ -127,6 +133,82 @@ initTimeline();
   assert(!s.world.flags.includes("quartz_thread_available"));
 }
 
+// Established command objectives require the intended host and relay peer.
+{
+  let s=resetState();s.player.alias="contextqa";setFlag("alias_created");
+  emit("email:read",{emailId:"meridian_job"});
+  await run("find / halcyon");
+  assert(!s.missions.progress.mission_recovery?.meridian_find,"Recovery Index find completed on HOME-PC");
+
+  s=resetState();s.player.alias="contextqa";setFlag("alias_created");
+  emit("email:read",{emailId:"helix_job"});
+  await run("ip");
+  assert(!s.missions.progress.mission_ghost?.inspect_interfaces,"Ghost Account ip completed on HOME-PC");
+
+  s=resetState();s.player.alias="contextqa";setFlag("alias_created");
+  emit("email:read",{emailId:"deaddrop_job"});
+  await run("services");
+  assert(!s.missions.progress.mission_deaddrop?.drop_services,"Dead Drop services completed on HOME-PC");
+
+  s=resetState();s.player.alias="contextqa";setFlag("alias_created");
+  emit("email:read",{emailId:"relay_job"});
+  s.player.identifiedHosts.push("axiomrelay");
+  await run("connect AXIOM-RELAY");
+  await run("traceroute AXIOM-RELAY");
+  assert(!s.missions.progress.mission_relay?.relay_trace,"Relay traceroute accepted the wrong peer");
+  await run("traceroute 198.51.100.27");
+  assert(s.missions.progress.mission_relay?.relay_trace,"Relay traceroute rejected the intended peer");
+}
+
+// Equivalent command spellings share one canonical timeline action.
+{
+  let s=resetState();s.player.alias="semanticsqa";setFlag("alias_created");
+  s.player.identifiedHosts.push("archives01");
+  const beforeConnect=s.world.actionTick;
+  await run("connect ARCHIVES-01");await run("exit");
+  await run(`connect ${HOSTS.archives01.address}`);await run("exit");
+  await run("connect archives01");await run("exit");
+  assert.equal(s.world.actionTick,beforeConnect+1,"host aliases counted as different actions");
+
+  s=resetState();s.player.alias="semanticsqa";setFlag("lumen_contract_available");
+  const beforeDns=s.world.actionTick;
+  await run("nslookup updates.lumen.test");
+  await run("nslookup UPDATES.LUMEN.TEST");
+  await run("nslookup updates.lumen.test.");
+  assert.equal(s.world.actionTick,beforeDns+1,"DNS case/trailing-dot variants counted as different actions");
+
+  s=resetState();s.player.alias="semanticsqa";s.terminal.hostId="archives01";s.terminal.user="archive";s.terminal.cwd="/archive";
+  const beforePath=s.world.actionTick;
+  await run("cat employees.db");
+  await run("cat ./employees.db");
+  await run("cat /archive/employees.db");
+  assert.equal(s.world.actionTick,beforePath+1,"relative and absolute paths counted as different actions");
+}
+
+// Eligibility anchors at the prerequisite transition, independent of clock polling.
+{
+  const deliveryTick=withPoll=>{
+    const s=resetState();s.player.alias="timelineqa";setFlag("alias_created");
+    assert.equal(s.world.eventEligibleAt.threatdesk_online,0);
+    if(withPoll){processTimeline();processTimeline();}
+    advanceWorld(withPoll?"timeline:polled":"timeline:direct");
+    assert(s.world.deliveredEvents.includes("threatdesk_online"));
+    return s.world.actionTick;
+  };
+  assert.equal(deliveryTick(false),deliveryTick(true));
+}
+
+// Mutable player text is encoded, and the audited desktop sinks use safe DOM boundaries.
+{
+  assert.equal(escapeHtml(`<img src=x onerror='bad'>&"`),"&lt;img src=x onerror=&#39;bad&#39;&gt;&amp;&quot;");
+  const desktopSource=readFileSync(new URL("../js/ui/desktop.js",import.meta.url),"utf8");
+  assert(!desktopSource.includes("${s.player.notes"),"notes are still interpolated into innerHTML");
+  assert.match(desktopSource,/escapeHtml\(s\.player\.alias\)/);
+  assert.match(desktopSource,/body\.querySelector\("b"\)\.textContent=site/);
+  assert(AUTOSAVE_EVENTS.includes("notes:changed"));
+  assert(AUTOSAVE_EVENTS.includes("browser:navigated"));
+}
+
 // Reading the Quartz relay thread now starts the optional Relay Cache chain.
 {
   const s=resetState();s.player.alias="quartzqa";setFlag("quartz_thread_available");
@@ -176,7 +258,7 @@ initTimeline();
   index=s.terminal.lastScanResults.indexOf("helixlog");
   assert(index>=0,"HELIX-LOG not pinned");
   await run(`connect scan ${index}`);
-  await run("grep svc_old /var/log/auth.log");
+  await run("grep SVC_OLD /var/log/auth.log");
   assert(s.world.completedMissions.includes("mission_ghost"));
   await run("exit");
 
@@ -220,7 +302,7 @@ initTimeline();
   const irisIndex=s.terminal.lastScanResults.indexOf("irisops");
   assert(irisIndex>=0,"IRIS-OPS not pinned in mission scan");
   await run(`connect scan ${irisIndex}`);
-  await run("grep beacon-legacy /var/log/overnight.log");
+  await run("grep BEACON-LEGACY /var/log/overnight.log");
   assert(s.world.completedMissions.includes("mission_beacon"));
   await run("exit");
 
@@ -250,4 +332,46 @@ initTimeline();
   assert.equal(s.world.actionTick,before+1);
 }
 
-console.log("BLACKBOX v0.3.0 smoke tests passed");
+// Every successful terminal command commits its final state to storage.
+{
+  const stored=new Map();
+  globalThis.localStorage={
+    getItem:key=>stored.has(key)?stored.get(key):null,
+    setItem:(key,value)=>stored.set(key,String(value)),
+    removeItem:key=>stored.delete(key)
+  };
+  clearSave();
+  beginNewIdentity("saveqa",{archiveActive:false});
+  setFlag("alias_created");
+  initAutosave();
+
+  const commits=[];
+  on("command:committed",payload=>commits.push({payload,hostId:getState().terminal.hostId,actionTick:getState().world.actionTick}));
+  await run("scan");
+  await run("scan");
+  let memory=getState(),disk=JSON.parse(stored.get("blackbox_firstboot_save")).activeIdentity;
+  assert.equal(disk.world.scanCounters.home,2);
+  assert.deepEqual(disk.terminal.lastScanResults,memory.terminal.lastScanResults);
+  assert.equal(disk.world.actionTick,memory.world.actionTick);
+
+  memory.player.identifiedHosts.push("archives01");
+  await run("connect ARCHIVES-01");
+  await run("exit");
+  disk=JSON.parse(stored.get("blackbox_firstboot_save")).activeIdentity;
+  assert.equal(disk.terminal.hostId,"home");
+  assert.deepEqual(disk.terminal.lastScanResults,[]);
+  assert.equal(commits.at(-1).hostId,"home");
+
+  memory.player.notes="<b>literal notes</b>";emit("notes:changed",{notes:memory.player.notes});
+  memory.ui.lastBrowserSite="forum";emit("browser:navigated",{site:"forum"});
+  disk=JSON.parse(stored.get("blackbox_firstboot_save")).activeIdentity;
+  assert.equal(disk.player.notes,"<b>literal notes</b>");
+  assert.equal(disk.ui.lastBrowserSite,"forum");
+
+  memory.terminal.hostId="archives01";
+  loadProfile();
+  assert.equal(getState().terminal.hostId,"home","reload did not restore the committed disconnect");
+  assert.equal(getState().world.scanCounters.home,2,"reload lost the repeated scan counter");
+}
+
+console.log("BLACKBOX v0.3.0 RC3 smoke tests passed");

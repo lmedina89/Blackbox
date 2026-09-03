@@ -21,6 +21,7 @@ import { proficiencyLabel } from "../systems/progression.js";
 import { displayName } from "../systems/network.js";
 import { playSound, toggleAudio, isAudioEnabled } from "../systems/audio.js";
 import { lookupDns, formatDnsResult } from "../systems/dns.js";
+import { escapeHtml } from "./safeText.js";
 
 function visible(item){
   if((item.visibleWhen||[]).some(f=>!hasFlag(f))) return false;
@@ -80,7 +81,12 @@ export function initDesktopUI({enterBlackbox}){
   }
   refreshBadges();
 
-  function toast(text){const t=document.createElement("div");t.className="toast";t.innerHTML=`<b>NEXUS/OS</b><span>${text}</span>`;toastBox.appendChild(t);setTimeout(()=>t.classList.add("toast-out"),3300);setTimeout(()=>t.remove(),3800);}
+  function toast(text){
+    const t=document.createElement("div"),title=document.createElement("b"),message=document.createElement("span");
+    t.className="toast";title.textContent="NEXUS/OS";message.textContent=String(text);
+    t.append(title,message);toastBox.appendChild(t);
+    setTimeout(()=>t.classList.add("toast-out"),3300);setTimeout(()=>t.remove(),3800);
+  }
   function updateClock(){const c=formatClock();document.querySelector("#clock-time").textContent=c.time;document.querySelector("#clock-date").textContent=c.date;}
   updateClock();on("clock:tick",updateClock);
   on("mission:started",({mission})=>{toast(`New job received: ${mission.title}`);renderOpenApps();});
@@ -112,9 +118,10 @@ export function initDesktopUI({enterBlackbox}){
 
   function renderBrowser(el){
     const s=getState();
-    el.innerHTML=`<div class="browser-chrome"><div class="browser-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Favorites&nbsp;&nbsp; Help</div><div class="app-toolbar browser-toolbar"><button data-nav="back">←</button><button data-site="news">News</button><button data-site="social">FriendSpace</button><button data-site="forum">NightWire</button><button data-site="packet">Packet Underground</button><button data-site="deaddrop">DeadDrop</button><button data-site="shop">ByteBarn</button><input value="nexus://${s.ui.lastBrowserSite||"news"}" aria-label="Address"></div></div><div class="app-body browser-page" id="browser-body"></div>`;
+    const browserSites=new Set(["news","social","forum","packet","deaddrop","shop"]);
+    el.innerHTML=`<div class="browser-chrome"><div class="browser-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Favorites&nbsp;&nbsp; Help</div><div class="app-toolbar browser-toolbar"><button data-nav="back">←</button><button data-site="news">News</button><button data-site="social">FriendSpace</button><button data-site="forum">NightWire</button><button data-site="packet">Packet Underground</button><button data-site="deaddrop">DeadDrop</button><button data-site="shop">ByteBarn</button><input aria-label="Address"></div></div><div class="app-body browser-page" id="browser-body"></div>`;
     const body=el.querySelector("#browser-body"),addr=el.querySelector("input");
-    const show=site=>{s.ui.lastBrowserSite=site;addr.value=`nexus://${site}`;
+    const show=site=>{const previous=s.ui.lastBrowserSite;s.ui.lastBrowserSite=site;addr.value=`nexus://${site}`;if(previous!==site)emit("browser:navigated",{site});
       if(site==="news"){
         body.innerHTML=`<div class="site-head"><div class="site-logo">METROWIRE</div><span>LOCAL // TECHNOLOGY // BUSINESS</span></div>${NEWS.filter(visible).map(n=>n.clueId?`<button class="news-story news-story-button ${s.world.readNewsStories.includes(n.id)?"read":""}" data-news="${n.id}"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · Day ${s.world.day} · open story</span></button>`:`<article class="news-story"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · Day ${s.world.day}</span></article>`).join("")}`;
         body.querySelectorAll("[data-news]").forEach(btn=>btn.addEventListener("click",()=>{
@@ -126,7 +133,7 @@ export function initDesktopUI({enterBlackbox}){
         }));
       }
       if(site==="social"){
-        body.innerHTML=`<div class="site-head friendspace"><div class="site-logo">FriendSpace</div><span>${s.player.alias}'s feed</span></div>${SOCIAL_POSTS.filter(visible).map(x=>`<article class="social-post"><div class="avatar">${x.name[0]}</div><div><h3>${x.name} <span>@${x.author}</span></h3><p>${x.body}</p><small>${x.time}</small>${x.clueId?`<button class="save-clue" data-social="${x.id}">${s.world.readSocialPosts.includes(x.id)?"Saved to BLACKBOX":"Save technical info"}</button>`:""}</div></article>`).join("")}`;
+        body.innerHTML=`<div class="site-head friendspace"><div class="site-logo">FriendSpace</div><span>${escapeHtml(s.player.alias)}'s feed</span></div>${SOCIAL_POSTS.filter(visible).map(x=>`<article class="social-post"><div class="avatar">${x.name[0]}</div><div><h3>${x.name} <span>@${x.author}</span></h3><p>${x.body}</p><small>${x.time}</small>${x.clueId?`<button class="save-clue" data-social="${x.id}">${s.world.readSocialPosts.includes(x.id)?"Saved to BLACKBOX":"Save technical info"}</button>`:""}</div></article>`).join("")}`;
         body.querySelectorAll("[data-social]").forEach(btn=>btn.addEventListener("click",()=>{
           const id=btn.dataset.social;
           if(!s.world.readSocialPosts.includes(id))s.world.readSocialPosts.push(id);
@@ -161,14 +168,14 @@ export function initDesktopUI({enterBlackbox}){
       }
     };
     el.querySelectorAll("[data-site]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.site)));
-    addr.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const site=addr.value.replace(/^nexus:\/\//,"").trim().toLowerCase();if(["news","social","forum","packet","deaddrop","shop"].includes(site))show(site);else{body.innerHTML=`<div class="browser-error"><h2>Page cannot be displayed</h2><p>NEXUS Explorer could not resolve <b>${site||"(blank)"}</b>.</p></div>`;}});
-    show(s.ui.lastBrowserSite||"news");
+    addr.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const site=addr.value.replace(/^nexus:\/\//,"").trim().toLowerCase();if(browserSites.has(site))show(site);else{body.innerHTML='<div class="browser-error"><h2>Page cannot be displayed</h2><p>NEXUS Explorer could not resolve <b></b>.</p></div>';body.querySelector("b").textContent=site||"(blank)";}});
+    show(browserSites.has(s.ui.lastBrowserSite)?s.ui.lastBrowserSite:"news");
   }
 
   function renderMail(el){
     const s=getState(),mails=EMAILS.filter(visible);
     el.innerHTML=`<div class="mail-header"><b>NEXUS Mail</b><span>${mails.filter(m=>!s.world.readEmails.includes(m.id)).length} unread</span></div><div class="mail-layout"><div class="sidebar mail-list">${mails.map(m=>`<button data-mail="${m.id}" class="${s.world.readEmails.includes(m.id)?"read":"unread"}"><span>${m.from.split("@")[0]}</span><b>${m.subject}</b></button>`).join("")}</div><div class="content-pane"><div class="empty-state">Select a message to read.</div></div></div>`;
-    const pane=el.querySelector(".content-pane");el.querySelectorAll("[data-mail]").forEach(btn=>btn.addEventListener("click",()=>{const mail=mails.find(m=>m.id===btn.dataset.mail);pane.innerHTML=`<div class="mail-message"><h2>${mail.subject}</h2><div class="mail-meta">From: ${mail.from}<br>To: ${s.player.alias}@nexus.local</div><div class="mail-body">${mail.body}</div></div>`;if(!s.world.readEmails.includes(mail.id))s.world.readEmails.push(mail.id);btn.classList.remove("unread");btn.classList.add("read");emit("email:read",{emailId:mail.id});refreshBadges();}));
+    const pane=el.querySelector(".content-pane");el.querySelectorAll("[data-mail]").forEach(btn=>btn.addEventListener("click",()=>{const mail=mails.find(m=>m.id===btn.dataset.mail);pane.innerHTML=`<div class="mail-message"><h2>${mail.subject}</h2><div class="mail-meta">From: ${mail.from}<br>To: ${escapeHtml(s.player.alias)}@nexus.local</div><div class="mail-body">${mail.body}</div></div>`;if(!s.world.readEmails.includes(mail.id))s.world.readEmails.push(mail.id);btn.classList.remove("unread");btn.classList.add("read");emit("email:read",{emailId:mail.id});refreshBadges();}));
   }
 
   function messageTime(message,state){
@@ -206,7 +213,7 @@ export function initDesktopUI({enterBlackbox}){
           <div class="buddy-group">Away / Offline (${others.length})</div>${others.map(buddy).join("")}
         </div>
         <div class="content-pane chat-pane">
-          <div class="chat-history">${messages.map(m=>`<div class="chat-line"><span class="chat-time">${messageTime(m,s)}</span><b>${m.from==="player"?s.player.alias:thread.name}:</b> ${m.text}</div>`).join("")}</div>
+          <div class="chat-history">${messages.map(m=>`<div class="chat-line"><span class="chat-time">${messageTime(m,s)}</span><b>${m.from==="player"?escapeHtml(s.player.alias):thread.name}:</b> ${m.text}</div>`).join("")}</div>
           ${pending?`<div class="chat-choices">${pending.choice.options.map(o=>`<button data-choice="${o.id}">${o.text}</button>`).join("")}</div>`:`<div class="chat-compose"><input placeholder="No reply needed right now." disabled><button disabled>Send</button></div>`}
         </div>
       </div>`;
@@ -225,7 +232,7 @@ export function initDesktopUI({enterBlackbox}){
     const clues=getKnownClues();
     const caseClues=clues.filter(c=>c.kind!=="world"),worldIntel=clues.filter(c=>c.kind==="world");
     el.innerHTML=`<div class="app-body">
-      <div class="system-title"><div class="computer-glyph">🖥️</div><div><h2>${s.player.alias}'s Computer</h2><span>NEXUS/OS Personal Workstation</span></div></div>
+      <div class="system-title"><div class="computer-glyph">🖥️</div><div><h2>${escapeHtml(s.player.alias)}'s Computer</h2><span>NEXUS/OS Personal Workstation</span></div></div>
       <div class="system-grid">
         <div class="stat"><b>Processor</b><br>${s.player.installedHardware.includes("cpu_p3_933")?"Northstar P3 933 MHz":"Northstar P3 733 MHz"}</div>
         <div class="stat"><b>Memory</b><br>${s.player.installedHardware.includes("ram_256")?"384":"128"} MB</div>
@@ -267,7 +274,7 @@ export function initDesktopUI({enterBlackbox}){
     el.querySelector("#td-lookup").addEventListener("submit",e=>{e.preventDefault();const out=el.querySelector("#td-result");try{out.textContent=formatDnsResult(lookupDns(el.querySelector("#td-name").value,"ANY"),{detailed:(s.player.installedSoftware||[]).includes("resolver_pro")});}catch(err){out.textContent=err.message;}});
   }
 
-  function renderNotes(el){const s=getState();el.innerHTML=`<div class="notepad-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; Format&nbsp;&nbsp; Help</div><textarea id="player-notes" class="notepad" spellcheck="false" placeholder="Write anything you want to remember...">${s.player.notes||""}</textarea>`;const ta=el.querySelector("#player-notes");ta.addEventListener("input",()=>{s.player.notes=ta.value;});}
+  function renderNotes(el){const s=getState();el.innerHTML='<div class="notepad-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; Format&nbsp;&nbsp; Help</div><textarea id="player-notes" class="notepad" spellcheck="false" placeholder="Write anything you want to remember..."></textarea>';const ta=el.querySelector("#player-notes");ta.value=s.player.notes||"";ta.addEventListener("input",()=>{s.player.notes=ta.value;emit("notes:changed",{notes:ta.value});});}
 
   return {openApp,toast,refresh:renderOpenApps};
 }

@@ -1,3 +1,5 @@
+import { emit } from "./events.js";
+
 export const SAVE_VERSION=9;
 export const WORLD_SCHEMA=9;
 
@@ -71,6 +73,11 @@ export function getState(){return state;}
 export function resetState(){state=baseState();return state;}
 export function replaceState(next){state=next;return state;}
 export function hasFlag(flag){return state.world.flags.includes(flag);}
-export function setFlag(flag){if(!hasFlag(flag))state.world.flags.push(flag);}
+export function setFlag(flag){
+  if(hasFlag(flag))return false;
+  state.world.flags.push(flag);
+  emit("state:flag-set",{flag});
+  return true;
+}
 export function addCredits(amount){state.player.credits=Math.max(0,state.player.credits+amount);}
 export function touch(){state.meta.updatedAt=Date.now();}

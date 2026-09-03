@@ -53,6 +53,9 @@ export function advanceWorld(actionKey,{minutes=3,once=false}={}){
 
 export function initTimeline(){
   processTimeline();
+  on("state:flag-set",processTimeline);
+  on("clue:discovered",processTimeline);
+  on("mission:completed",processTimeline);
   on("email:read",({emailId})=>advanceWorld(`email:${emailId}`,{minutes:4,once:true}));
   on("forum:read",({postId})=>advanceWorld(`forum:${postId}`,{minutes:3,once:true}));
   on("social:read",({postId})=>advanceWorld(`social:${postId}`,{minutes:2,once:true}));

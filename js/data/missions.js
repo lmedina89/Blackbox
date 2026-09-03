@@ -23,7 +23,7 @@ export const MISSIONS = [
     objectives:[
       {id:"meridian_lead",type:"forum_read",target:"f4",label:"Find Meridian's support host on NightWire"},
       {id:"meridian_connect",type:"host_connected",target:"meridian01",label:"Connect to MERIDIAN-01"},
-      {id:"meridian_find",type:"command_used",target:"find",label:"Use find to locate the Halcyon recovery data"},
+      {id:"meridian_find",type:"command_used_at",target:"meridian01:find",label:"Use find to locate the Halcyon recovery data"},
       {id:"meridian_read",type:"file_read",target:"meridian01:/srv/projects/recovered/halcyon.txt",label:"Confirm the recovered Halcyon document"}
     ],rewards:{credits:180,reputation:3},flagsOnStart:["mission_recovery_started"],flagsOnComplete:["mission_recovery_complete"]
   },
@@ -32,7 +32,7 @@ export const MISSIONS = [
     startWhen:{event:"email:read",target:"helix_job"},
     objectives:[
       {id:"edge_connect",type:"host_connected",target:"helixedge",label:"Connect to HELIX-EDGE"},
-      {id:"inspect_interfaces",type:"command_used",target:"ip",label:"Inspect HELIX-EDGE network interfaces with ip"},
+      {id:"inspect_interfaces",type:"command_used_at",target:"helixedge:ip",label:"Inspect HELIX-EDGE network interfaces with ip"},
       {id:"internal_scan",type:"command_used_at",target:"helixedge:scan",label:"Scan from HELIX-EDGE for the internal diagnostics network"},
       {id:"log_connect",type:"host_connected",target:"helixlog",label:"Connect to HELIX-LOG"},
       {id:"filter_auth",type:"file_searched",target:"helixlog:/var/log/auth.log:svc_old",label:"Use grep to find svc_old activity in auth.log"}
@@ -44,7 +44,7 @@ export const MISSIONS = [
     objectives:[
       {id:"drop_lead",type:"forum_read",target:"f6",label:"Read packetmoth's Axiom relay note"},
       {id:"drop_connect",type:"host_connected",target:"axiomrelay",label:"Connect to AXIOM-RELAY"},
-      {id:"drop_services",type:"command_used",target:"services",label:"Inspect listening services"},
+      {id:"drop_services",type:"command_used_at",target:"axiomrelay:services",label:"Inspect listening services"},
       {id:"drop_download",type:"file_downloaded",target:"axiomrelay:/etc/relay.conf",label:"Download relay.conf as evidence"}
     ],rewards:{credits:300,reputation:5},flagsOnStart:["mission_deaddrop_started"],flagsOnComplete:["mission_deaddrop_complete"]
   },
@@ -54,7 +54,7 @@ export const MISSIONS = [
     objectives:[
       {id:"relay_connect",type:"host_connected",target:"axiomrelay",label:"Return to AXIOM-RELAY"},
       {id:"relay_netstat",type:"command_used_at",target:"axiomrelay:netstat",label:"Inspect active network connections"},
-      {id:"relay_trace",type:"command_used",target:"traceroute",label:"Use traceroute to inspect the relay path"},
+      {id:"relay_trace",type:"command_used_at",target:"axiomrelay:traceroute:198.51.100.27",label:"Use traceroute to inspect the relay path"},
       {id:"relay_config",type:"file_read",target:"axiomrelay:/etc/relay.conf",label:"Read the relay configuration"}
     ],rewards:{credits:350,reputation:6},flagsOnStart:["mission_relay_started"],flagsOnComplete:["mission_relay_complete"]
   },

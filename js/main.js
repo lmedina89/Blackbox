@@ -6,9 +6,10 @@ import { initClues } from "./systems/clues.js";
 import { initDesktopUI } from "./ui/desktop.js";
 import { initTerminalUI } from "./ui/terminalUI.js";
 import { enterBlackboxTransition, exitBlackboxTransition } from "./ui/transitions.js";
-import { on } from "./core/events.js";
 import { initAudio, playSound } from "./systems/audio.js";
 import { initTimeline } from "./systems/timeline.js";
+import { initAutosave } from "./core/autosave.js";
+import { escapeHtml } from "./ui/safeText.js";
 
 const boot=document.querySelector("#boot-screen");
 const desktop=document.querySelector("#desktop");
@@ -64,10 +65,6 @@ function renderBoot(){
 
   if(loadResult.legacyMigrated)bootStatus.textContent="Existing v0.1.2 identity imported into the new profile system.";
   else bootStatus.textContent=summary.active?"Select Continue to resume your active identity.":"No active identity. Create one to begin.";
-}
-
-function escapeHtml(value){
-  return String(value).replace(/[&<>'"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[ch]));
 }
 
 function renderArchives(){
@@ -145,11 +142,12 @@ function purgeIdentity(){
 initAudio();
 initClues();
 initMissions();
+initAutosave();
 initTimeline();
 
-for(const eventName of ["mission:started","mission:completed","mission:progress","hardware:purchased","software:purchased","clue:discovered","dialogue:choice","proficiency:changed","file:downloaded","target:saved","target:removed","clock:tick","timeline:event","dns:lookup","threat:read","lab:completed","email:read","forum:read","social:read","news:read","message:read","thread:read"]){
-  on(eventName,()=>saveGame());
-}
+window.addEventListener("pagehide",()=>{
+  if(getState().player.alias)saveGame();
+});
 
 continueButton.addEventListener("click",()=>initializeGameUI());
 newIdentityButton.addEventListener("click",()=>showPanel("new"));

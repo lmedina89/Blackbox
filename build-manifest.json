@@ -35,7 +35,12 @@
     "completed case and world timeline history",
     "desktop unread badges and persistent app read state",
     "hardware-gated Resolver Pro, WideScan Suite, and LogScope progression",
-    "safe save 8 to save 9 migration"
+    "safe save 8 to save 9 migration",
+    "post-command persistence boundary for refresh-safe terminal state",
+    "host-contextual legacy command objectives with preserved objective IDs",
+    "canonical evidence and semantic time anti-spam keys",
+    "prerequisite-anchored world-event timing",
+    "safe persistence and rendering for mutable local text"
   ],
   "deferred": [
     "packet capture and sniffing simulation",
@@ -57,7 +62,14 @@
     "RC2 harmless-command alternation does not advance the world clock",
     "RC2 migrated future Maya messages remain unread until unlocked",
     "RC2 event-driven messenger lines use world-event timestamps",
-    "RC2 Resolver Pro adds TTL plus explicit alias/mail diagnostics"
+    "RC2 Resolver Pro adds TTL plus explicit alias/mail diagnostics",
+    "RC3 repeated scans and remote exit survive immediate reload",
+    "RC3 wrong-host commands cannot complete contextual objectives",
+    "RC3 uppercase grep evidence completes Ghost Account and Quiet Hours",
+    "RC3 equivalent host, DNS, and path spellings count once",
+    "RC3 timeline eligibility is invariant to extra clock polling",
+    "RC3 all nonzero service PIDs resolve to host processes",
+    "RC3 mutable alias, notes, and browser error text use safe boundaries"
   ],
-  "releaseCandidate": 2
+  "releaseCandidate": 3
 }

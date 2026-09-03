@@ -1,6 +1,6 @@
 # BLACKBOX v0.3.0 — The Wider Net
 
-**RC2 candidate:** fixes DNS progression gates, the Quartz optional chain, command-spam time advancement, migrated Messenger unread state, event-driven Messenger timestamps, and Resolver Pro diagnostics.
+**RC3 candidate:** preserves all RC2 content and save compatibility while fixing post-command persistence, wrong-host legacy objectives, case-normalized evidence, semantic time anti-spam, deterministic event eligibility, mutable-text rendering/persistence, and the VANTA-WEB service/process mismatch.
 
 Built from the exact stable **v0.2.3.4** iPhone-tested package. v0.3.0 is a major playable expansion that preserves the original six-investigation sequence and expands BLACKBOX into a larger, changing fictional network.
 
@@ -60,7 +60,7 @@ The resolver never contacts real DNS. Every address, hostname, organization, per
 - Automatic migration: v0.2.3.4 save 8 → v0.3.0 save 9
 - Stable IDs prevent event redelivery after save, reload, app reopening, or identity restoration.
 
-The original v0.2.3.4 ZIP is not modified by this release and remains the rollback checkpoint.
+The original v0.2.3.4 ZIP and the audited RC2 candidate are not modified by this release and remain rollback checkpoints.
 
 ## Verification
 
@@ -70,7 +70,7 @@ Run the deterministic gameplay suite with:
 node tests/smoke.mjs
 ```
 
-It verifies migration, unique host addressing, filesystem coverage, scan variation, mission-target reliability, explicit numeric namespaces, anti-spam time behavior, all six established investigations, and all three new investigation paths.
+It verifies migration, unique host addressing, filesystem and service-process coverage, scan variation, mission-target reliability, explicit numeric namespaces, post-command save/reload behavior, contextual objective rejection, case-normalized evidence, semantic anti-spam equivalence, clock-poll-invariant event timing, safe mutable-text boundaries, all six established investigations, and all three new investigation paths.
 
 Automated JavaScript syntax checks and the gameplay suite pass in the release workspace. Direct iPhone/Safari feel and layout testing should still be performed on the deployed candidate before replacing the stable public build.
 

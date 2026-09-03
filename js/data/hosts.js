@@ -91,7 +91,7 @@ export const HOSTS = {
   vantaedge:{
     id:"vantaedge",hostname:"VANTA-WEB",address:"10.72.4.20",owner:"Vanta Dynamics",os:"Vanta Web Appliance 4.6",filesystem:"vantaedge",users:["webguest"],homeDir:"/home/webguest",
     interfaces:[{name:"eth0",address:"10.72.4.20",cidr:24,gateway:"10.72.4.1"},{name:"eth1",address:"172.31.8.10",cidr:24,gateway:null}],routes:["vantadev","vantaprint","vantadb"],
-    services:[{name:"ssh",port:22,state:"open",pid:72},{name:"http",port:80,state:"open",pid:140},{name:"https",port:443,state:"open",pid:141}],
+    services:[{name:"ssh",port:22,state:"open",pid:72},{name:"http",port:80,state:"open",pid:140},{name:"https",port:443,state:"open",pid:140}],
     processes:[{pid:1,user:"root",cpu:"0.0",mem:"0.2",name:"init"},{pid:72,user:"root",cpu:"0.0",mem:"0.7",name:"sshd"},{pid:140,user:"web",cpu:"0.2",mem:"4.3",name:"httpd"}],
     connections:[{proto:"tcp",local:"172.31.8.10:443",remote:"172.31.8.24:8443",state:"ESTABLISHED"}],access:{mode:"webguest"},identity:"unknown"
   },
