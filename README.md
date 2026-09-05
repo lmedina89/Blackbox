@@ -1,6 +1,6 @@
 # BLACKBOX v0.3.0 — The Wider Net
 
-**RC4 candidate:** targeted release-repair build from the audited RC3 baseline. It preserves v0.3.0 content and save schema while repairing evidence-capacity softlocks, save/profile failure isolation, purge persistence, Safari audio recovery, desktop redraw/read-state defects, mobile terminal prompt layout, and the small Meridian/DNS feedback inconsistencies identified by the RC3 full QA audit.
+**RC5 candidate:** narrow audio hotfix built from the exact RC4 candidate after physical iPhone testing exposed a complete Web Audio unlock regression. It preserves every RC4 gameplay, save, mission, UI, and content repair. RC5 changes only the Web Audio recovery path, audio regression coverage, and release metadata.
 
 Built from the exact stable **v0.2.3.4** iPhone-tested package. v0.3.0 is a major playable expansion that preserves the original six-investigation sequence and expands BLACKBOX into a larger, changing fictional network.
 
@@ -71,11 +71,12 @@ node tests/smoke.mjs
 node tests/rc4-regression.mjs
 node tests/rc4-campaign.mjs
 node tests/audio-rc4.mjs
+node tests/audio-rc5-gesture.mjs
 ```
 
 Together they verify migration, unique host addressing, filesystem and service-process coverage, scan variation, mission-target reliability, explicit numeric namespaces, post-command save/reload behavior, contextual objective rejection, semantic anti-spam equivalence, clock-poll-invariant event timing, safe mutable-text boundaries, all nine investigations, full-storage mandatory evidence, corrupt/future-save handling, purge lifecycle safety, storage-write failures, DNS fact matching, migrated Messenger clue recovery, and instrumented Web Audio interruption/closed-context recovery.
 
-Automated JavaScript syntax checks and all four test suites pass in the release workspace. A local real-browser launch was also attempted, but the available container Chromium blocks local/file navigation by administrator policy, so actual rendered browser playthrough and direct iPhone/Safari feel, layout, keyboard, and audio-interruption testing remain release gates before replacing the stable public build.
+Automated JavaScript syntax checks and all campaign/regression/UI/audio suites pass in the release workspace, including the RC5 Safari gesture-retry regression. A local real-browser launch was also attempted, but the available container Chromium blocks local/file navigation by administrator policy, so actual rendered browser playthrough and direct iPhone/Safari feel, layout, keyboard, and audio-interruption testing remain release gates before replacing the stable public build.
 
 ## Explicitly deferred
 

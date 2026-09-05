@@ -4,7 +4,6 @@ const STORAGE_KEY="blackbox.audio.enabled";
 let context=null;
 let master=null;
 let initialized=false;
-let recoveryPromise=null;
 let pendingSound=null;
 
 function readPreference(){
@@ -100,13 +99,14 @@ function playNow(name){
 }
 function requestRecovery(name=null){
   if(name)pendingSound={name,at:Date.now()};
-  if(recoveryPromise)return recoveryPromise;
-  recoveryPromise=recoverAudioContext().then(ok=>{
+  // iOS/Safari may reject or ignore one gesture-phase resume while allowing
+  // a later phase of the same trusted action. Never let an earlier recovery
+  // promise prevent the actual sound-triggering click from retrying resume().
+  return recoverAudioContext().then(ok=>{
     if(ok&&pendingSound&&Date.now()-pendingSound.at<1500){const next=pendingSound.name;pendingSound=null;playNow(next);}
     else if(pendingSound&&Date.now()-pendingSound.at>=1500)pendingSound=null;
     return ok;
-  }).finally(()=>{recoveryPromise=null;});
-  return recoveryPromise;
+  });
 }
 
 export function playSound(name){
@@ -135,6 +135,8 @@ export function initAudio(){
   if(initialized)return;initialized=true;
   const recoverFromGesture=()=>{if(enabled)requestRecovery();};
   document.addEventListener("pointerdown",recoverFromGesture,{capture:true});
+  document.addEventListener("click",recoverFromGesture,{capture:true});
+  document.addEventListener("touchend",recoverFromGesture,{capture:true});
   document.addEventListener("keydown",recoverFromGesture,{capture:true});
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&enabled&&context)requestRecovery();});
   window.addEventListener("pageshow",()=>{if(enabled&&context)requestRecovery();});

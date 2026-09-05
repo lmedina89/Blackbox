@@ -43,7 +43,7 @@
     "safe persistence and rendering for mutable local text",
     "reserved mandatory-evidence handling with idempotent re-downloads",
     "validated and recoverable profile persistence with save-failure signaling",
-    "Safari-aware Web Audio interruption recovery",
+    "Safari gesture-bound Web Audio recovery with retry across pointer/click activation",
     "deferred desktop redraws with preserved mail, ThreatDesk, and Notes view state"
   ],
   "deferred": [
@@ -78,10 +78,11 @@
     "RC4 malformed/future save data is normalized or quarantined without hiding healthy active identities",
     "RC4 purge cannot be re-saved as an active identity",
     "RC4 storage-write failure preserves the last good save and exposes failure state",
-    "RC4 interrupted and closed AudioContext lifecycle paths are exercised with instrumentation",
     "RC4 continuous nine-case campaign passes with save/reload after every terminal command and 25 additional cycles",
     "RC4 Harbor CNAME-only lookup no longer awards the vault address clue",
-    "RC4 browser launch was attempted in the available container Chromium but local/file navigation was administrator-blocked; real browser/iPhone acceptance remains required"
+    "RC4 browser launch was attempted in the available container Chromium but local/file navigation was administrator-blocked; real browser/iPhone acceptance remains required",
+    "RC5 audio lifecycle instrumentation passes with repeated trusted-gesture recovery",
+    "RC5 Safari gesture regression verifies a later trusted play attempt retries after an earlier resume failure"
   ],
-  "releaseCandidate": 4
+  "releaseCandidate": 5
 }

@@ -40,8 +40,10 @@ assert(instances.at(-1).resumeCalls>=1,"replacement suspended context was not re
 
 audio.initAudio();
 assert(listeners.document.has("pointerdown"));
+assert(listeners.document.has("click"));
+assert(listeners.document.has("touchend"));
 assert(listeners.document.has("visibilitychange"));
 assert(listeners.window.has("pageshow"));
 
 console.warn=originalWarn;
-console.log("BLACKBOX v0.3.0 RC4 audio lifecycle tests passed");
+console.log("BLACKBOX v0.3.0 RC5 audio lifecycle tests passed");
