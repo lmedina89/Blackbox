@@ -1,6 +1,6 @@
 # BLACKBOX v0.3.0 — The Wider Net
 
-**RC6 candidate:** focused iPhone device-polish repair built from the exact packaged RC5 candidate (SHA-256 `3e7a1f40b8c7dd324f7cf9bd8e6d2fc04dcdd80db7ccb41dde5110f74fc44e12`). Physical iPhone testing of RC5 confirmed initial sound recovery but exposed a long-background Safari audio failure, hidden portrait taskbar app buttons, desktop-style landscape geometry, and an undersized Notepad editor. RC6 repairs only those device issues and adds the approved BLACKBOX A2 desktop shortcut. Missions, saves, progression, host topology, content, and command behavior are unchanged.
+**RC7 candidate:** focused terminal/readability and mobile-taskbar polish built directly from the exact RC6 candidate (SHA-256 `1bfd86ac94844e9f53a25c900bb5dfed858d98c0f41f0f53a498ea88aa89faf6`) after on-device testing confirmed the RC6 responsive layout and BLACKBOX shortcut. RC7 adds semantic terminal colors, a fixed BLACKBOX status header, an independently scrollable terminal history with pinned prompt and Latest control, compact portrait taskbar restore icons, and clearer World Intel destination feedback. Missions, saves, progression, host topology, content, command syntax, rewards, and network behavior are unchanged.
 
 Built from the exact stable **v0.2.3.4** iPhone-tested package. v0.3.0 is a major playable expansion that preserves the original six-investigation sequence and expands BLACKBOX into a larger, changing fictional network.
 
@@ -15,6 +15,13 @@ Built from the exact stable **v0.2.3.4** iPhone-tested package. v0.3.0 is a majo
 - **Living world:** eleven persistent events pace new contracts, replies, stories, messages, advisories, and optional leads through meaningful actions and game time. Harmless terminal toggling does not fast-forward the world clock.
 - **Progression:** FastLink 100 widens scans and service detail; the RAM upgrade unlocks LogScope; the CPU upgrade unlocks Resolver Pro; storage still expands evidence capacity.
 - **Unread feedback:** relevant desktop apps show visible numeric badges, while important changes also remain available after the notification disappears.
+
+## RC7 terminal and navigation polish
+
+- **Semantic BLACKBOX palette:** green remains the primary identity; cyan marks network/intel structure, amber marks caution/unknown states, red marks errors and denied actions, pale text separates typed commands, and violet is reserved for rare anomalous BLACKBOX events. IP addresses, hostnames, ports, quoted commands, and UNKNOWN scan entries receive consistent token styling.
+- **True terminal viewport:** the compact BLACKBOX status header stays visible, terminal history scrolls independently, and the command prompt remains pinned at the bottom. When the player manually scrolls upward, new output no longer yanks the view back down; a `↓ LATEST` control returns to current output.
+- **Compact portrait taskbar:** open/minimized NEXUS apps use icon-sized restore buttons in portrait so more than two remain visible. Desktop and phone landscape retain icon + label buttons.
+- **World Intel routing feedback:** discovery toasts now explicitly say that optional World Intel is stored in `My Computer → World Intel` and available through BLACKBOX `clues`.
 
 ## RC6 device-polish repairs
 
@@ -82,11 +89,12 @@ node tests/audio-rc4.mjs
 node tests/audio-rc5-gesture.mjs
 node tests/audio-rc6-background.mjs
 node tests/rc6-device-ui-static.mjs
+node tests/rc7-terminal-ui-static.mjs
 ```
 
 Together they verify migration, unique host addressing, filesystem and service-process coverage, scan variation, mission-target reliability, explicit numeric namespaces, post-command save/reload behavior, contextual objective rejection, semantic anti-spam equivalence, clock-poll-invariant event timing, safe mutable-text boundaries, all nine investigations, full-storage mandatory evidence, corrupt/future-save handling, purge lifecycle safety, storage-write failures, DNS fact matching, migrated Messenger clue recovery, and instrumented Web Audio interruption/closed-context recovery.
 
-Automated JavaScript syntax checks and all campaign/regression/UI/audio suites pass in the release workspace, including the RC5 gesture-retry regression and the new RC6 stale-`running` long-background lifecycle regression. The packaged RC5 ZIP was also extracted and verified byte-identical to the RC5 working tree before RC6 was created. The available container Chromium still blocks local/file navigation by administrator policy, so the new responsive layout and real iPhone/Safari long-background recovery remain direct-device acceptance gates before stable promotion.
+Automated JavaScript syntax checks and all campaign/regression/UI/audio suites pass in the release workspace, including the RC5 gesture-retry regression and the RC6 stale-`running` long-background lifecycle regression and RC7 terminal/navigation static guards. The packaged RC5 ZIP was also extracted and verified byte-identical to the RC5 working tree before RC6 was created. The available container Chromium still blocks local/file navigation by administrator policy, so the new responsive layout and real iPhone/Safari long-background recovery remain direct-device acceptance gates before stable promotion.
 
 ## Explicitly deferred
 

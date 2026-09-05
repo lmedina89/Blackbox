@@ -88,11 +88,11 @@ export function initDesktopUI({enterBlackbox}){
   }
   refreshBadges();
 
-  function toast(text){
+  function toast(text,{duration=3300,titleText="NEXUS/OS"}={}){
     const t=document.createElement("div"),title=document.createElement("b"),message=document.createElement("span");
-    t.className="toast";title.textContent="NEXUS/OS";message.textContent=String(text);
+    t.className="toast";title.textContent=titleText;message.textContent=String(text);
     t.append(title,message);toastBox.appendChild(t);
-    setTimeout(()=>t.classList.add("toast-out"),3300);setTimeout(()=>t.remove(),3800);
+    setTimeout(()=>t.classList.add("toast-out"),duration);setTimeout(()=>t.remove(),duration+500);
   }
   function syncSaveWarning(){
     const status=getPersistenceStatus();
@@ -112,7 +112,11 @@ export function initDesktopUI({enterBlackbox}){
   on("mission:completed",({mission})=>{toast(`Job complete. ${mission.rewards.credits} credits transferred.`);scheduleRenderOpenApps();setTimeout(()=>openApp("mail"),650);});
   on("hardware:purchased",({item})=>{toast(`${item.name} installed.`);scheduleRenderOpenApps();});
   on("software:purchased",({item})=>{toast(`${item.name} installed.`);scheduleRenderOpenApps();});
-  on("clue:discovered",({clue})=>{toast(clue.kind==="world"?`World intel learned: ${clue.title}`:`Clue recorded: ${clue.title}`);scheduleRenderOpenApps();});
+  on("clue:discovered",({clue})=>{
+    if(clue.kind==="world")toast(`World intel learned: ${clue.title}. Recorded in My Computer → World Intel and BLACKBOX "clues".`,{duration:5200,titleText:"WORLD INTEL"});
+    else toast(`Clue recorded: ${clue.title}`);
+    scheduleRenderOpenApps();
+  });
   on("communications:changed",()=>scheduleRenderOpenApps());
   on("timeline:event",({event})=>{if(event.notice)toast(event.notice);scheduleRenderOpenApps();});
   on("save:status",()=>syncSaveWarning());
@@ -125,7 +129,11 @@ export function initDesktopUI({enterBlackbox}){
     win.addEventListener("pointerdown",()=>win.style.zIndex=String(++z));
     win.querySelector("[data-close]").addEventListener("click",()=>{playSound("ui_close");win.remove();taskApps.querySelector(`[data-task="${id}"]`)?.remove();});
     win.querySelector("[data-min]").addEventListener("click",()=>win.classList.add("hidden"));layer.appendChild(win);
-    const task=document.createElement("button");task.className="taskbar-app";task.dataset.task=id;task.textContent=title;task.title=title;task.addEventListener("click",()=>{
+    const task=document.createElement("button");task.className="taskbar-app";task.dataset.task=id;task.title=title;task.setAttribute("aria-label",title);
+    const appDef=DESKTOP_APPS.find(app=>app.id===id);
+    const taskGlyph=document.createElement("span"),taskLabel=document.createElement("span");
+    taskGlyph.className="taskbar-app-glyph";taskGlyph.setAttribute("aria-hidden","true");taskGlyph.textContent=appDef?.glyph||"▣";
+    taskLabel.className="taskbar-app-label";taskLabel.textContent=title;task.append(taskGlyph,taskLabel);task.addEventListener("click",()=>{
       const restoring=win.classList.contains("hidden");win.classList.toggle("hidden");win.style.zIndex=String(++z);
       if(restoring)renderWindow(id,win.querySelector(".window-content"));
     });taskApps.appendChild(task);return win.querySelector(".window-content");

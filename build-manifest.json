@@ -49,7 +49,12 @@
     "phone portrait taskbar app restore strip with horizontal overflow instead of hidden minimized apps",
     "dedicated coarse-pointer phone-landscape desktop and app-window geometry",
     "full-width Notepad editor sizing on mobile Safari",
-    "inline vector BLACKBOX A2 desktop shortcut launching the existing secure terminal transition"
+    "inline vector BLACKBOX A2 desktop shortcut launching the existing secure terminal transition",
+    "semantic BLACKBOX terminal palette with network/intel, warning, error, success, command, and anomaly roles",
+    "fixed BLACKBOX status header with independently scrollable terminal history and pinned command prompt",
+    "manual-scroll preservation with a Latest control instead of forced output snapping",
+    "compact icon-based portrait taskbar restore buttons with labeled landscape/desktop task buttons",
+    "explicit World Intel destination feedback pointing to My Computer and the BLACKBOX clues command"
   ],
   "deferred": [
     "packet capture and sniffing simulation",
@@ -90,7 +95,9 @@
     "RC5 Safari gesture regression verifies a later trusted play attempt retries after an earlier resume failure",
     "RC6 stale-running AudioContext regression recreates the graph on the first trusted gesture after visibility/page lifecycle suspension",
     "RC6 device UI guards verify visible portrait taskbar apps, dedicated phone-landscape geometry, full-width Notepad, and the BLACKBOX A2 SVG launcher",
-    "RC6 retains save version 9 and world schema 9; no gameplay-state migration is required"
+    "RC6 retains save version 9 and world schema 9; no gameplay-state migration is required",
+    "RC7 static UI guards verify semantic terminal classes/tokens, fixed-shell scroll architecture, Latest behavior hooks, compact portrait taskbar icons, and explicit World Intel routing feedback",
+    "RC7 retains save version 9 and world schema 9; command semantics and gameplay state are unchanged"
   ],
-  "releaseCandidate": 6
+  "releaseCandidate": 7
 }

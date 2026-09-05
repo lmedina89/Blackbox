@@ -9,7 +9,7 @@
   .threatdesk-head{align-items:flex-start}.threatdesk-head strong{font-size:9px}
   .td-lookup{align-items:stretch;flex-direction:column}
   .blackbox-header{align-items:flex-start}.bb-status{justify-content:flex-end}.blackbox-footer{display:none}
-  .terminal-shell{min-height:calc(100vh - 54px);padding:10px}.terminal-output,.terminal-input{font-size:12.5px}
+  .terminal-shell{min-height:0;padding:0}.terminal-output{padding:10px}.terminal-output,.terminal-input{font-size:12.5px}
   .site-head{align-items:flex-start}.site-logo{font-size:22px}.site-head span{display:none}
   .blackbox-launch{align-items:flex-start;flex-direction:column}
   .window-titlebar{touch-action:none}
@@ -19,7 +19,7 @@
   .taskbar-button{flex:0 0 auto;padding:0 8px;font-size:13px}
   .taskbar-apps{display:flex;gap:3px;flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;padding:0 2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .taskbar-apps::-webkit-scrollbar{display:none}
-  .taskbar-app{flex:0 0 clamp(72px,24vw,100px);max-width:none;padding:0 6px;font-size:11px}
+  .taskbar-app{flex:0 0 42px;max-width:42px;width:42px;padding:0;display:grid;place-items:center;font-size:18px}.taskbar-app-label{display:none}.taskbar-app-glyph{display:block;line-height:1}
   .audio-button{flex:0 0 38px;min-width:38px}
   .clock-button{flex:0 0 70px;min-width:70px;padding:0 5px}
 }
@@ -38,7 +38,7 @@
   .browser-toolbar input{flex:0 0 160px;min-width:160px}
   .terminal-input{font-size:16px !important;line-height:1.4}
   .blackbox-header{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
-  .terminal-shell{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+  .terminal-output{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}.terminal-form{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
   .bb-desktop-button{min-height:34px;padding:5px 8px;font-family:inherit;font-size:11px;letter-spacing:.5px;color:var(--terminal);background:#041004;border:1px solid #396337}
   .terminal-form{align-items:flex-start}
   .terminal-prompt{padding-top:2px}
@@ -68,6 +68,7 @@
   .terminal-form{flex-direction:column;align-items:stretch;gap:2px}
   .terminal-prompt{white-space:normal;overflow-wrap:anywhere;word-break:break-word;padding-top:0;line-height:1.25}
   .terminal-input{width:100%;min-width:100%}
+  .terminal-latest{right:max(14px,env(safe-area-inset-right));bottom:72px}
 }
 
 /* RC6: a phone in landscape is still a phone. Do not fall back to the desktop geometry just because width exceeds 700px. */
@@ -119,10 +120,10 @@
 
   .taskbar-apps{display:flex;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
   .taskbar-apps::-webkit-scrollbar{display:none}
-  .taskbar-app{flex:0 0 130px;max-width:150px;font-size:11px}
+  .taskbar-app{flex:0 0 130px;max-width:150px;font-size:11px;display:flex;align-items:center;gap:6px;padding:0 8px}.taskbar-app-label{display:inline;overflow:hidden;text-overflow:ellipsis}.taskbar-app-glyph{display:inline}
 
   .blackbox-header{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
-  .terminal-shell{min-height:calc(100vh - 54px);padding:8px max(10px,env(safe-area-inset-right)) 8px max(10px,env(safe-area-inset-left))}
+  .terminal-shell{min-height:0;padding:0}.terminal-output{padding:8px max(10px,env(safe-area-inset-right)) 8px max(10px,env(safe-area-inset-left))}.terminal-form{padding:7px max(10px,env(safe-area-inset-right)) 7px max(10px,env(safe-area-inset-left))}
   .blackbox-footer{display:none}
   .terminal-input{font-size:16px!important}
 }
