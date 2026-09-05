@@ -11,3 +11,6 @@
 .news-story-button.read{opacity:.72}
 .news-story-button:focus-visible,.buddy-list button:focus-visible{outline:2px solid #315f8f;outline-offset:2px}
 .buddy-list button.active{background:#fff;font-weight:700}
+
+/* RC6 device polish: Notepad owns the full app canvas instead of Safari's intrinsic textarea width. */
+.notepad{display:block;width:100%;height:calc(100% - 29px);min-height:0;box-sizing:border-box;resize:none;border:0;padding:9px;background:#fff;color:#1d2732;font:14px/1.45 Arial,sans-serif;outline:none}

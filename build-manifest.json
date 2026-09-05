@@ -44,7 +44,12 @@
     "reserved mandatory-evidence handling with idempotent re-downloads",
     "validated and recoverable profile persistence with save-failure signaling",
     "Safari gesture-bound Web Audio recovery with retry across pointer/click activation",
-    "deferred desktop redraws with preserved mail, ThreatDesk, and Notes view state"
+    "deferred desktop redraws with preserved mail, ThreatDesk, and Notes view state",
+    "lifecycle-invalidated Safari Web Audio graph rebuilt on the next trusted gesture after background/page suspension",
+    "phone portrait taskbar app restore strip with horizontal overflow instead of hidden minimized apps",
+    "dedicated coarse-pointer phone-landscape desktop and app-window geometry",
+    "full-width Notepad editor sizing on mobile Safari",
+    "inline vector BLACKBOX A2 desktop shortcut launching the existing secure terminal transition"
   ],
   "deferred": [
     "packet capture and sniffing simulation",
@@ -82,7 +87,10 @@
     "RC4 Harbor CNAME-only lookup no longer awards the vault address clue",
     "RC4 browser launch was attempted in the available container Chromium but local/file navigation was administrator-blocked; real browser/iPhone acceptance remains required",
     "RC5 audio lifecycle instrumentation passes with repeated trusted-gesture recovery",
-    "RC5 Safari gesture regression verifies a later trusted play attempt retries after an earlier resume failure"
+    "RC5 Safari gesture regression verifies a later trusted play attempt retries after an earlier resume failure",
+    "RC6 stale-running AudioContext regression recreates the graph on the first trusted gesture after visibility/page lifecycle suspension",
+    "RC6 device UI guards verify visible portrait taskbar apps, dedicated phone-landscape geometry, full-width Notepad, and the BLACKBOX A2 SVG launcher",
+    "RC6 retains save version 9 and world schema 9; no gameplay-state migration is required"
   ],
-  "releaseCandidate": 5
+  "releaseCandidate": 6
 }

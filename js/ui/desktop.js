@@ -8,7 +8,7 @@ import { HARDWARE } from "../data/hardware.js";
 import { SOFTWARE } from "../data/software.js";
 import { THREATS, FIELD_NOTES, LABS } from "../data/threats.js";
 import { MISSIONS } from "../data/missions.js";
-import { DESKTOP_APPS } from "../data/apps.js";
+import { DESKTOP_APPS, BLACKBOX_SHORTCUT } from "../data/apps.js";
 import { on, emit } from "../core/events.js";
 import { buyHardware, buySoftware } from "../systems/hardware.js";
 import { missionView } from "../systems/missions.js";
@@ -45,6 +45,12 @@ export function initDesktopUI({enterBlackbox}){
     const b=document.createElement("button");b.className="desktop-icon";b.dataset.appIcon=app.id;b.innerHTML=`<span class="glyph">${app.glyph}</span><span>${app.shortName}</span><span class="app-badge hidden" aria-label="unread items"></span>`;b.addEventListener("click",()=>openApp(app.id));icons.appendChild(b);
     const s=document.createElement("button");s.textContent=`${app.glyph} ${app.name}`;s.addEventListener("click",()=>{startMenu.classList.add("hidden");openApp(app.id);});startList.appendChild(s);
   }
+  const blackboxIcon=document.createElement("button");
+  blackboxIcon.className="desktop-icon blackbox-desktop-icon";
+  blackboxIcon.dataset.appIcon=BLACKBOX_SHORTCUT.id;
+  blackboxIcon.innerHTML=`<span class="glyph svg-glyph" aria-hidden="true">${BLACKBOX_SHORTCUT.glyphSvg}</span><span>${BLACKBOX_SHORTCUT.shortName}</span><span class="app-badge hidden" aria-label="unread items"></span>`;
+  blackboxIcon.addEventListener("click",()=>enterBlackbox());
+  icons.appendChild(blackboxIcon);
   document.querySelector("#start-button").addEventListener("click",()=>startMenu.classList.toggle("hidden"));
   document.querySelector("#blackbox-button").addEventListener("click",()=>{startMenu.classList.add("hidden");enterBlackbox();});
   document.querySelector("#save-button").addEventListener("click",()=>{const result=saveGame();toast(result.ok?"Game saved to local disk.":"Save failed. Your last stored save was preserved.");syncSaveWarning();});
@@ -119,7 +125,7 @@ export function initDesktopUI({enterBlackbox}){
     win.addEventListener("pointerdown",()=>win.style.zIndex=String(++z));
     win.querySelector("[data-close]").addEventListener("click",()=>{playSound("ui_close");win.remove();taskApps.querySelector(`[data-task="${id}"]`)?.remove();});
     win.querySelector("[data-min]").addEventListener("click",()=>win.classList.add("hidden"));layer.appendChild(win);
-    const task=document.createElement("button");task.className="taskbar-app";task.dataset.task=id;task.textContent=title;task.addEventListener("click",()=>{
+    const task=document.createElement("button");task.className="taskbar-app";task.dataset.task=id;task.textContent=title;task.title=title;task.addEventListener("click",()=>{
       const restoring=win.classList.contains("hidden");win.classList.toggle("hidden");win.style.zIndex=String(++z);
       if(restoring)renderWindow(id,win.querySelector(".window-content"));
     });taskApps.appendChild(task);return win.querySelector(".window-content");

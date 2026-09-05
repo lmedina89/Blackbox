@@ -5,6 +5,7 @@ let context=null;
 let master=null;
 let initialized=false;
 let pendingSound=null;
+let refreshContextOnNextGesture=false;
 
 function readPreference(){
   try{return globalThis.localStorage?.getItem(STORAGE_KEY)!=="0";}
@@ -20,19 +21,46 @@ function AudioContextClass(){return window.AudioContext||window.webkitAudioConte
 function createContext(){
   const Ctx=AudioContextClass();
   if(!Ctx||!enabled)return null;
-  context=new Ctx();
-  master=context.createGain();
-  master.gain.value=0.30;
-  master.connect(context.destination);
-  return context;
+  try{
+    context=new Ctx();
+    master=context.createGain();
+    master.gain.value=0.30;
+    master.connect(context.destination);
+    return context;
+  }catch(err){
+    context=null;master=null;
+    console.warn("[audio] context creation failed",err);
+    return null;
+  }
+}
+function discardContext(){
+  const old=context;
+  context=null;master=null;
+  if(!old||typeof old.close!=="function")return;
+  try{
+    const closing=old.close();
+    if(closing&&typeof closing.catch==="function")closing.catch(err=>console.warn("[audio] context close failed",err));
+  }catch(err){console.warn("[audio] context close failed",err);}
 }
 function ensureContext(){
   if(!enabled)return null;
   if(context?.state==="closed"){context=null;master=null;}
   return context||createContext();
 }
+function markContextStale(){
+  // iOS can restore a long-backgrounded AudioContext with state === "running"
+  // while the graph is effectively silent. Do not trust that old graph after
+  // a page/background lifecycle transition; recreate it on the next gesture.
+  if(context)refreshContextOnNextGesture=true;
+  pendingSound=null;
+}
 
-export async function recoverAudioContext(){
+export async function recoverAudioContext({trustedGesture=false}={}){
+  if(!enabled)return false;
+  if(trustedGesture&&refreshContextOnNextGesture){
+    refreshContextOnNextGesture=false;
+    discardContext();
+  }
   const ctx=ensureContext();
   if(!ctx)return false;
   if(ctx.state==="running")return true;
@@ -97,12 +125,11 @@ function playNow(name){
   if(!enabled||!fn||context?.state!=="running")return false;
   try{fn();return true;}catch(err){console.warn("[audio]",err);return false;}
 }
-function requestRecovery(name=null){
+function requestRecovery(name=null,{trustedGesture=false}={}){
   if(name)pendingSound={name,at:Date.now()};
-  // iOS/Safari may reject or ignore one gesture-phase resume while allowing
-  // a later phase of the same trusted action. Never let an earlier recovery
-  // promise prevent the actual sound-triggering click from retrying resume().
-  return recoverAudioContext().then(ok=>{
+  // Each trusted phase may retry independently. This covers Safari cases where
+  // pointerdown fails but the later click/keydown phase is allowed to resume.
+  return recoverAudioContext({trustedGesture}).then(ok=>{
     if(ok&&pendingSound&&Date.now()-pendingSound.at<1500){const next=pendingSound.name;pendingSound=null;playNow(next);}
     else if(pendingSound&&Date.now()-pendingSound.at>=1500)pendingSound=null;
     return ok;
@@ -113,7 +140,7 @@ export function playSound(name){
   if(!enabled||!SOUNDS[name])return false;
   const ctx=ensureContext();
   if(!ctx)return false;
-  if(ctx.state==="running")return playNow(name);
+  if(ctx.state==="running"&&!refreshContextOnNextGesture)return playNow(name);
   requestRecovery(name);
   return true;
 }
@@ -124,6 +151,9 @@ export function setAudioEnabled(value){
   enabled=!!value;
   writePreference(enabled);
   if(!enabled){pendingSound=null;return enabled;}
+  // Unmute normally happens inside a trusted click. If iOS backgrounded a live
+  // graph while muted, make sure this action does not reuse the stale graph.
+  if(refreshContextOnNextGesture){refreshContextOnNextGesture=false;discardContext();}
   ensureContext();
   playSound("ui_open");
   return enabled;
@@ -133,13 +163,19 @@ export function toggleAudio(){return setAudioEnabled(!enabled);}
 
 export function initAudio(){
   if(initialized)return;initialized=true;
-  const recoverFromGesture=()=>{if(enabled)requestRecovery();};
+  const recoverFromGesture=()=>{if(enabled)requestRecovery(null,{trustedGesture:true});};
   document.addEventListener("pointerdown",recoverFromGesture,{capture:true});
   document.addEventListener("click",recoverFromGesture,{capture:true});
   document.addEventListener("touchend",recoverFromGesture,{capture:true});
   document.addEventListener("keydown",recoverFromGesture,{capture:true});
-  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&enabled&&context)requestRecovery();});
-  window.addEventListener("pageshow",()=>{if(enabled&&context)requestRecovery();});
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="hidden"){markContextStale();return;}
+    // A visible lifecycle callback is not reliably a trusted iOS audio gesture.
+    // Leave a stale graph alone and let the next real tap rebuild it.
+    if(enabled&&context&&!refreshContextOnNextGesture)requestRecovery();
+  });
+  window.addEventListener("pagehide",markContextStale);
+  window.addEventListener("pageshow",()=>{if(context)refreshContextOnNextGesture=true;});
 
   on("host:connected",({hostId})=>playSound(hostId==="home"?"disconnect":"connect"));
   on("mission:started",()=>playSound("message"));

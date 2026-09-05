@@ -1,4 +1,28 @@
-@media (max-width:700px){.desktop-icons{grid-template-columns:repeat(3,1fr);width:auto;right:10px;gap:5px}.desktop-icon{font-size:11px;min-height:65px}.app-window{left:2%!important;top:3%!important;width:96%;height:85%;min-height:430px}.mail-layout,.chat-layout{grid-template-columns:1fr}.sidebar{border-right:0;border-bottom:1px solid #c8ced5;max-height:140px}.system-grid,.threatdesk-body{grid-template-columns:1fr}.threatdesk-head{align-items:flex-start}.threatdesk-head strong{font-size:9px}.td-lookup{align-items:stretch;flex-direction:column}.blackbox-header{align-items:flex-start}.bb-status{justify-content:flex-end}.blackbox-footer{display:none}.terminal-shell{min-height:calc(100vh - 54px);padding:10px}.terminal-output,.terminal-input{font-size:12.5px}.taskbar-apps{display:none}.site-head{align-items:flex-start}.site-logo{font-size:22px}.site-head span{display:none}.blackbox-launch{align-items:flex-start;flex-direction:column}.notepad{min-height:500px}.window-titlebar{touch-action:none}}
+@media (max-width:700px){
+  .desktop-icons{grid-template-columns:repeat(3,1fr);width:auto;right:10px;gap:5px}
+  .desktop-icon{font-size:11px;min-height:65px}
+  .desktop-icon .svg-glyph{height:42px}.desktop-icon .svg-glyph svg{width:42px;height:42px}
+  .app-window{left:2%!important;top:3%!important;width:96%;height:85%;min-height:430px}
+  .mail-layout,.chat-layout{grid-template-columns:1fr}
+  .sidebar{border-right:0;border-bottom:1px solid #c8ced5;max-height:140px}
+  .system-grid,.threatdesk-body{grid-template-columns:1fr}
+  .threatdesk-head{align-items:flex-start}.threatdesk-head strong{font-size:9px}
+  .td-lookup{align-items:stretch;flex-direction:column}
+  .blackbox-header{align-items:flex-start}.bb-status{justify-content:flex-end}.blackbox-footer{display:none}
+  .terminal-shell{min-height:calc(100vh - 54px);padding:10px}.terminal-output,.terminal-input{font-size:12.5px}
+  .site-head{align-items:flex-start}.site-logo{font-size:22px}.site-head span{display:none}
+  .blackbox-launch{align-items:flex-start;flex-direction:column}
+  .window-titlebar{touch-action:none}
+
+  /* Keep real taskbar restore targets visible on phones. The center strip scrolls; system controls stay pinned. */
+  .taskbar{gap:3px;padding-left:max(4px,env(safe-area-inset-left));padding-right:max(4px,env(safe-area-inset-right))}
+  .taskbar-button{flex:0 0 auto;padding:0 8px;font-size:13px}
+  .taskbar-apps{display:flex;gap:3px;flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;padding:0 2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .taskbar-apps::-webkit-scrollbar{display:none}
+  .taskbar-app{flex:0 0 clamp(72px,24vw,100px);max-width:none;padding:0 6px;font-size:11px}
+  .audio-button{flex:0 0 38px;min-width:38px}
+  .clock-button{flex:0 0 70px;min-width:70px;padding:0 5px}
+}
 
 @media (max-width:700px){
   html,body{width:100%;max-width:100%;overflow-x:hidden}
@@ -8,49 +32,14 @@
   .app-window{max-width:96%;overflow:hidden}
   .window-content{overflow-x:hidden}
   .app-body,.content-pane{max-width:100%;overflow-wrap:anywhere}
-  .browser-toolbar{
-    display:flex;
-    flex-wrap:nowrap;
-    overflow-x:auto;
-    overflow-y:hidden;
-    gap:6px;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
-  }
+  .browser-toolbar{display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   .browser-toolbar::-webkit-scrollbar{display:none}
-  .browser-toolbar button{
-    flex:0 0 auto;
-    min-width:max-content;
-    max-width:none;
-    white-space:nowrap;
-    padding-inline:12px;
-  }
-  .browser-toolbar input{
-    flex:0 0 160px;
-    min-width:160px;
-  }
-  .terminal-input{
-    font-size:16px !important;
-    line-height:1.4;
-  }
-  .blackbox-header{
-    padding-left:max(12px,env(safe-area-inset-left));
-    padding-right:max(12px,env(safe-area-inset-right));
-  }
-  .terminal-shell{
-    padding-left:max(12px,env(safe-area-inset-left));
-    padding-right:max(12px,env(safe-area-inset-right));
-  }
-  .bb-desktop-button{
-    min-height:34px;
-    padding:5px 8px;
-    font-family:inherit;
-    font-size:11px;
-    letter-spacing:.5px;
-    color:var(--terminal);
-    background:#041004;
-    border:1px solid #396337;
-  }
+  .browser-toolbar button{flex:0 0 auto;min-width:max-content;max-width:none;white-space:nowrap;padding-inline:12px}
+  .browser-toolbar input{flex:0 0 160px;min-width:160px}
+  .terminal-input{font-size:16px !important;line-height:1.4}
+  .blackbox-header{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+  .terminal-shell{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right))}
+  .bb-desktop-button{min-height:34px;padding:5px 8px;font-family:inherit;font-size:11px;letter-spacing:.5px;color:var(--terminal);background:#041004;border:1px solid #396337}
   .terminal-form{align-items:flex-start}
   .terminal-prompt{padding-top:2px}
 }
@@ -72,15 +61,68 @@
 }
 
 @media (max-width:700px){
-  .bb-notifications{
-    top:74px;
-    right:max(10px,env(safe-area-inset-right));
-    width:min(260px,calc(100% - 20px));
-  }
+  .bb-notifications{top:74px;right:max(10px,env(safe-area-inset-right));width:min(260px,calc(100% - 20px))}
 }
 
 @media (max-width:700px){
   .terminal-form{flex-direction:column;align-items:stretch;gap:2px}
   .terminal-prompt{white-space:normal;overflow-wrap:anywhere;word-break:break-word;padding-top:0;line-height:1.25}
   .terminal-input{width:100%;min-width:100%}
+}
+
+/* RC6: a phone in landscape is still a phone. Do not fall back to the desktop geometry just because width exceeds 700px. */
+@media (orientation:landscape) and (max-height:520px) and (pointer:coarse){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  .desktop,.blackbox{width:100%;max-width:100%;overflow:hidden}
+
+  .desktop-icons{
+    top:7px;
+    left:max(8px,env(safe-area-inset-left));
+    right:auto;
+    width:min(560px,calc(100% - 16px - env(safe-area-inset-left) - env(safe-area-inset-right)));
+    grid-template-columns:repeat(4,minmax(72px,1fr));
+    gap:2px 8px;
+  }
+  .desktop-icon{min-height:61px;padding:2px;font-size:10px}
+  .desktop-icon .glyph{font-size:27px;margin-bottom:1px}
+  .desktop-icon .svg-glyph{height:37px}.desktop-icon .svg-glyph svg{width:37px;height:37px}
+
+  .app-window{
+    left:max(6px,env(safe-area-inset-left))!important;
+    right:max(6px,env(safe-area-inset-right));
+    top:5px!important;
+    bottom:5px;
+    width:auto;
+    height:auto;
+    max-width:none;
+    min-height:0;
+    overflow:hidden;
+  }
+  .window-titlebar{height:30px;font-size:13px;touch-action:none}
+  .window-controls button{width:40px;height:28px;font-size:16px}
+  .window-content{overflow-x:hidden}
+  .app-body,.content-pane{max-width:100%;padding:10px;overflow-wrap:anywhere}
+  .browser-menu,.notepad-menu{padding:4px 6px;font-size:11px}
+  .browser-toolbar{display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;gap:4px;padding:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .browser-toolbar::-webkit-scrollbar{display:none}
+  .browser-toolbar button{flex:0 0 auto;min-width:max-content;height:30px;padding:0 9px;font-size:12px;white-space:nowrap}
+  .browser-toolbar input{flex:0 0 150px;min-width:150px;height:30px;font-size:12px}
+  .site-head{align-items:flex-start;margin-bottom:8px;padding:6px 4px}.site-logo{font-size:20px}.site-head span{font-size:9px}
+  .news-story h2{font-size:18px}
+  .mail-layout,.chat-layout{grid-template-columns:minmax(155px,28%) 1fr}
+  .sidebar{max-height:none;border-right:1px solid #c8ced5;border-bottom:0;padding:5px}
+  .mail-header,.messenger-top{padding:5px 8px}
+  .chat-line{padding:4px 2px}
+  .threatdesk-body{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:7px}
+  .td-panel{padding:8px}.td-panel h2{font-size:15px}
+  .system-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+  .taskbar-apps{display:flex;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+  .taskbar-apps::-webkit-scrollbar{display:none}
+  .taskbar-app{flex:0 0 130px;max-width:150px;font-size:11px}
+
+  .blackbox-header{padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
+  .terminal-shell{min-height:calc(100vh - 54px);padding:8px max(10px,env(safe-area-inset-right)) 8px max(10px,env(safe-area-inset-left))}
+  .blackbox-footer{display:none}
+  .terminal-input{font-size:16px!important}
 }
