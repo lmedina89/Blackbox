@@ -10,6 +10,7 @@ import { learn, proficiencyLabel } from "./progression.js";
 import { saveTarget, removeTarget, getSavedTargets, missionTitle, activeMissionForHost } from "./targets.js";
 import { advanceWorld } from "./timeline.js";
 import { lookupDns, formatDnsResult } from "./dns.js";
+import { MISSIONS } from "../data/missions.js";
 
 const commands=new Map(),aliases=new Map();
 const MEANINGFUL_COMMANDS=new Set(["scan","connect","ip","services","netstat","ping","nslookup","traceroute","cat","head","tail","grep","find","download"]);
@@ -141,7 +142,7 @@ registerCommand({name:"help",aliases:["?"],execute(){return line([
 "  tail <file>       last lines of file",
 "  grep <text> <file> filter matching lines",
 "  find [path] <name> locate files",
-"  download <file>   copy evidence to HOME-PC","",
+"  download <file>   record evidence on HOME-PC","",
 "NETWORK",
 "  ip                inspect network interfaces",
 "  ping <host>       test current-host reachability",
@@ -195,7 +196,28 @@ registerCommand({name:"tail",execute({state,args}){if(!args[0])throw new Error("
 registerCommand({name:"grep",execute({state,args}){if(args.length<2)throw new Error("usage: grep <text> <file>");const needle=args[0],canonicalQuery=needle.toLowerCase(),{path,body}=fileText(state,args[1]),matches=body.split("\n").filter(x=>x.toLowerCase().includes(canonicalQuery));emit("file:searched",{hostId:state.terminal.hostId,path,query:canonicalQuery,canonicalQuery,rawQuery:needle});learn(`grep:${state.terminal.hostId}`,"analysis",2);const result=matches.length?matches.join("\n"):"grep: no matches";return line((state.player.installedSoftware||[]).includes("logscope")?`${result}\n\nLogScope: ${matches.length} matching line${matches.length===1?"":"s"}; query recorded for correlation.`:result);}});
 function walk(node,path,out,needle){if(node.type==="file"){if(path.toLowerCase().includes(needle.toLowerCase()))out.push(path);return;}for(const [name,child] of Object.entries(node.children||{}))walk(child,`${path==="/"?"/":path+"/"}${name}`,out,needle);}
 registerCommand({name:"find",execute({state,args}){if(!args.length)throw new Error("usage: find [path] <name>");const needle=args.at(-1),base=args.length>1?normalizePath(state.terminal.cwd,args[0],state.terminal.hostId):state.terminal.cwd,node=getNode(state.terminal.hostId,base);if(!node)throw new Error("find: path not found");const out=[];walk(node,base,out,needle);learn(`find:${state.terminal.hostId}`,"analysis");return line(out.length?out.join("\n"):"find: no matches");}});
-registerCommand({name:"download",execute({state,args}){if(state.terminal.hostId==="home")throw new Error("download: already on HOME-PC");if(!args[0])throw new Error("download: missing file operand");const {path}=fileText(state,args[0]);const capacity=state.player.installedHardware.includes("hdd_20gb")?8:2;if(state.player.downloads.length>=capacity)throw new Error(`download: local evidence storage full (${capacity} files)`);const id=`${state.terminal.hostId}:${path}`;if(!state.player.downloads.includes(id))state.player.downloads.push(id);emit("file:downloaded",{hostId:state.terminal.hostId,path});learn("download","systems");return line(`Transferred ${path} -> HOME-PC:/home/downloads/\nEvidence stored locally.`);}});
+function requiredEvidenceIds(){
+  return new Set(MISSIONS.flatMap(m=>m.objectives||[]).filter(o=>o.type==="file_downloaded").map(o=>o.target));
+}
+const REQUIRED_EVIDENCE=requiredEvidenceIds();
+registerCommand({name:"download",execute({state,args}){
+  if(state.terminal.hostId==="home")throw new Error("download: already on HOME-PC");
+  if(!args[0])throw new Error("download: missing file operand");
+  const {path}=fileText(state,args[0]),id=`${state.terminal.hostId}:${path}`;
+  state.player.downloads??=[];
+  const alreadyStored=state.player.downloads.includes(id);
+  if(!alreadyStored){
+    const capacity=state.player.installedHardware.includes("hdd_20gb")?8:2;
+    const optionalCount=state.player.downloads.filter(item=>!REQUIRED_EVIDENCE.has(item)).length;
+    if(!REQUIRED_EVIDENCE.has(id)&&optionalCount>=capacity)throw new Error(`download: optional evidence storage full (${capacity} files)`);
+    state.player.downloads.push(id);
+  }
+  emit("file:downloaded",{hostId:state.terminal.hostId,path,alreadyStored});
+  learn("download","systems");
+  return line(alreadyStored
+    ? `Evidence already recorded: ${path}\nExisting HOME-PC evidence reference reused.`
+    : `Transfer verified: ${path}\nEvidence reference recorded in HOME-PC evidence register.`);
+}});
 
 registerCommand({name:"ip",execute({state}){const h=HOSTS[state.terminal.hostId];learn(`ip:${state.terminal.hostId}`,"network",2);return line(["INTERFACES",...h.interfaces.map(i=>`${i.name.padEnd(6)} ${i.address}/${i.cidr}${i.gateway?`  gateway ${i.gateway}`:""}`)].join("\n"));}});
 registerCommand({name:"nslookup",execute({state,args}){

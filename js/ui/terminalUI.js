@@ -87,7 +87,13 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
       print(line,line==="IDENTITY PURGED"?"purged":"dim");
     }
     await sleep(500);
-    onPurge();
+    const purged=onPurge();
+    if(purged===false){
+      print("PURGE FAILED: identity archive could not be saved. Original identity remains active.","error");
+      form.classList.remove("terminal-locked");input.disabled=false;
+      refreshPrompt();
+      try{input.focus({preventScroll:true});}catch{input.focus();}
+    }
   }
 
   async function run(raw){
@@ -152,6 +158,15 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
   });
 
   on("terminal:exit",()=>onExit());
+  on("save:status",({ok,error})=>{
+    let warning=bbNotifications.querySelector("[data-save-warning]");
+    if(ok){warning?.remove();return;}
+    if(!warning){warning=document.createElement("div");warning.className="bb-toast save-warning";warning.dataset.saveWarning="1";bbNotifications.appendChild(warning);}
+    warning.innerHTML="";
+    const title=document.createElement("b"),body=document.createElement("span");
+    title.textContent="SAVE WARNING";body.textContent=`Progress is not persisting. Last good save preserved. ${error||"Browser storage unavailable."}`;
+    warning.append(title,body);
+  });
   on("host:connected",refreshPrompt);
   on("mission:progress",({mission,objective})=>{
     const progress=getState().missions.progress[mission.id]||{};

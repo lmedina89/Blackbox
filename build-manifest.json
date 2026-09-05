@@ -40,7 +40,11 @@
     "host-contextual legacy command objectives with preserved objective IDs",
     "canonical evidence and semantic time anti-spam keys",
     "prerequisite-anchored world-event timing",
-    "safe persistence and rendering for mutable local text"
+    "safe persistence and rendering for mutable local text",
+    "reserved mandatory-evidence handling with idempotent re-downloads",
+    "validated and recoverable profile persistence with save-failure signaling",
+    "Safari-aware Web Audio interruption recovery",
+    "deferred desktop redraws with preserved mail, ThreatDesk, and Notes view state"
   ],
   "deferred": [
     "packet capture and sniffing simulation",
@@ -69,7 +73,15 @@
     "RC3 equivalent host, DNS, and path spellings count once",
     "RC3 timeline eligibility is invariant to extra clock polling",
     "RC3 all nonzero service PIDs resolve to host processes",
-    "RC3 mutable alias, notes, and browser error text use safe boundaries"
+    "RC3 mutable alias, notes, and browser error text use safe boundaries",
+    "RC4 required mission evidence remains usable at both full storage tiers",
+    "RC4 malformed/future save data is normalized or quarantined without hiding healthy active identities",
+    "RC4 purge cannot be re-saved as an active identity",
+    "RC4 storage-write failure preserves the last good save and exposes failure state",
+    "RC4 interrupted and closed AudioContext lifecycle paths are exercised with instrumentation",
+    "RC4 continuous nine-case campaign passes with save/reload after every terminal command and 25 additional cycles",
+    "RC4 Harbor CNAME-only lookup no longer awards the vault address clue",
+    "RC4 browser launch was attempted in the available container Chromium but local/file navigation was administrator-blocked; real browser/iPhone acceptance remains required"
   ],
-  "releaseCandidate": 3
+  "releaseCandidate": 4
 }

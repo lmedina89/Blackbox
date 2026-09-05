@@ -1,5 +1,5 @@
 import { getState, setFlag } from "./core/state.js";
-import { saveGame, loadProfile, getProfileSummary, beginNewIdentity, restoreArchivedIdentity, archiveCurrentIdentity } from "./core/save.js";
+import { saveGame, loadProfile, getProfileSummary, beginNewIdentity, restoreArchivedIdentity, archiveCurrentIdentity, hasActiveIdentity } from "./core/save.js";
 import { startClock } from "./core/clock.js";
 import { initMissions } from "./systems/missions.js";
 import { initClues } from "./systems/clues.js";
@@ -63,7 +63,8 @@ function renderBoot(){
     archivesButton.classList.add("hidden");
   }
 
-  if(loadResult.legacyMigrated)bootStatus.textContent="Existing v0.1.2 identity imported into the new profile system.";
+  if(loadResult.error)bootStatus.textContent=loadResult.message||"Stored profile data could not be loaded safely. Recoverable data has been preserved.";
+  else if(loadResult.legacyMigrated)bootStatus.textContent="Existing v0.1.2 identity imported into the new profile system.";
   else bootStatus.textContent=summary.active?"Select Continue to resume your active identity.":"No active identity. Create one to begin.";
 }
 
@@ -135,8 +136,10 @@ async function closeBlackbox(){
 }
 
 function purgeIdentity(){
-  archiveCurrentIdentity("purged");
+  const archived=archiveCurrentIdentity("purged");
+  if(!archived)return false;
   window.location.reload();
+  return true;
 }
 
 initAudio();
@@ -146,7 +149,7 @@ initAutosave();
 initTimeline();
 
 window.addEventListener("pagehide",()=>{
-  if(getState().player.alias)saveGame();
+  if(hasActiveIdentity())saveGame();
 });
 
 continueButton.addEventListener("click",()=>initializeGameUI());

@@ -15,3 +15,4 @@
 .bb-notifications{position:absolute;right:12px;top:58px;width:min(300px,calc(100% - 24px));z-index:30;display:grid;gap:7px;pointer-events:none}
 .bb-toast{padding:8px 10px;border:1px solid #396337;background:#020a02e8;box-shadow:0 5px 18px #0009;text-shadow:none;display:grid;gap:2px;transition:.35s}
 .bb-toast b{font-size:11px;letter-spacing:1px;color:#aaff9f}.bb-toast span{font-size:12px;color:#d8ffd2}.bb-toast small{font-size:10px;color:#70ad69}.bb-toast.milestone{border-color:#78bd70;box-shadow:0 0 16px #4dff4033}.bb-toast-out{opacity:0;transform:translateY(-4px)}
+.bb-toast.save-warning{border-color:#b84b4b;background:#160303;color:#ffd2d2}.bb-toast.save-warning b{color:#ff9b9b}

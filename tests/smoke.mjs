@@ -374,4 +374,4 @@ initTimeline();
   assert.equal(getState().world.scanCounters.home,2,"reload lost the repeated scan counter");
 }
 
-console.log("BLACKBOX v0.3.0 RC3 smoke tests passed");
+console.log("BLACKBOX v0.3.0 RC4 smoke tests passed");

@@ -13,9 +13,9 @@ import { on, emit } from "../core/events.js";
 import { buyHardware, buySoftware } from "../systems/hardware.js";
 import { missionView } from "../systems/missions.js";
 import { formatClock } from "../core/clock.js";
-import { saveGame } from "../core/save.js";
+import { saveGame, getPersistenceStatus } from "../core/save.js";
 import { makeChoice, choiceMade } from "../systems/communications.js";
-import { getKnownClues } from "../systems/clues.js";
+import { getKnownClues, reconcilePresentedMessageClues } from "../systems/clues.js";
 import { HOSTS } from "../data/hosts.js";
 import { proficiencyLabel } from "../systems/progression.js";
 import { displayName } from "../systems/network.js";
@@ -38,7 +38,8 @@ export function initDesktopUI({enterBlackbox}){
   layer.replaceChildren();
   taskApps.replaceChildren();
   toastBox.replaceChildren();
-  let z=20,offset=0,activeThreadId="maya";
+  let z=20,offset=0,activeThreadId="maya",selectedMailId=null,renderScheduled=false;
+  const threatDeskView={query:"",output:"Enter a fictional hostname."};
 
   for(const app of DESKTOP_APPS){
     const b=document.createElement("button");b.className="desktop-icon";b.dataset.appIcon=app.id;b.innerHTML=`<span class="glyph">${app.glyph}</span><span>${app.shortName}</span><span class="app-badge hidden" aria-label="unread items"></span>`;b.addEventListener("click",()=>openApp(app.id));icons.appendChild(b);
@@ -46,7 +47,7 @@ export function initDesktopUI({enterBlackbox}){
   }
   document.querySelector("#start-button").addEventListener("click",()=>startMenu.classList.toggle("hidden"));
   document.querySelector("#blackbox-button").addEventListener("click",()=>{startMenu.classList.add("hidden");enterBlackbox();});
-  document.querySelector("#save-button").addEventListener("click",()=>{saveGame();toast("Game saved to local disk.");});
+  document.querySelector("#save-button").addEventListener("click",()=>{const result=saveGame();toast(result.ok?"Game saved to local disk.":"Save failed. Your last stored save was preserved.");syncSaveWarning();});
   document.querySelector("#start-alias").textContent=getState().player.alias;
   function refreshAudioButton(){
     const enabled=isAudioEnabled();
@@ -87,16 +88,28 @@ export function initDesktopUI({enterBlackbox}){
     t.append(title,message);toastBox.appendChild(t);
     setTimeout(()=>t.classList.add("toast-out"),3300);setTimeout(()=>t.remove(),3800);
   }
+  function syncSaveWarning(){
+    const status=getPersistenceStatus();
+    let warning=toastBox.querySelector("[data-save-warning]");
+    if(status.ok){warning?.remove();return;}
+    if(!warning){
+      warning=document.createElement("div");warning.className="toast save-warning";warning.dataset.saveWarning="1";
+      const title=document.createElement("b"),message=document.createElement("span");title.textContent="SAVE WARNING";warning.append(title,message);toastBox.appendChild(warning);
+    }
+    warning.querySelector("span").textContent=`Progress cannot be saved right now. Last good save preserved. ${status.error||"Browser storage unavailable."}`;
+  }
+  syncSaveWarning();
   function updateClock(){const c=formatClock();document.querySelector("#clock-time").textContent=c.time;document.querySelector("#clock-date").textContent=c.date;}
   updateClock();on("clock:tick",updateClock);
-  on("mission:started",({mission})=>{toast(`New job received: ${mission.title}`);renderOpenApps();});
-  on("mission:progress",({objective})=>{toast(`Objective complete: ${objective.label}`);renderOpenApps();});
-  on("mission:completed",({mission})=>{toast(`Job complete. ${mission.rewards.credits} credits transferred.`);renderOpenApps();setTimeout(()=>openApp("mail"),650);});
-  on("hardware:purchased",({item})=>{toast(`${item.name} installed.`);renderOpenApps();});
-  on("software:purchased",({item})=>{toast(`${item.name} installed.`);renderOpenApps();});
-  on("clue:discovered",({clue})=>{toast(clue.kind==="world"?`World intel learned: ${clue.title}`:`Clue recorded: ${clue.title}`);renderOpenApps();});
-  on("communications:changed",()=>renderOpenApps());
-  on("timeline:event",({event})=>{if(event.notice)toast(event.notice);renderOpenApps();});
+  on("mission:started",({mission})=>{toast(`New job received: ${mission.title}`);scheduleRenderOpenApps();});
+  on("mission:progress",({objective})=>{toast(`Objective complete: ${objective.label}`);scheduleRenderOpenApps();});
+  on("mission:completed",({mission})=>{toast(`Job complete. ${mission.rewards.credits} credits transferred.`);scheduleRenderOpenApps();setTimeout(()=>openApp("mail"),650);});
+  on("hardware:purchased",({item})=>{toast(`${item.name} installed.`);scheduleRenderOpenApps();});
+  on("software:purchased",({item})=>{toast(`${item.name} installed.`);scheduleRenderOpenApps();});
+  on("clue:discovered",({clue})=>{toast(clue.kind==="world"?`World intel learned: ${clue.title}`:`Clue recorded: ${clue.title}`);scheduleRenderOpenApps();});
+  on("communications:changed",()=>scheduleRenderOpenApps());
+  on("timeline:event",({event})=>{if(event.notice)toast(event.notice);scheduleRenderOpenApps();});
+  on("save:status",()=>syncSaveWarning());
 
   function createWindow(id,title){
     playSound("ui_open");
@@ -106,20 +119,36 @@ export function initDesktopUI({enterBlackbox}){
     win.addEventListener("pointerdown",()=>win.style.zIndex=String(++z));
     win.querySelector("[data-close]").addEventListener("click",()=>{playSound("ui_close");win.remove();taskApps.querySelector(`[data-task="${id}"]`)?.remove();});
     win.querySelector("[data-min]").addEventListener("click",()=>win.classList.add("hidden"));layer.appendChild(win);
-    const task=document.createElement("button");task.className="taskbar-app";task.dataset.task=id;task.textContent=title;task.addEventListener("click",()=>{win.classList.toggle("hidden");win.style.zIndex=String(++z);});taskApps.appendChild(task);return win.querySelector(".window-content");
+    const task=document.createElement("button");task.className="taskbar-app";task.dataset.task=id;task.textContent=title;task.addEventListener("click",()=>{
+      const restoring=win.classList.contains("hidden");win.classList.toggle("hidden");win.style.zIndex=String(++z);
+      if(restoring)renderWindow(id,win.querySelector(".window-content"));
+    });taskApps.appendChild(task);return win.querySelector(".window-content");
   }
 
+  function renderWindow(id,el){
+    ({browser:renderBrowser,mail:renderMail,chat:renderChat,files:renderSystem,missions:renderMissions,notes:renderNotes,threatdesk:renderThreatDesk}[id])?.(el);
+  }
   function openApp(id){
     const app=DESKTOP_APPS.find(a=>a.id===id);if(!app)return;
     const el=createWindow(id,app.name);
-    ({browser:renderBrowser,mail:renderMail,chat:renderChat,files:renderSystem,missions:renderMissions,notes:renderNotes,threatdesk:renderThreatDesk}[id])?.(el);
+    renderWindow(id,el);
   }
-  function renderOpenApps(){for(const win of layer.querySelectorAll(".app-window")){const fn={browser:renderBrowser,mail:renderMail,chat:renderChat,files:renderSystem,missions:renderMissions,notes:renderNotes,threatdesk:renderThreatDesk}[win.dataset.window];fn?.(win.querySelector(".window-content"));}refreshBadges();}
+  function renderOpenApps(){
+    for(const win of layer.querySelectorAll(".app-window")){
+      if(win.dataset.window==="notes")continue;
+      renderWindow(win.dataset.window,win.querySelector(".window-content"));
+    }
+    refreshBadges();
+  }
+  function scheduleRenderOpenApps(){
+    if(renderScheduled)return;renderScheduled=true;
+    queueMicrotask(()=>{renderScheduled=false;renderOpenApps();});
+  }
 
   function renderBrowser(el){
     const s=getState();
     const browserSites=new Set(["news","social","forum","packet","deaddrop","shop"]);
-    el.innerHTML=`<div class="browser-chrome"><div class="browser-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Favorites&nbsp;&nbsp; Help</div><div class="app-toolbar browser-toolbar"><button data-nav="back">←</button><button data-site="news">News</button><button data-site="social">FriendSpace</button><button data-site="forum">NightWire</button><button data-site="packet">Packet Underground</button><button data-site="deaddrop">DeadDrop</button><button data-site="shop">ByteBarn</button><input aria-label="Address"></div></div><div class="app-body browser-page" id="browser-body"></div>`;
+    el.innerHTML=`<div class="browser-chrome"><div class="browser-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; View&nbsp;&nbsp; Favorites&nbsp;&nbsp; Help</div><div class="app-toolbar browser-toolbar"><button data-nav="back" disabled title="History unavailable in this build">←</button><button data-site="news">News</button><button data-site="social">FriendSpace</button><button data-site="forum">NightWire</button><button data-site="packet">Packet Underground</button><button data-site="deaddrop">DeadDrop</button><button data-site="shop">ByteBarn</button><input aria-label="Address"></div></div><div class="app-body browser-page" id="browser-body"></div>`;
     const body=el.querySelector("#browser-body"),addr=el.querySelector("input");
     const show=site=>{const previous=s.ui.lastBrowserSite;s.ui.lastBrowserSite=site;addr.value=`nexus://${site}`;if(previous!==site)emit("browser:navigated",{site});
       if(site==="news"){
@@ -174,8 +203,14 @@ export function initDesktopUI({enterBlackbox}){
 
   function renderMail(el){
     const s=getState(),mails=EMAILS.filter(visible);
-    el.innerHTML=`<div class="mail-header"><b>NEXUS Mail</b><span>${mails.filter(m=>!s.world.readEmails.includes(m.id)).length} unread</span></div><div class="mail-layout"><div class="sidebar mail-list">${mails.map(m=>`<button data-mail="${m.id}" class="${s.world.readEmails.includes(m.id)?"read":"unread"}"><span>${m.from.split("@")[0]}</span><b>${m.subject}</b></button>`).join("")}</div><div class="content-pane"><div class="empty-state">Select a message to read.</div></div></div>`;
-    const pane=el.querySelector(".content-pane");el.querySelectorAll("[data-mail]").forEach(btn=>btn.addEventListener("click",()=>{const mail=mails.find(m=>m.id===btn.dataset.mail);pane.innerHTML=`<div class="mail-message"><h2>${mail.subject}</h2><div class="mail-meta">From: ${mail.from}<br>To: ${escapeHtml(s.player.alias)}@nexus.local</div><div class="mail-body">${mail.body}</div></div>`;if(!s.world.readEmails.includes(mail.id))s.world.readEmails.push(mail.id);btn.classList.remove("unread");btn.classList.add("read");emit("email:read",{emailId:mail.id});refreshBadges();}));
+    if(selectedMailId&&!mails.some(m=>m.id===selectedMailId))selectedMailId=null;
+    const selected=mails.find(m=>m.id===selectedMailId);
+    el.innerHTML=`<div class="mail-header"><b>NEXUS Mail</b><span>${mails.filter(m=>!s.world.readEmails.includes(m.id)).length} unread</span></div><div class="mail-layout"><div class="sidebar mail-list">${mails.map(m=>`<button data-mail="${m.id}" class="${s.world.readEmails.includes(m.id)?"read":"unread"}"><span>${m.from.split("@")[0]}</span><b>${m.subject}</b></button>`).join("")}</div><div class="content-pane">${selected?`<div class="mail-message"><h2>${selected.subject}</h2><div class="mail-meta">From: ${selected.from}<br>To: ${escapeHtml(s.player.alias)}@nexus.local</div><div class="mail-body">${selected.body}</div></div>`:`<div class="empty-state">Select a message to read.</div>`}</div></div>`;
+    el.querySelectorAll("[data-mail]").forEach(btn=>btn.addEventListener("click",()=>{
+      const mail=mails.find(m=>m.id===btn.dataset.mail);if(!mail)return;selectedMailId=mail.id;
+      if(!s.world.readEmails.includes(mail.id)){s.world.readEmails.push(mail.id);emit("email:read",{emailId:mail.id});}
+      renderMail(el);refreshBadges();
+    }));
   }
 
   function messageTime(message,state){
@@ -185,23 +220,20 @@ export function initDesktopUI({enterBlackbox}){
     return `${String(Math.floor(event.minute/60)).padStart(2,"0")}:${String(event.minute%60).padStart(2,"0")}`;
   }
 
+  function chatIsPresented(el){
+    const win=el.closest(".app-window");
+    if(!win||win.classList.contains("hidden")||document.querySelector("#desktop")?.classList.contains("hidden"))return false;
+    const visibleWindows=[...layer.querySelectorAll(".app-window")].filter(item=>!item.classList.contains("hidden"));
+    const top=Math.max(...visibleWindows.map(item=>Number(item.style.zIndex)||0));
+    return (Number(win.style.zIndex)||0)>=top;
+  }
+
   function renderChat(el){
     const s=getState();
     const thread=THREADS.find(x=>x.id===activeThreadId)||THREADS[0];
     activeThreadId=thread.id;
     const messages=thread.messages.filter(m=>(m.visibleWhen||[]).every(hasFlag));
     const pending=messages.find(m=>m.choice && !m.choice.options.some(o=>choiceMade(o.id)));
-
-    const newlyRead=[];
-    if(!el.closest(".app-window")?.classList.contains("hidden"))for(const m of messages){
-      if(m.from!=="player"&&!(s.world.readMessages||[]).includes(m.id)){
-        s.world.readMessages.push(m.id);
-        newlyRead.push(m.id);
-        emit("message:read",{messageId:m.id,threadId:thread.id});
-      }
-    }
-    if(newlyRead.length)emit("thread:read",{threadId:thread.id,messageIds:newlyRead});
-
     const online=THREADS.filter(x=>x.status==="online");
     const others=THREADS.filter(x=>x.status!=="online");
     const buddy=(x)=>`<button data-thread="${x.id}" class="${x.id===thread.id?"active":""}">${x.status==="online"?'<span class="online-dot"></span>':""}${x.name}</button>`;
@@ -219,11 +251,23 @@ export function initDesktopUI({enterBlackbox}){
       </div>`;
 
     el.querySelectorAll("[data-thread]").forEach(btn=>btn.addEventListener("click",()=>{activeThreadId=btn.dataset.thread;renderChat(el);}));
-    refreshBadges();
     el.querySelectorAll("[data-choice]").forEach(btn=>btn.addEventListener("click",()=>{
       const result=makeChoice(btn.dataset.choice);
       if(result.ok){toast("Message sent.");renderChat(el);}
     }));
+
+    if(chatIsPresented(el)){
+      const newlyRead=[];
+      for(const m of messages){
+        if(m.from==="player")continue;
+        if(!(s.world.readMessages||[]).includes(m.id)){
+          s.world.readMessages.push(m.id);newlyRead.push(m.id);emit("message:read",{messageId:m.id,threadId:thread.id});
+        }
+        reconcilePresentedMessageClues(m.id);
+      }
+      if(newlyRead.length)emit("thread:read",{threadId:thread.id,messageIds:newlyRead});
+    }
+    refreshBadges();
   }
 
   function renderSystem(el){
@@ -264,14 +308,21 @@ export function initDesktopUI({enterBlackbox}){
     const reports=THREATS.filter(visible);
     el.innerHTML=`<div class="threatdesk-head"><div><b>NEXUS ThreatDesk</b><span>SIMULATED THREAT INTELLIGENCE</span></div><strong>FEED ONLINE</strong></div>
       <div class="threatdesk-body">
-        <section class="td-panel"><h2>Lookup Tools</h2><p>Query the fictional NEXUS resolver. No real DNS request is sent.</p><form id="td-lookup" class="td-lookup"><input id="td-name" placeholder="hostname.test" autocapitalize="none" autocomplete="off"><button>Resolve</button></form><pre id="td-result" class="td-result">Enter a fictional hostname.</pre></section>
+        <section class="td-panel"><h2>Lookup Tools</h2><p>Query the fictional NEXUS resolver. No real DNS request is sent.</p><form id="td-lookup" class="td-lookup"><input id="td-name" placeholder="hostname.test" autocapitalize="none" autocomplete="off"><button>Resolve</button></form><pre id="td-result" class="td-result"></pre></section>
         <section class="td-panel"><h2>Threat Feed</h2><div class="td-feed">${reports.map(r=>`<button data-threat="${r.id}" class="td-report ${(s.world.readThreats||[]).includes(r.id)?"read":"unread"}"><span>${r.severity}</span><b>${r.title}</b><small>${r.body}</small></button>`).join("")}</div></section>
         <section class="td-panel"><h2>Field Notes</h2>${FIELD_NOTES.map(n=>`<details><summary>${n.title}</summary><p>${n.body}</p></details>`).join("")}</section>
         <section class="td-panel"><h2>Training Lab</h2>${LABS.map(l=>`<div class="td-lab"><b>${l.title} ${(s.world.completedLabs||[]).includes(l.id)?"✓":""}</b><p>${l.question}</p><div>${l.options.map(o=>`<button data-lab="${l.id}" data-answer="${o}">${o}</button>`).join("")}</div></div>`).join("")}</section>
       </div>`;
+    const nameInput=el.querySelector("#td-name"),resultEl=el.querySelector("#td-result");
+    nameInput.value=threatDeskView.query;resultEl.textContent=threatDeskView.output;
     el.querySelectorAll("[data-threat]").forEach(btn=>btn.addEventListener("click",()=>{const id=btn.dataset.threat;if(!s.world.readThreats.includes(id))s.world.readThreats.push(id);emit("threat:read",{threatId:id});btn.classList.remove("unread");btn.classList.add("read");toast("ThreatDesk report recorded.");refreshBadges();}));
     el.querySelectorAll("[data-lab]").forEach(btn=>btn.addEventListener("click",()=>{const lab=LABS.find(x=>x.id===btn.dataset.lab);if(!lab)return;if(btn.dataset.answer!==lab.answer){toast("Not quite. Review the Field Notes and try again.");return;}if(!s.world.completedLabs.includes(lab.id)){s.world.completedLabs.push(lab.id);emit("lab:completed",{labId:lab.id});}toast(lab.explanation);renderThreatDesk(el);}));
-    el.querySelector("#td-lookup").addEventListener("submit",e=>{e.preventDefault();const out=el.querySelector("#td-result");try{out.textContent=formatDnsResult(lookupDns(el.querySelector("#td-name").value,"ANY"),{detailed:(s.player.installedSoftware||[]).includes("resolver_pro")});}catch(err){out.textContent=err.message;}});
+    el.querySelector("#td-lookup").addEventListener("submit",e=>{
+      e.preventDefault();const name=nameInput.value;threatDeskView.query=name;
+      try{threatDeskView.output=formatDnsResult(lookupDns(name,"ANY"),{detailed:(s.player.installedSoftware||[]).includes("resolver_pro")});}
+      catch(err){threatDeskView.output=err.message;}
+      renderThreatDesk(el);
+    });
   }
 
   function renderNotes(el){const s=getState();el.innerHTML='<div class="notepad-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; Format&nbsp;&nbsp; Help</div><textarea id="player-notes" class="notepad" spellcheck="false" placeholder="Write anything you want to remember..."></textarea>';const ta=el.querySelector("#player-notes");ta.value=s.player.notes||"";ta.addEventListener("input",()=>{s.player.notes=ta.value;emit("notes:changed",{notes:ta.value});});}

@@ -1,6 +1,6 @@
 # BLACKBOX v0.3.0 — The Wider Net
 
-**RC3 candidate:** preserves all RC2 content and save compatibility while fixing post-command persistence, wrong-host legacy objectives, case-normalized evidence, semantic time anti-spam, deterministic event eligibility, mutable-text rendering/persistence, and the VANTA-WEB service/process mismatch.
+**RC4 candidate:** targeted release-repair build from the audited RC3 baseline. It preserves v0.3.0 content and save schema while repairing evidence-capacity softlocks, save/profile failure isolation, purge persistence, Safari audio recovery, desktop redraw/read-state defects, mobile terminal prompt layout, and the small Meridian/DNS feedback inconsistencies identified by the RC3 full QA audit.
 
 Built from the exact stable **v0.2.3.4** iPhone-tested package. v0.3.0 is a major playable expansion that preserves the original six-investigation sequence and expands BLACKBOX into a larger, changing fictional network.
 
@@ -64,15 +64,18 @@ The original v0.2.3.4 ZIP and the audited RC2 candidate are not modified by this
 
 ## Verification
 
-Run the deterministic gameplay suite with:
+Run the deterministic gameplay suites with:
 
 ```text
 node tests/smoke.mjs
+node tests/rc4-regression.mjs
+node tests/rc4-campaign.mjs
+node tests/audio-rc4.mjs
 ```
 
-It verifies migration, unique host addressing, filesystem and service-process coverage, scan variation, mission-target reliability, explicit numeric namespaces, post-command save/reload behavior, contextual objective rejection, case-normalized evidence, semantic anti-spam equivalence, clock-poll-invariant event timing, safe mutable-text boundaries, all six established investigations, and all three new investigation paths.
+Together they verify migration, unique host addressing, filesystem and service-process coverage, scan variation, mission-target reliability, explicit numeric namespaces, post-command save/reload behavior, contextual objective rejection, semantic anti-spam equivalence, clock-poll-invariant event timing, safe mutable-text boundaries, all nine investigations, full-storage mandatory evidence, corrupt/future-save handling, purge lifecycle safety, storage-write failures, DNS fact matching, migrated Messenger clue recovery, and instrumented Web Audio interruption/closed-context recovery.
 
-Automated JavaScript syntax checks and the gameplay suite pass in the release workspace. Direct iPhone/Safari feel and layout testing should still be performed on the deployed candidate before replacing the stable public build.
+Automated JavaScript syntax checks and all four test suites pass in the release workspace. A local real-browser launch was also attempted, but the available container Chromium blocks local/file navigation by administrator policy, so actual rendered browser playthrough and direct iPhone/Safari feel, layout, keyboard, and audio-interruption testing remain release gates before replacing the stable public build.
 
 ## Explicitly deferred
 

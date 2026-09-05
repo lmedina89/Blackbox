@@ -39,7 +39,7 @@ export const FILESYSTEMS = {
   meridian01:{
     "/":{type:"dir",children:{
       home:{type:"dir",children:{support:{type:"dir",children:{"ticket.txt":{type:"file",content:"MERIDIAN SUPPORT TICKET 441\nUser: r.hale\nIssue: project folder disappeared after cleanup job.\nExpected path: /srv/projects/halcyon"}}}}},
-      srv:{type:"dir",children:{projects:{type:"dir",children:{"recovery.log":{type:"file",content:"RECOVERY INDEX\nHALCYON -> /srv/recovered/halcyon\nTEMP -> purged\nCACHE -> purged"},recovered:{type:"dir",children:{"halcyon.txt":{type:"file",content:"PROJECT HALCYON\nRecovered document set intact.\nOwner: R. Hale\nStatus: RESTORED"}}}}}}},
+      srv:{type:"dir",children:{projects:{type:"dir",children:{"recovery.log":{type:"file",content:"RECOVERY INDEX\nHALCYON -> /srv/projects/recovered/halcyon.txt\nTEMP -> purged\nCACHE -> purged"},recovered:{type:"dir",children:{"halcyon.txt":{type:"file",content:"PROJECT HALCYON\nRecovered document set intact.\nOwner: R. Hale\nStatus: RESTORED"}}}}}}},
       etc:{type:"dir",children:{"issue":{type:"file",content:"Meridian Systems support image"}}}
     }}
   },

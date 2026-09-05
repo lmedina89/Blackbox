@@ -32,3 +32,5 @@
   transform:rotate(-45deg);
   pointer-events:none;
 }
+
+.save-warning{border-color:#a12828;background:#fff1f1;color:#4d1010}.save-warning b{color:#8d1717}

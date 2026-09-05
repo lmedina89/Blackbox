@@ -3,28 +3,49 @@ import { on } from "../core/events.js";
 const STORAGE_KEY="blackbox.audio.enabled";
 let context=null;
 let master=null;
-let enabled=localStorage.getItem(STORAGE_KEY)!=="0";
 let initialized=false;
+let recoveryPromise=null;
+let pendingSound=null;
+
+function readPreference(){
+  try{return globalThis.localStorage?.getItem(STORAGE_KEY)!=="0";}
+  catch(err){console.warn("[audio] preference read unavailable",err);return true;}
+}
+function writePreference(value){
+  try{globalThis.localStorage?.setItem(STORAGE_KEY,value?"1":"0");return true;}
+  catch(err){console.warn("[audio] preference write unavailable",err);return false;}
+}
+let enabled=readPreference();
 
 function AudioContextClass(){return window.AudioContext||window.webkitAudioContext;}
-
-function ensureContext(){
+function createContext(){
   const Ctx=AudioContextClass();
   if(!Ctx||!enabled)return null;
-  if(!context){
-    context=new Ctx();
-    master=context.createGain();
-    // Mobile speakers need more headroom than the original subtle mix provided.
-    // Individual effects remain conservative so layered cues do not become harsh.
-    master.gain.value=0.30;
-    master.connect(context.destination);
-  }
-  if(context.state==="suspended")context.resume().catch(()=>{});
+  context=new Ctx();
+  master=context.createGain();
+  master.gain.value=0.30;
+  master.connect(context.destination);
   return context;
+}
+function ensureContext(){
+  if(!enabled)return null;
+  if(context?.state==="closed"){context=null;master=null;}
+  return context||createContext();
+}
+
+export async function recoverAudioContext(){
+  const ctx=ensureContext();
+  if(!ctx)return false;
+  if(ctx.state==="running")return true;
+  if(ctx.state==="closed")return !!ensureContext()&&context.state==="running";
+  if(typeof ctx.resume!=="function")return false;
+  try{await ctx.resume();}catch(err){console.warn("[audio] resume failed",err);}
+  if(context?.state==="closed"){ensureContext();}
+  return context?.state==="running";
 }
 
 function tone({freq=440,endFreq=freq,duration=.06,delay=0,type="square",gain=.16}={}){
-  const ctx=ensureContext();if(!ctx||!master)return;
+  const ctx=ensureContext();if(!ctx||ctx.state!=="running"||!master)return;
   const start=ctx.currentTime+delay;
   const osc=ctx.createOscillator(),amp=ctx.createGain();
   osc.type=type;
@@ -38,7 +59,7 @@ function tone({freq=440,endFreq=freq,duration=.06,delay=0,type="square",gain=.16
 }
 
 function noise({duration=.08,delay=0,gain=.05,highpass=900}={}){
-  const ctx=ensureContext();if(!ctx||!master)return;
+  const ctx=ensureContext();if(!ctx||ctx.state!=="running"||!master)return;
   const length=Math.max(1,Math.floor(ctx.sampleRate*duration));
   const buffer=ctx.createBuffer(1,length,ctx.sampleRate),data=buffer.getChannelData(0);
   for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*(1-i/length);
@@ -72,16 +93,39 @@ const SOUNDS={
   download(){tone({freq:300,endFreq:560,duration:.12,type:"square",gain:.13});noise({duration:.15,delay:.06,gain:.045,highpass:1800});}
 };
 
+function playNow(name){
+  const fn=SOUNDS[name];
+  if(!enabled||!fn||context?.state!=="running")return false;
+  try{fn();return true;}catch(err){console.warn("[audio]",err);return false;}
+}
+function requestRecovery(name=null){
+  if(name)pendingSound={name,at:Date.now()};
+  if(recoveryPromise)return recoveryPromise;
+  recoveryPromise=recoverAudioContext().then(ok=>{
+    if(ok&&pendingSound&&Date.now()-pendingSound.at<1500){const next=pendingSound.name;pendingSound=null;playNow(next);}
+    else if(pendingSound&&Date.now()-pendingSound.at>=1500)pendingSound=null;
+    return ok;
+  }).finally(()=>{recoveryPromise=null;});
+  return recoveryPromise;
+}
+
 export function playSound(name){
-  if(!enabled)return false;
-  try{SOUNDS[name]?.();return !!SOUNDS[name];}catch(err){console.warn("[audio]",err);return false;}
+  if(!enabled||!SOUNDS[name])return false;
+  const ctx=ensureContext();
+  if(!ctx)return false;
+  if(ctx.state==="running")return playNow(name);
+  requestRecovery(name);
+  return true;
 }
 
 export function isAudioEnabled(){return enabled;}
 
 export function setAudioEnabled(value){
-  enabled=!!value;localStorage.setItem(STORAGE_KEY,enabled?"1":"0");
-  if(enabled){ensureContext();playSound("ui_open");}
+  enabled=!!value;
+  writePreference(enabled);
+  if(!enabled){pendingSound=null;return enabled;}
+  ensureContext();
+  playSound("ui_open");
   return enabled;
 }
 
@@ -89,9 +133,11 @@ export function toggleAudio(){return setAudioEnabled(!enabled);}
 
 export function initAudio(){
   if(initialized)return;initialized=true;
-  const unlock=()=>{if(enabled)ensureContext();};
-  document.addEventListener("pointerdown",unlock,{once:true,capture:true});
-  document.addEventListener("keydown",unlock,{once:true,capture:true});
+  const recoverFromGesture=()=>{if(enabled)requestRecovery();};
+  document.addEventListener("pointerdown",recoverFromGesture,{capture:true});
+  document.addEventListener("keydown",recoverFromGesture,{capture:true});
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&enabled&&context)requestRecovery();});
+  window.addEventListener("pageshow",()=>{if(enabled&&context)requestRecovery();});
 
   on("host:connected",({hostId})=>playSound(hostId==="home"?"disconnect":"connect"));
   on("mission:started",()=>playSound("message"));
@@ -103,8 +149,6 @@ export function initAudio(){
   on("file:downloaded",()=>playSound("download"));
 }
 
-// QA hook: renders a short tone off-screen and verifies the generated waveform has energy.
-// It does not play through the speakers and is never called during normal gameplay.
 export async function audioSelfTest(){
   const Offline=window.OfflineAudioContext||window.webkitOfflineAudioContext;
   if(!Offline)return {supported:false,peak:0,rms:0};

@@ -60,7 +60,6 @@ export function initTimeline(){
   on("forum:read",({postId})=>advanceWorld(`forum:${postId}`,{minutes:3,once:true}));
   on("social:read",({postId})=>advanceWorld(`social:${postId}`,{minutes:2,once:true}));
   on("news:read",({newsId})=>advanceWorld(`news:${newsId}`,{minutes:2,once:true}));
-  on("thread:read",({threadId,messageIds=[]})=>advanceWorld(`thread:${threadId}:${messageIds.at(-1)||"open"}`,{minutes:2,once:true}));
   on("threat:read",({threatId})=>advanceWorld(`threat:${threatId}`,{minutes:3,once:true}));
   on("lab:completed",({labId})=>advanceWorld(`lab:${labId}`,{minutes:6,once:true}));
   on("dialogue:choice",({choiceId})=>advanceWorld(`choice:${choiceId}`,{minutes:3,once:true}));
