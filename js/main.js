@@ -8,6 +8,7 @@ import { initTerminalUI } from "./ui/terminalUI.js";
 import { enterBlackboxTransition, exitBlackboxTransition } from "./ui/transitions.js";
 import { initAudio, playSound } from "./systems/audio.js";
 import { initTimeline } from "./systems/timeline.js";
+import { initCommunications } from "./systems/communications.js";
 import { initAutosave } from "./core/autosave.js";
 import { escapeHtml } from "./ui/safeText.js";
 
@@ -146,6 +147,7 @@ initAudio();
 initClues();
 initMissions();
 initAutosave();
+initCommunications();
 initTimeline();
 
 window.addEventListener("pagehide",()=>{

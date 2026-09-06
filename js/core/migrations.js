@@ -230,7 +230,23 @@ function normalize(save){
   save.missions.active=uniqueStrings(save.missions.active,[]);
   save.missions.progress=safePlainObject(save.missions.progress,{});
   save.communications.choicesMade=uniqueStrings(save.communications.choicesMade,[]);
-  save.communications.threads=safePlainObject(save.communications.threads,{});
+  const rawThreads=safePlainObject(save.communications.threads,{}),threads={};
+  for(const [threadId,raw] of Object.entries(rawThreads)){
+    if(typeof threadId!=="string"||!threadId||!isObject(raw))continue;
+    const nullableString=value=>value==null?null:asString(value,"").slice(0,128)||null;
+    const nullableAbsolute=value=>value==null?null:asNumber(value,0,{integer:true,min:0});
+    threads[threadId]={
+      lastDeliveredNode:nullableString(raw.lastDeliveredNode),
+      lastDeliveryAt:nullableAbsolute(raw.lastDeliveryAt),
+      lastPresentedNode:nullableString(raw.lastPresentedNode),
+      lastPresentedAt:nullableAbsolute(raw.lastPresentedAt),
+      waitingForReply:nullableString(raw.waitingForReply),
+      lastChoiceId:nullableString(raw.lastChoiceId),
+      lastChoiceAt:nullableAbsolute(raw.lastChoiceAt),
+      cooldownUntil:nullableAbsolute(raw.cooldownUntil)
+    };
+  }
+  save.communications.threads=threads;
 
   save.learning.questionAttempts=safePlainObject(save.learning.questionAttempts,{});
   save.learning.topicStats=safePlainObject(save.learning.topicStats,{});

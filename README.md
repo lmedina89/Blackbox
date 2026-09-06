@@ -1,35 +1,38 @@
-# BLACKBOX v0.4.0 Alpha 3 — First Living-World Content
+# BLACKBOX v0.4.0 Alpha 4 — Chronology & Conversation State
 
-Built from verified **v0.4.0 Alpha 2** SHA-256 `04c4bbd178b06244d7db802c6844dd0774ac9970cfff753ed22aa2f0d5aa1fc1`, itself descended directly from exact v0.3.0 RC7.
+Built directly from verified **v0.4.0 Alpha 3** SHA-256 `899d4ce1d15feb78c86f30895f17ce981f72f34aec429cca0563d1b2a0c06298`, descended from exact v0.3.0 RC7.
 
-Alpha 3 is the first milestone where the new scheduler controls visible content, but the migration is intentionally tiny and non-critical.
+Alpha 4 fixes the chronology defects found during physical iPhone testing before any larger conversation migration occurs.
 
-## Alpha 3 changes
+## Alpha 4 changes
 
-- Adds three ordinary ambient Messenger lines: one each for Maya, Sam, and Chris.
-- These messages do not grant clues, start missions, change rewards, or contain mission-critical reply choices.
-- Places each new line inside a known safe gap in its existing thread. If later campaign content overtakes that gap before delivery, the ambient line is cancelled instead of appearing out of order.
-- Adds one unrelated scheduled FriendSpace post and one unrelated MetroWire story to prove the world can move without mission completion.
-- Scheduled content displays its persisted delivery time rather than receiving a fake current-time timestamp after a save/load catch-up.
-- Messenger/browser badges and open windows refresh when scheduler-managed content is delivered/cancelled/expired/replaced.
-- Existing contract mail, clue-bearing Sam/Chris messages, Old Mirror choices, mission definitions, rewards, host topology, DNS, and the 11 current world events remain on their proven legacy paths.
+- Adds one canonical effective-time model shared by Messenger/FriendSpace presentation.
+- Messenger now renders visible messages chronologically by their real effective timestamp rather than source-array position.
+- Scheduled messages use their persisted scheduler delivery time.
+- Existing `timeFromEvent` messages use the actual recorded world-event time.
+- Legacy event/mission-linked content can infer a stable event anchor from case history.
+- Equal-minute messages retain deterministic authored order.
+- FriendSpace now withholds non-mission-critical posts whose effective publication time is still in the future.
+- FriendSpace renders due posts newest-first.
+- Old Mirror's required Sam FriendSpace post remains explicitly legacy-available so presentation chronology cannot block mission progression.
+- Adds persistent per-thread conversation state for delivered/presented node, waiting-for-reply, last choice, and future cooldown support.
+- Records mission-start timestamps in case history for future coherent event-relative conversations.
+- No new missions, rewards, hosts, DNS records, clues, contract emails, ThreatDesk content, or story progression were added.
 
-## Why the migration is deliberately small
+## Device findings addressed
 
-The current Messenger threads were authored as fixed-order arrays. Alpha 3 does not dump arbitrary random lines into them. The first scheduled messages are placed only where chronology can be protected with explicit cancellation conditions. A later conversation-state milestone can safely support deeper branching and longer time-based threads.
+Physical A3 testing showed Maya's scheduled 18:55 ambient message rendering above an existing 18:46 ThreatDesk line. Alpha 4 sorts by effective time so 18:46 now renders first.
 
-## Alpha 3 verification target
+The same test showed FriendSpace displaying 19:26 and 20:08 posts while the NEXUS clock was 19:05. Alpha 4 time-gates non-critical legacy posts so they cannot appear before their publication time.
 
-- Existing nine-case campaign remains mechanically unchanged.
-- Ambient delivery remains separate from read state.
-- Ambient messages cannot discover clues or start jobs.
-- Time-based background News/Social content can appear without a mission completion event.
-- Save/reload preserves scheduled and delivered timestamps.
-- Existing A2 scheduler tests and all RC7 regression/audio/device guards remain green.
+## Safety strategy
+
+This remains a compatibility-first migration. Existing mission-critical contracts and dialogue are not moved to the scheduler in Alpha 4. The new conversation-state layer is foundation only; larger ambient branching comes after chronology is proven on device.
 
 ---
 
 ## RC7 baseline notes retained for reference
+
 
 # BLACKBOX v0.3.0 — The Wider Net
 

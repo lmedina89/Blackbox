@@ -72,6 +72,7 @@ export function initTimeline(){
   on("threat:read",({threatId})=>advanceWorld(`threat:${threatId}`,{minutes:3,once:true}));
   on("lab:completed",({labId})=>advanceWorld(`lab:${labId}`,{minutes:6,once:true}));
   on("dialogue:choice",({choiceId})=>advanceWorld(`choice:${choiceId}`,{minutes:3,once:true}));
+  on("mission:started",({mission})=>addCaseHistory({id:`mission-start:${mission.id}`,kind:"mission-start",refId:mission.id,title:mission.title}));
   on("mission:progress",({mission,objective})=>addCaseHistory({id:`objective:${mission.id}:${objective.id}`,kind:"objective",refId:mission.id,title:objective.label}));
   on("mission:completed",({mission})=>addCaseHistory({id:`mission:${mission.id}`,kind:"mission",refId:mission.id,title:mission.title}));
 }

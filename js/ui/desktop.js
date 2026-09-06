@@ -14,7 +14,7 @@ import { buyHardware, buySoftware } from "../systems/hardware.js";
 import { missionView } from "../systems/missions.js";
 import { formatClock } from "../core/clock.js";
 import { saveGame, getPersistenceStatus } from "../core/save.js";
-import { makeChoice, choiceMade } from "../systems/communications.js";
+import { makeChoice, choiceMade, recordPresentedThread, setWaitingForReply } from "../systems/communications.js";
 import { getKnownClues, reconcilePresentedMessageClues } from "../systems/clues.js";
 import { HOSTS } from "../data/hosts.js";
 import { proficiencyLabel } from "../systems/progression.js";
@@ -23,8 +23,10 @@ import { playSound, toggleAudio, isAudioEnabled } from "../systems/audio.js";
 import { lookupDns, formatDnsResult } from "../systems/dns.js";
 import { escapeHtml } from "./safeText.js";
 import { contentAvailable, contentDelivery } from "../systems/contentAvailability.js";
+import { chronologyAvailable, contentAbsoluteTime, contentTimeLabel, sortChronologically } from "../systems/contentChronology.js";
 
 function visible(item){return contentAvailable(item);}
+function visibleSocial(item){return contentAvailable(item)&&chronologyAvailable(item,{kind:"social"});}
 
 export function initDesktopUI({enterBlackbox}){
   const icons=document.querySelector("#desktop-icons"),startList=document.querySelector("#start-app-list"),startMenu=document.querySelector("#start-menu"),layer=document.querySelector("#window-layer"),taskApps=document.querySelector("#taskbar-apps"),toastBox=document.querySelector("#notifications"),audioButton=document.querySelector("#audio-button");
@@ -72,7 +74,7 @@ export function initDesktopUI({enterBlackbox}){
     if(appId==="mail")return EMAILS.filter(visible).filter(x=>!s.world.readEmails.includes(x.id)).length;
     if(appId==="threatdesk")return hasFlag("threatdesk_online")?THREATS.filter(visible).filter(x=>!(s.world.readThreats||[]).includes(x.id)).length:0;
     if(appId==="chat")return THREADS.flatMap(x=>x.messages).filter(x=>x.from!=="player"&&contentAvailable(x)&&!(s.world.readMessages||[]).includes(x.id)).length;
-    if(appId==="browser")return NEWS.filter(x=>x.clueId&&visible(x)&&!s.world.readNewsStories.includes(x.id)).length+FORUM_POSTS.filter(x=>x.clueId&&visible(x)&&!s.world.readForumPosts.includes(x.id)).length+SOCIAL_POSTS.filter(x=>x.clueId&&visible(x)&&!s.world.readSocialPosts.includes(x.id)).length;
+    if(appId==="browser")return NEWS.filter(x=>x.clueId&&visible(x)&&!s.world.readNewsStories.includes(x.id)).length+FORUM_POSTS.filter(x=>x.clueId&&visible(x)&&!s.world.readForumPosts.includes(x.id)).length+SOCIAL_POSTS.filter(x=>x.clueId&&visibleSocial(x)&&!s.world.readSocialPosts.includes(x.id)).length;
     if(appId==="missions")return (s.missions.active||[]).length;
     return 0;
   }
@@ -184,7 +186,7 @@ export function initDesktopUI({enterBlackbox}){
         }));
       }
       if(site==="social"){
-        body.innerHTML=`<div class="site-head friendspace"><div class="site-logo">FriendSpace</div><span>${escapeHtml(s.player.alias)}'s feed</span></div>${SOCIAL_POSTS.filter(visible).map(x=>`<article class="social-post"><div class="avatar">${x.name[0]}</div><div><h3>${x.name} <span>@${x.author}</span></h3><p>${x.body}</p><small>${deliveryLabel(x,{includeDay:false})||x.time||""}</small>${x.clueId?`<button class="save-clue" data-social="${x.id}">${s.world.readSocialPosts.includes(x.id)?"Saved to BLACKBOX":"Save technical info"}</button>`:""}</div></article>`).join("")}`;
+        body.innerHTML=`<div class="site-head friendspace"><div class="site-logo">FriendSpace</div><span>${escapeHtml(s.player.alias)}'s feed</span></div>${sortChronologically(SOCIAL_POSTS.filter(visibleSocial),s,{direction:"desc"}).map(x=>`<article class="social-post"><div class="avatar">${x.name[0]}</div><div><h3>${x.name} <span>@${x.author}</span></h3><p>${x.body}</p><small>${contentTimeLabel(x,s,{includeDay:false})}</small>${x.clueId?`<button class="save-clue" data-social="${x.id}">${s.world.readSocialPosts.includes(x.id)?"Saved to BLACKBOX":"Save technical info"}</button>`:""}</div></article>`).join("")}`;
         body.querySelectorAll("[data-social]").forEach(btn=>btn.addEventListener("click",()=>{
           const id=btn.dataset.social;
           if(!s.world.readSocialPosts.includes(id))s.world.readSocialPosts.push(id);
@@ -235,14 +237,7 @@ export function initDesktopUI({enterBlackbox}){
     }));
   }
 
-  function messageTime(message,state){
-    const scheduled=deliveryLabel(message,{includeDay:false});
-    if(scheduled)return scheduled;
-    if(!message.timeFromEvent)return message.time||"";
-    const event=(state.world.caseHistory||[]).find(x=>x.id===`event:${message.timeFromEvent}`);
-    if(!event)return message.time||"";
-    return `${String(Math.floor(event.minute/60)).padStart(2,"0")}:${String(event.minute%60).padStart(2,"0")}`;
-  }
+  function messageTime(message,state){return contentTimeLabel(message,state,{includeDay:false});}
 
   function chatIsPresented(el){
     const win=el.closest(".app-window");
@@ -256,8 +251,9 @@ export function initDesktopUI({enterBlackbox}){
     const s=getState();
     const thread=THREADS.find(x=>x.id===activeThreadId)||THREADS[0];
     activeThreadId=thread.id;
-    const messages=thread.messages.filter(contentAvailable);
+    const messages=sortChronologically(thread.messages.filter(contentAvailable),s,{direction:"asc"});
     const pending=messages.find(m=>m.choice && !m.choice.options.some(o=>choiceMade(o.id)));
+    setWaitingForReply(thread.id,pending?.id||null);
     const online=THREADS.filter(x=>x.status==="online");
     const others=THREADS.filter(x=>x.status!=="online");
     const buddy=(x)=>`<button data-thread="${x.id}" class="${x.id===thread.id?"active":""}">${x.status==="online"?'<span class="online-dot"></span>':""}${x.name}</button>`;
@@ -289,6 +285,8 @@ export function initDesktopUI({enterBlackbox}){
         }
         reconcilePresentedMessageClues(m.id);
       }
+      const lastMessage=messages.at(-1);
+      if(lastMessage)recordPresentedThread(thread.id,lastMessage.id,contentAbsoluteTime(lastMessage,s));
       if(newlyRead.length)emit("thread:read",{threadId:thread.id,messageIds:newlyRead});
     }
     refreshBadges();
@@ -307,7 +305,7 @@ export function initDesktopUI({enterBlackbox}){
         <div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div>
         <div class="stat"><b>Credits</b><br>${s.player.credits}</div>
         <div class="stat"><b>Reputation</b><br>${s.player.reputation}</div>
-        <div class="stat"><b>BLACKBOX</b><br>0.4.0-A3 installed</div>
+        <div class="stat"><b>BLACKBOX</b><br>0.4.0-A4 installed</div>
       </div>
       <div class="card"><h3>Installed software</h3><p>${(s.player.installedSoftware||[]).map(id=>({resolver_basic:"Basic Resolver",resolver_pro:"Resolver Pro",scan_suite:"WideScan Suite",logscope:"LogScope"}[id]||id)).join(" · ")}</p></div>
       <div class="card"><h3>BLACKBOX proficiencies</h3><div class="system-grid">${Object.entries(s.player.proficiencies||{}).map(([skill,value])=>`<div class="stat"><b>${skill[0].toUpperCase()+skill.slice(1)}</b><br>${proficiencyLabel(value)} (${value})</div>`).join("")}</div><p class="muted">Proficiency grows by using real CLI and investigation concepts, not by spending skill points.</p></div>

@@ -1,6 +1,6 @@
 {
   "name": "Human Layer / Act II Foundation",
-  "version": "0.4.0-alpha.3",
+  "version": "0.4.0-alpha.4",
   "saveVersion": 10,
   "worldSchema": 10,
   "baseline": {
@@ -25,8 +25,12 @@
     "scheduledContent": 5
   },
   "features": [
-    "first live living-world migration: three non-mission-critical ambient Messenger lines plus unrelated scheduled News/FriendSpace activity",
-    "safe-gap conversation scheduling cancels ambient lines if later legacy campaign content overtakes their chronological slot",
+    "canonical content chronology for Messenger and FriendSpace using scheduler delivery times, world-event history, mission history, and authored clock times",
+    "Messenger renders visible messages by effective timestamp with deterministic source-order tie breaking instead of raw data-array order",
+    "FriendSpace hides non-mission-critical legacy posts until their effective publication time and renders the feed newest-first",
+    "current mission-critical FriendSpace objectives remain on the proven legacy availability path so chronology polish cannot softlock Old Mirror",
+    "persistent per-thread conversation-state foundation tracks delivered/presented nodes, waiting-for-reply, last choice, and cooldown state",
+    "mission-start case-history timestamps added for future coherent event-relative content",
     "scheduler-backed content renders persisted delivery timestamps and refreshes open NEXUS apps/unread badges on delivery state changes",
     "scheduler timing modes: afterMinutes, timeWindow including overnight windows, afterEvent, afterActions, and absolute game time",
     "persisted deterministic delivery targets with original scheduled timestamps preserved during catch-up",
@@ -78,7 +82,11 @@
     "IPv6"
   ],
   "verification": [
-    "Alpha 3 migrates only five non-critical content items; no contract, clue-bearing message, mission choice, mission definition, reward, host, DNS entry, or legacy world event is migrated",
+    "A4 physical-device regression reproduced in automation: a ThreatDesk event at 18:46 sorts before an ambient Maya delivery at 18:55 even when source-array order is reversed",
+    "FriendSpace chronology regression verifies 19:26 and 20:08 posts remain hidden at world time 19:05, then unlock when their effective publication time arrives",
+    "Old Mirror mission-critical FriendSpace target s5 is explicitly exempt from the new legacy time gate",
+    "v040-conversations suite verifies persistent waiting/presentation/choice/cooldown thread state and safe malformed-state normalization",
+    "Alpha 4 migrates only five non-critical content items; no contract, clue-bearing message, mission choice, mission definition, reward, host, DNS entry, or legacy world event is migrated",
     "v040-ambient suite verifies schedule mapping, hidden-until-delivered state, no mission/clue/reward effects, safe-gap cancellation, independent world activity, and delivery timestamp UI wiring",
     "continuous nine-case campaign and all prior RC7/A1 regression suites pass after timeline integration",
     "all eleven legacy v0.3 world events remain defined in the unchanged worldEvents data and continue through the proven actionTick compatibility path",
@@ -127,5 +135,5 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A3 first live living-world content; mission-critical progression remains legacy-protected"
+  "foundationMilestone": "A4 chronology + conversation-state foundation; mission-critical progression remains legacy-protected"
 }
