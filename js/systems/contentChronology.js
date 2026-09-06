@@ -4,12 +4,6 @@ import { MISSIONS } from "../data/missions.js";
 import { contentDelivery } from "./contentAvailability.js";
 
 const DAY_MINUTES=1440;
-const MISSION_SOCIAL_TARGETS=new Set(
-  MISSIONS.flatMap(mission=>(mission.objectives||[])
-    .filter(objective=>objective.type==="social_read")
-    .map(objective=>objective.target))
-);
-
 const WORLD_FLAG_EVENTS=new Map();
 for(const event of WORLD_EVENTS){
   for(const flag of event.setFlags||[])WORLD_FLAG_EVENTS.set(flag,event.id);
@@ -119,8 +113,6 @@ export function sortChronologically(items,state=getState(),{direction="asc"}={})
 }
 
 export function chronologyAvailable(item,{kind="generic",state=getState()}={}){
-  // Mission-critical FriendSpace objectives remain on their proven legacy availability path.
-  if(kind==="social"&&MISSION_SOCIAL_TARGETS.has(item?.id))return true;
   if(item?.scheduleId)return true; // scheduler delivery itself already gates availability
   if(!item?.time)return true;
   const absolute=contentAbsoluteTime(item,state);
@@ -128,4 +120,3 @@ export function chronologyAvailable(item,{kind="generic",state=getState()}={}){
   return worldAbsoluteMinute(state)>=absolute;
 }
 
-export function isMissionCriticalSocial(itemId){return MISSION_SOCIAL_TARGETS.has(itemId);}

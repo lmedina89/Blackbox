@@ -9,7 +9,7 @@ import { missionView } from "./missions.js";
 import { learn, proficiencyLabel } from "./progression.js";
 import { saveTarget, removeTarget, getSavedTargets, missionTitle, activeMissionForHost } from "./targets.js";
 import { advanceWorld } from "./timeline.js";
-import { lookupDns, formatDnsResult } from "./dns.js";
+import { lookupDns, formatDnsResult, resolveDnsTarget } from "./dns.js";
 import { MISSIONS } from "../data/missions.js";
 
 const commands=new Map(),aliases=new Map();
@@ -50,7 +50,11 @@ function scanTarget(state,value){
     const id=state.terminal.lastScanResults?.[Number(value)];
     if(id)return HOSTS[id];
   }
-  const h=resolveTarget(value);
+  let h=resolveTarget(value);
+  if(!h){
+    const dns=resolveDnsTarget(value,{requireIdentified:true});
+    h=dns?HOSTS[dns.hostId]:null;
+  }
   if(!h)return null;
   if(h.id===state.terminal.hostId)return h;
   const known=(state.player.seenHosts||[]).includes(h.id)||(state.player.identifiedHosts||[]).includes(h.id);

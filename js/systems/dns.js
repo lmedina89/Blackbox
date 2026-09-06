@@ -11,6 +11,29 @@ function recordAvailable(record,state){
   return true;
 }
 
+
+export function resolveDnsTarget(rawName,{requireIdentified=true}={}){
+  const state=getState();
+  const name=String(rawName||"").trim().toLowerCase().replace(/\.$/,"");
+  if(!name)return null;
+  const availableRecords=DNS_RECORDS.filter(record=>recordAvailable(record,state));
+  let current=name;
+  const seen=new Set();
+  for(let depth=0;depth<8&&!seen.has(current);depth++){
+    seen.add(current);
+    const address=availableRecords.find(record=>record.name===current&&record.type==="A"&&record.hostId);
+    if(address){
+      const hostId=address.hostId;
+      if(requireIdentified&&!(state.player.identifiedHosts||[]).includes(hostId))return null;
+      return {name,canonicalName:current,hostId,address:address.value};
+    }
+    const alias=availableRecords.find(record=>record.name===current&&record.type==="CNAME");
+    if(!alias)return null;
+    current=String(alias.value||"").trim().toLowerCase().replace(/\.$/,"");
+  }
+  return null;
+}
+
 export function lookupDns(rawName,rawType="ANY",{emitEvent=true}={}){
   const state=getState();
   const name=String(rawName||"").trim().toLowerCase().replace(/\.$/,"");

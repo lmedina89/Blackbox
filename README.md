@@ -1,3 +1,21 @@
+# BLACKBOX v0.4.0 Alpha 4.2 — Interactive QA Repair
+
+Built directly from the exact Work-audited **v0.4.0 Alpha 4.1** archive SHA-256 `9760ea55e248ea2c924f53b6139b088e20d77c496e7607e8eb59aac87fdd3cc0`.
+
+Alpha 4.2 repairs only findings established during the interactive Work audit.
+
+## Alpha 4.2 repairs
+
+- Messenger now withholds legacy messages until their canonical effective timestamp instead of merely sorting future-dated messages correctly.
+- Messenger unread badges use the same chronology gate, so a hidden future message cannot create an early unread count.
+- FriendSpace no longer bypasses chronology for Old Mirror's Sam post. The existing Maya reply action advances three in-game minutes, allowing Sam's authored 19:05 post to appear naturally without changing mission logic.
+- Simulated DNS names become usable by network commands after an explicit `nslookup` has identified the backing host. This makes `ping updates.lumen.test`, `connect updates.lumen.test`, and `traceroute updates.lumen.test` behave consistently with the resolver while preserving the required DNS-learning step.
+- DNS resolution remains network-context aware; internal names do not resolve from the wrong simulated network.
+- My Computer and visible runtime labels consistently report A4.2.
+- Mission IDs, objectives, rewards, evidence behavior, host topology, save schema, and world-event timing are unchanged.
+
+---
+
 # BLACKBOX v0.4.0 Alpha 4.1 — Cross-App Timestamp Consistency
 
 Built directly from verified **v0.4.0 Alpha 4** SHA-256 `5183d162b3f2f3ff6f333b923d9654c5135267cfac5380f553d542267e7a3db1`, descended from exact v0.3.0 RC7.

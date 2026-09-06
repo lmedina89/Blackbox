@@ -15,7 +15,7 @@ function at(s,h,m){s.world.day=1;s.world.minute=h*60+m;}
   s.world.timeline.delivered.push("ambient_maya_food_01");
   s.world.timeline.deliveryTimes.ambient_maya_food_01={day:1,minute:18*60+55,absolute:18*60+55};
   const thread=THREADS.find(t=>t.id==="maya");
-  const visible=sortChronologically(thread.messages.filter(contentAvailable),s,{direction:"asc"});
+  const visible=sortChronologically(thread.messages.filter(message=>contentAvailable(message)&&chronologyAvailable(message,{kind:"message",state:s})),s,{direction:"asc"});
   const ids=visible.map(message=>message.id);
   assert(ids.indexOf("m10")<ids.indexOf("m13"),"18:46 ThreatDesk line must render before 18:55 ambient line");
   assert.equal(contentTimeLabel(visible.find(m=>m.id==="m10"),s),"18:46");
@@ -39,12 +39,30 @@ function at(s,h,m){s.world.day=1;s.world.minute=h*60+m;}
   assert.equal(chronologyAvailable(threat,{kind:"social",state:s}),true);
 }
 
-// Mission-critical FriendSpace remains on the proven legacy path so Old Mirror cannot be time-gated into a softlock.
+// Mission-critical FriendSpace obeys chronology too. Maya's reply action advances three minutes,
+// so Sam's authored 19:05 post is naturally due by the time the player can inspect FriendSpace.
 {
-  const s=resetState();at(s,18,50);setFlag("mirror_lead_accepted");
+  const s=resetState();at(s,19,3);setFlag("mirror_lead_accepted");
   const mirror=SOCIAL_POSTS.find(x=>x.id==="s5");
   assert.equal(contentAvailable(mirror),true);
-  assert.equal(chronologyAvailable(mirror,{kind:"social",state:s}),true,"Old Mirror's required social objective must remain immediately available");
+  assert.equal(chronologyAvailable(mirror,{kind:"social",state:s}),false,"Sam's 19:05 post must not appear at 19:03");
+  at(s,19,6);
+  assert.equal(chronologyAvailable(mirror,{kind:"social",state:s}),true,"Sam's Old Mirror post should be due after the existing 3-minute reply action");
+}
+
+// Work interactive audit regression: mission-completion reactions must not appear future-dated.
+{
+  const s=resetState();at(s,18,56);setFlag("alias_created");setFlag("mission_first_complete");
+  s.world.caseHistory.push({id:"mission:mission_first",kind:"mission",day:1,minute:18*60+56,title:"Easy Money"});
+  const thread=THREADS.find(t=>t.id==="maya");
+  const due=thread.messages.filter(message=>contentAvailable(message)&&chronologyAvailable(message,{kind:"message",state:s}));
+  assert.equal(due.some(message=>message.id==="m4"),false,"19:01 Easy Money reaction must be hidden at 18:56");
+  assert.equal(due.some(message=>message.id==="m5"),false,"19:03 Old Mirror lead must be hidden at 18:56");
+  at(s,19,1);
+  assert.equal(chronologyAvailable(thread.messages.find(m=>m.id==="m4"),{kind:"message",state:s}),true);
+  assert.equal(chronologyAvailable(thread.messages.find(m=>m.id==="m5"),{kind:"message",state:s}),false);
+  at(s,19,3);
+  assert.equal(chronologyAvailable(thread.messages.find(m=>m.id==="m5"),{kind:"message",state:s}),true);
 }
 
 // FriendSpace is rendered newest-first once items are actually due.
@@ -61,4 +79,4 @@ function at(s,h,m){s.world.day=1;s.world.minute=h*60+m;}
   }
 }
 
-console.log("BLACKBOX v0.4.0 Alpha 4.1 chronology tests passed");
+console.log("BLACKBOX v0.4.0 Alpha 4.2 chronology tests passed");

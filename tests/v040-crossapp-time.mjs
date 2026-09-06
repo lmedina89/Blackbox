@@ -65,4 +65,4 @@ const desktopSource=await import("node:fs").then(fs=>fs.readFileSync(new URL("..
 assert.match(desktopSource,/MetroWire desk · \$\{contentTimeLabel\(n,s,\{includeDay:true\}\)/,"MetroWire must render canonical content timestamps");
 assert.match(desktopSource,/r\.timeFromEvent\?` · \$\{contentTimeLabel\(r,s,\{includeDay:false\}\)\}`/,"ThreatDesk event-generated reports must render canonical event time");
 
-console.log("BLACKBOX v0.4.0 Alpha 4.1 cross-app timestamp consistency tests passed");
+console.log("BLACKBOX v0.4.0 Alpha 4.2 cross-app timestamp consistency tests passed");

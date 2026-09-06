@@ -1,6 +1,6 @@
 {
   "name": "Human Layer / Act II Foundation",
-  "version": "0.4.0-alpha.4.1",
+  "version": "0.4.0-alpha.4.2",
   "saveVersion": 10,
   "worldSchema": 10,
   "baseline": {
@@ -25,6 +25,10 @@
     "scheduledContent": 5
   },
   "features": [
+    "Messenger visibility and unread badges now honor canonical effective timestamps so future-dated legacy reactions stay hidden until due",
+    "mission-critical FriendSpace content now follows the same chronology gate; Old Mirror remains playable because the existing reply action advances time past Sam's authored post time",
+    "known simulated DNS aliases resolved through nslookup can be reused by ping, traceroute, connect, services, and target commands without enabling scan-index shortcuts",
+    "My Computer/runtime labels consistently report Alpha 4.2",
     "event-generated News, FriendSpace, and ThreatDesk content inherits the canonical timestamp of the world event that created it",
     "MetroWire and ThreatDesk display canonical event-derived timestamps while later reaction content retains authored timing",
     "canonical content chronology for Messenger and FriendSpace using scheduler delivery times, world-event history, mission history, and authored clock times",
@@ -139,5 +143,5 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.1 cross-app timestamp consistency hotfix; chronology/conversation foundation retained; mission progression unchanged"
+  "foundationMilestone": "A4.2 interactive QA repair: future-content visibility, known DNS alias command resolution, and version-label consistency; mission progression/rewards unchanged"
 }
