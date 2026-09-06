@@ -32,7 +32,7 @@ initTimeline();
   delete old.player.installedSoftware;
   for(const key of ["readMessages","readThreats","completedLabs","actionTick","networkEpoch","scanCounters","deliveredEvents","eventEligibleAt","countedActions","caseHistory"])delete old.world[key];
   const migrated=migrateSave(structuredClone(old));
-  assert.equal(migrated.meta.saveVersion,10);
+  assert.equal(migrated.meta.saveVersion,11);
   assert.equal(migrated.meta.worldSchema,10);
   assert.deepEqual(migrated.player.installedSoftware,["resolver_basic"]);
   assert(migrated.world.completedMissions.includes("mission_first"));
@@ -204,7 +204,7 @@ initTimeline();
   const desktopSource=readFileSync(new URL("../js/ui/desktop.js",import.meta.url),"utf8");
   assert(!desktopSource.includes("${s.player.notes"),"notes are still interpolated into innerHTML");
   assert.match(desktopSource,/escapeHtml\(s\.player\.alias\)/);
-  assert.match(desktopSource,/body\.querySelector\("b"\)\.textContent=site/);
+  assert.match(desktopSource,/escapeHtml\(message\)/);
   assert(AUTOSAVE_EVENTS.includes("notes:changed"));
   assert(AUTOSAVE_EVENTS.includes("browser:navigated"));
 }

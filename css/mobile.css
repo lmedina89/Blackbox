@@ -150,3 +150,22 @@
   .terminal-form{padding-top:5px;padding-bottom:5px}
   .notepad{min-height:62px;font-size:13px;padding:6px}.notepad-menu{padding-top:2px;padding-bottom:2px}.nexus-input-controls{padding-top:2px;padding-bottom:2px}.nexus-input-controls button{min-height:28px;padding:2px 7px;font-size:9px}
 }
+
+/* A4.5 phone layouts for retro web pages and NEXUS system tools. */
+@media (max-width:700px){
+  .mw-columns{grid-template-columns:1fr}.mw-columns aside{border-left:0;border-top:1px solid #999;padding:7px 0 0}.bbn-listing{grid-template-columns:50px minmax(0,1fr)}.bbn-listing>strong,.bbn-listing>.old-web-button{grid-column:2;justify-self:start}.dd-index article{grid-template-columns:1fr}.dd-index article small{grid-column:1}.explorer-layout{grid-template-columns:1fr}.explorer-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px}.explorer-side-title{grid-column:1/-1}.device-row{grid-template-columns:1fr}.device-row .classic-button{justify-self:start}.network-details{grid-template-columns:105px 1fr}.service-head,.service-row{grid-template-columns:minmax(0,1fr) 70px}.service-head>*:last-child,.service-row>.classic-button{grid-column:1/-1;justify-self:start}.event-head,.event-row{grid-template-columns:72px 85px 45px minmax(120px,1fr);min-width:420px}.event-table{overflow-x:auto}.system-toolbar label{display:none}.system-content{padding:6px}.cp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* A4.5 dedicated compact BLACKBOX landscape input layout: visual theme unchanged, vertical footprint reduced. */
+@media (orientation:landscape) and (max-height:520px) and (pointer:coarse){
+  .terminal-input-controls{padding-top:1px;padding-bottom:1px}
+  .terminal-input-controls button{min-height:24px;height:24px;padding:1px 6px;font-size:8px}
+  .terminal-custom-keyboard{padding-top:1px;padding-bottom:calc(2px + env(safe-area-inset-bottom))}
+  .terminal-keyboard-case{padding:2px 4px 3px;border-radius:6px}
+  .terminal-keyboard-brand{display:none}
+  .terminal-key-row{gap:2px;margin-top:1px}
+  .terminal-key{min-height:22px;height:22px;padding:0 1px;font-size:8px;border-radius:2px}
+  .terminal-form{padding-top:3px;padding-bottom:3px;min-height:31px}
+  .terminal-output{padding-top:5px;padding-bottom:5px}
+  .terminal-latest{bottom:120px;min-height:26px;padding:2px 6px;font-size:8px}
+}

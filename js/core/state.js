@@ -1,6 +1,6 @@
 import { emit } from "./events.js";
 
-export const SAVE_VERSION=10;
+export const SAVE_VERSION=11;
 export const WORLD_SCHEMA=10;
 
 function id(prefix="id"){
@@ -55,6 +55,16 @@ export const baseState=()=>({
   learning:{questionAttempts:{},topicStats:{},reviewQueue:[]},
   helpDesk:{availableTickets:[],activeTickets:[],completedTickets:[],ticketProgress:{}},
   behavior:{autonomy:0,empathy:0,intervention:0,transparency:0,trust:0,decisions:[]},
+  nexusSystem:{
+    network:{adapterEnabled:true,dhcp:true,ip:"192.168.1.24",subnet:"255.255.255.0",gateway:"192.168.1.1",dns:["192.168.1.1"],leaseRenewals:0,lastRepairAt:null},
+    firewall:{enabled:true,profile:"Home",rules:{fileSharing:false,remoteAssistance:false,webBrowser:true,messenger:true}},
+    services:{dnsClient:"running",dhcpClient:"running",printSpooler:"running",workstation:"running",nexusUpdate:"running"},
+    devices:{networkAdapter:"enabled",soundAdapter:"enabled"},
+    eventLog:[
+      {id:"boot-system",level:"Information",source:"System",eventId:6005,message:"NEXUS/OS system services started."},
+      {id:"boot-network",level:"Information",source:"Tcpip",eventId:4201,message:"Local Area Connection initialized with DHCP."}
+    ]
+  },
   terminal:{
     hostId:"home",
     user:"user",

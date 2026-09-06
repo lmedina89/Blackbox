@@ -93,6 +93,10 @@ const migrations={
     save.helpDesk ??= {availableTickets:[],activeTickets:[],completedTickets:[],ticketProgress:{}};
     save.behavior ??= {autonomy:0,empathy:0,intervention:0,transparency:0,trust:0,decisions:[]};
     return save;
+  },
+  11(save){
+    save.nexusSystem ??= baseState().nexusSystem;
+    return save;
   }
 };
 
@@ -124,6 +128,7 @@ function normalize(save){
   save.learning=safePlainObject(save.learning,{});
   save.helpDesk=safePlainObject(save.helpDesk,{});
   save.behavior=safePlainObject(save.behavior,{});
+  save.nexusSystem=safePlainObject(save.nexusSystem,{});
   save.terminal=safePlainObject(save.terminal,{});
   save.ui=safePlainObject(save.ui,{});
 
@@ -259,6 +264,44 @@ function normalize(save){
 
   for(const key of ["autonomy","empathy","intervention","transparency","trust"])save.behavior[key]=asNumber(save.behavior[key],0);
   save.behavior.decisions=asArray(save.behavior.decisions,[]).filter(isObject);
+
+  const nexus=safePlainObject(save.nexusSystem,{}),nd=d.nexusSystem;
+  const network=safePlainObject(nexus.network,{});
+  save.nexusSystem.network={
+    adapterEnabled:asBoolean(network.adapterEnabled,nd.network.adapterEnabled),
+    dhcp:asBoolean(network.dhcp,nd.network.dhcp),
+    ip:asString(network.ip,nd.network.ip).slice(0,64)||nd.network.ip,
+    subnet:asString(network.subnet,nd.network.subnet).slice(0,64)||nd.network.subnet,
+    gateway:asString(network.gateway,nd.network.gateway).slice(0,64)||nd.network.gateway,
+    dns:uniqueStrings(network.dns,nd.network.dns).slice(0,4),
+    leaseRenewals:asNumber(network.leaseRenewals,0,{integer:true,min:0}),
+    lastRepairAt:network.lastRepairAt==null?null:asNumber(network.lastRepairAt,0,{integer:true,min:0})
+  };
+  if(!save.nexusSystem.network.dns.length)save.nexusSystem.network.dns=[...nd.network.dns];
+  const firewall=safePlainObject(nexus.firewall,{}),rules=safePlainObject(firewall.rules,{});
+  save.nexusSystem.firewall={
+    enabled:asBoolean(firewall.enabled,nd.firewall.enabled),
+    profile:["Home","Work","Public"].includes(firewall.profile)?firewall.profile:nd.firewall.profile,
+    rules:{
+      fileSharing:asBoolean(rules.fileSharing,nd.firewall.rules.fileSharing),
+      remoteAssistance:asBoolean(rules.remoteAssistance,nd.firewall.rules.remoteAssistance),
+      webBrowser:asBoolean(rules.webBrowser,nd.firewall.rules.webBrowser),
+      messenger:asBoolean(rules.messenger,nd.firewall.rules.messenger)
+    }
+  };
+  const services=safePlainObject(nexus.services,{}),validService=new Set(["running","stopped"]);
+  save.nexusSystem.services={};
+  for(const [name,initial] of Object.entries(nd.services)){const value=asString(services[name],initial);save.nexusSystem.services[name]=validService.has(value)?value:initial;}
+  const devices=safePlainObject(nexus.devices,{}),validDevice=new Set(["enabled","disabled"]);
+  save.nexusSystem.devices={};
+  for(const [name,initial] of Object.entries(nd.devices)){const value=asString(devices[name],initial);save.nexusSystem.devices[name]=validDevice.has(value)?value:initial;}
+  save.nexusSystem.eventLog=asArray(nexus.eventLog,nd.eventLog).filter(isObject).slice(-100).map((entry,index)=>({
+    id:asString(entry.id,`event-${index}`),
+    level:["Information","Warning","Error"].includes(entry.level)?entry.level:"Information",
+    source:asString(entry.source,"System").slice(0,64),
+    eventId:asNumber(entry.eventId,0,{integer:true,min:0,max:99999}),
+    message:asString(entry.message,"System event").slice(0,500)
+  }));
 
   save.terminal.hostId=asString(save.terminal.hostId,d.terminal.hostId)||d.terminal.hostId;
   save.terminal.user=asString(save.terminal.user,d.terminal.user)||d.terminal.user;

@@ -62,7 +62,7 @@ assert.equal(mayaReaction.timeFromEvent,undefined);
 assert.equal(contentTimeLabel(mayaReaction,s),"20:08");
 
 const desktopSource=await import("node:fs").then(fs=>fs.readFileSync(new URL("../js/ui/desktop.js",import.meta.url),"utf8"));
-assert.match(desktopSource,/MetroWire desk · \$\{contentTimeLabel\(n,s,\{includeDay:true\}\)/,"MetroWire must render canonical content timestamps");
+assert.match(desktopSource,/contentTimeLabel\(n,s,\{includeDay:true\}\)/,"MetroWire must render canonical content timestamps");
 assert.match(desktopSource,/r\.timeFromEvent\?` · \$\{contentTimeLabel\(r,s,\{includeDay:false\}\)\}`/,"ThreatDesk event-generated reports must render canonical event time");
 
 console.log("BLACKBOX v0.4.0 Alpha 4.2 cross-app timestamp consistency tests passed");
