@@ -22,7 +22,7 @@ import { displayName } from "../systems/network.js";
 import { playSound, toggleAudio, isAudioEnabled } from "../systems/audio.js";
 import { lookupDns, formatDnsResult } from "../systems/dns.js";
 import { escapeHtml } from "./safeText.js";
-import { contentAvailable } from "../systems/contentAvailability.js";
+import { contentAvailable, contentDelivery } from "../systems/contentAvailability.js";
 
 function visible(item){return contentAvailable(item);}
 
@@ -116,6 +116,10 @@ export function initDesktopUI({enterBlackbox}){
   });
   on("communications:changed",()=>scheduleRenderOpenApps());
   on("timeline:event",({event})=>{if(event.notice)toast(event.notice);scheduleRenderOpenApps();});
+  on("content:delivered",()=>scheduleRenderOpenApps());
+  on("content:cancelled",()=>scheduleRenderOpenApps());
+  on("content:expired",()=>scheduleRenderOpenApps());
+  on("content:replaced",()=>scheduleRenderOpenApps());
   on("save:status",()=>syncSaveWarning());
 
   function createWindow(id,title){
@@ -156,6 +160,13 @@ export function initDesktopUI({enterBlackbox}){
     queueMicrotask(()=>{renderScheduled=false;renderOpenApps();});
   }
 
+  function deliveryLabel(item,{includeDay=true}={}){
+    const delivered=contentDelivery(item);
+    if(!delivered)return null;
+    const h=String(Math.floor(delivered.minute/60)).padStart(2,"0"),m=String(delivered.minute%60).padStart(2,"0");
+    return includeDay?`Day ${delivered.day} · ${h}:${m}`:`${delivered.day>1?`D${delivered.day} `:""}${h}:${m}`;
+  }
+
   function renderBrowser(el){
     const s=getState();
     const browserSites=new Set(["news","social","forum","packet","deaddrop","shop"]);
@@ -163,7 +174,7 @@ export function initDesktopUI({enterBlackbox}){
     const body=el.querySelector("#browser-body"),addr=el.querySelector("input");
     const show=site=>{const previous=s.ui.lastBrowserSite;s.ui.lastBrowserSite=site;addr.value=`nexus://${site}`;if(previous!==site)emit("browser:navigated",{site});
       if(site==="news"){
-        body.innerHTML=`<div class="site-head"><div class="site-logo">METROWIRE</div><span>LOCAL // TECHNOLOGY // BUSINESS</span></div>${NEWS.filter(visible).map(n=>n.clueId?`<button class="news-story news-story-button ${s.world.readNewsStories.includes(n.id)?"read":""}" data-news="${n.id}"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · Day ${s.world.day} · open story</span></button>`:`<article class="news-story"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · Day ${s.world.day}</span></article>`).join("")}`;
+        body.innerHTML=`<div class="site-head"><div class="site-logo">METROWIRE</div><span>LOCAL // TECHNOLOGY // BUSINESS</span></div>${NEWS.filter(visible).map(n=>n.clueId?`<button class="news-story news-story-button ${s.world.readNewsStories.includes(n.id)?"read":""}" data-news="${n.id}"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · ${deliveryLabel(n)||`Day ${s.world.day}`} · open story</span></button>`:`<article class="news-story"><h2>${n.title}</h2><p>${n.body}</p><span class="feed-meta">MetroWire desk · ${deliveryLabel(n)||`Day ${s.world.day}`}</span></article>`).join("")}`;
         body.querySelectorAll("[data-news]").forEach(btn=>btn.addEventListener("click",()=>{
           const id=btn.dataset.news;
           if(!s.world.readNewsStories.includes(id))s.world.readNewsStories.push(id);
@@ -173,7 +184,7 @@ export function initDesktopUI({enterBlackbox}){
         }));
       }
       if(site==="social"){
-        body.innerHTML=`<div class="site-head friendspace"><div class="site-logo">FriendSpace</div><span>${escapeHtml(s.player.alias)}'s feed</span></div>${SOCIAL_POSTS.filter(visible).map(x=>`<article class="social-post"><div class="avatar">${x.name[0]}</div><div><h3>${x.name} <span>@${x.author}</span></h3><p>${x.body}</p><small>${x.time}</small>${x.clueId?`<button class="save-clue" data-social="${x.id}">${s.world.readSocialPosts.includes(x.id)?"Saved to BLACKBOX":"Save technical info"}</button>`:""}</div></article>`).join("")}`;
+        body.innerHTML=`<div class="site-head friendspace"><div class="site-logo">FriendSpace</div><span>${escapeHtml(s.player.alias)}'s feed</span></div>${SOCIAL_POSTS.filter(visible).map(x=>`<article class="social-post"><div class="avatar">${x.name[0]}</div><div><h3>${x.name} <span>@${x.author}</span></h3><p>${x.body}</p><small>${deliveryLabel(x,{includeDay:false})||x.time||""}</small>${x.clueId?`<button class="save-clue" data-social="${x.id}">${s.world.readSocialPosts.includes(x.id)?"Saved to BLACKBOX":"Save technical info"}</button>`:""}</div></article>`).join("")}`;
         body.querySelectorAll("[data-social]").forEach(btn=>btn.addEventListener("click",()=>{
           const id=btn.dataset.social;
           if(!s.world.readSocialPosts.includes(id))s.world.readSocialPosts.push(id);
@@ -225,6 +236,8 @@ export function initDesktopUI({enterBlackbox}){
   }
 
   function messageTime(message,state){
+    const scheduled=deliveryLabel(message,{includeDay:false});
+    if(scheduled)return scheduled;
     if(!message.timeFromEvent)return message.time||"";
     const event=(state.world.caseHistory||[]).find(x=>x.id===`event:${message.timeFromEvent}`);
     if(!event)return message.time||"";
@@ -294,7 +307,7 @@ export function initDesktopUI({enterBlackbox}){
         <div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div>
         <div class="stat"><b>Credits</b><br>${s.player.credits}</div>
         <div class="stat"><b>Reputation</b><br>${s.player.reputation}</div>
-        <div class="stat"><b>BLACKBOX</b><br>0.4.0-A1 installed</div>
+        <div class="stat"><b>BLACKBOX</b><br>0.4.0-A3 installed</div>
       </div>
       <div class="card"><h3>Installed software</h3><p>${(s.player.installedSoftware||[]).map(id=>({resolver_basic:"Basic Resolver",resolver_pro:"Resolver Pro",scan_suite:"WideScan Suite",logscope:"LogScope"}[id]||id)).join(" · ")}</p></div>
       <div class="card"><h3>BLACKBOX proficiencies</h3><div class="system-grid">${Object.entries(s.player.proficiencies||{}).map(([skill,value])=>`<div class="stat"><b>${skill[0].toUpperCase()+skill.slice(1)}</b><br>${proficiencyLabel(value)} (${value})</div>`).join("")}</div><p class="muted">Proficiency grows by using real CLI and investigation concepts, not by spending skill points.</p></div>

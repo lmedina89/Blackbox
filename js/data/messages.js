@@ -5,6 +5,7 @@ export const THREADS = [
       {id:"m1",from:"maya",time:"18:38",text:"yo, you finally got that machine running?",visibleWhen:[]},
       {id:"m2",from:"player",time:"18:39",text:"barely. it sounds like a jet engine.",visibleWhen:[]},
       {id:"m3",from:"maya",time:"18:39",text:"lol. check your email. someone sent you something weird.",visibleWhen:["alias_created"]},
+      {id:"m13",from:"maya",scheduleId:"ambient_maya_food_01",text:"you disappear into that screen fast lol. i was gonna ask if you wanted food before you went full cave mode."},
       {id:"m4",from:"maya",time:"19:01",text:"wait... did you actually do it?",visibleWhen:["mission_first_complete"]},
       {id:"m5",from:"maya",time:"19:03",text:"Sam says another one of those old Northstar mirror boxes is still online. He wants somebody to check what it's serving.",visibleWhen:["mission_first_complete"],choice:{id:"mirror_offer",options:[
         {id:"mirror_send",text:"Send me what he found.",setFlags:["mirror_lead_accepted"],relationship:{maya:1}},
@@ -25,6 +26,7 @@ export const THREADS = [
       {id:"sam1",from:"sam",time:"17:58",text:"you mess with old systems at all? found a BBS that somehow survived another decade.",visibleWhen:[]},
       {id:"sam2",from:"sam",time:"17:59",text:"COBALT-BBS / 10.91.6.23. visitor shell. not a job, just weird internet archaeology.",visibleWhen:[],clueId:"cobalt_bbs_host"},
       {id:"sam3",from:"sam",time:"18:02",text:"if you poke around, don't expect treasure. half the fun is figuring out what a machine even is.",visibleWhen:[]},
+      {id:"sam6",from:"sam",scheduleId:"ambient_sam_drives_01",text:"found a box of old IDE drives in my closet. one is labeled DO NOT FORMAT, so obviously now i need an adapter."},
       {id:"sam4",from:"sam",time:"21:15",timeFromEvent:"quartz_thread",text:"Quartz board is answering again. NightWire has the address if you want another archaeology trip.",visibleWhen:["quartz_thread_available"]},
       {id:"sam5",from:"sam",time:"21:41",timeFromEvent:"relay_cache_lead",text:"That relay thread points to a separate cache. Still optional, still probably boring, which means you'll definitely look.",visibleWhen:["relay_cache_available"]}
     ]
@@ -35,6 +37,7 @@ export const THREADS = [
       {id:"c1",from:"chris",time:"18:16",text:"Evan asked me why his old server still shows network activity lol",visibleWhen:[]},
       {id:"c2",from:"chris",time:"18:17",text:"he says the address is 10.33.8.44. pretty sure he left the old guest account enabled.",visibleWhen:[],clueId:"evan_box_host"},
       {id:"c3",from:"chris",time:"18:18",text:"not asking you to fix it. just thought you'd find that funny.",visibleWhen:[]},
+      {id:"c5",from:"chris",scheduleId:"ambient_chris_laptop_01",text:"I swear everybody has one laptop they refuse to throw away. mine has one working hinge and a battery that lasts twelve minutes."},
       {id:"c4",from:"chris",time:"19:28",timeFromEvent:"cedar_lead",text:"Cedar posted his home-lab address again. The server only seems awake some evenings.",visibleWhen:["cedar_lead_available"]}
     ]
   },

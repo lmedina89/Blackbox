@@ -1,6 +1,6 @@
 {
   "name": "Human Layer / Act II Foundation",
-  "version": "0.4.0-alpha.2",
+  "version": "0.4.0-alpha.3",
   "saveVersion": 10,
   "worldSchema": 10,
   "baseline": {
@@ -13,18 +13,21 @@
     "missions": 9,
     "emails": 14,
     "messengerThreads": 4,
-    "messages": 23,
-    "newsStories": 12,
+    "messages": 26,
+    "newsStories": 13,
     "forumPosts": 11,
-    "socialPosts": 13,
+    "socialPosts": 14,
     "clues": 28,
     "threatReports": 6,
     "fieldNotes": 4,
     "trainingLabs": 3,
-    "worldEvents": 11
+    "worldEvents": 11,
+    "scheduledContent": 5
   },
   "features": [
-    "persistent living-world scheduler engine integrated behind the existing timeline API with no live content migrated yet",
+    "first live living-world migration: three non-mission-critical ambient Messenger lines plus unrelated scheduled News/FriendSpace activity",
+    "safe-gap conversation scheduling cancels ambient lines if later legacy campaign content overtakes their chronological slot",
+    "scheduler-backed content renders persisted delivery timestamps and refreshes open NEXUS apps/unread badges on delivery state changes",
     "scheduler timing modes: afterMinutes, timeWindow including overnight windows, afterEvent, afterActions, and absolute game time",
     "persisted deterministic delivery targets with original scheduled timestamps preserved during catch-up",
     "declarative scheduler prerequisites for flags, missions, clues, delivered/read content, dialogue choices, and day bounds",
@@ -75,6 +78,8 @@
     "IPv6"
   ],
   "verification": [
+    "Alpha 3 migrates only five non-critical content items; no contract, clue-bearing message, mission choice, mission definition, reward, host, DNS entry, or legacy world event is migrated",
+    "v040-ambient suite verifies schedule mapping, hidden-until-delivered state, no mission/clue/reward effects, safe-gap cancellation, independent world activity, and delivery timestamp UI wiring",
     "continuous nine-case campaign and all prior RC7/A1 regression suites pass after timeline integration",
     "all eleven legacy v0.3 world events remain defined in the unchanged worldEvents data and continue through the proven actionTick compatibility path",
     "Alpha 2 leaves scheduledContent catalog empty so no current Messenger/Mail/News/Social/ThreatDesk/mission-critical content has moved to the new scheduler",
@@ -122,5 +127,5 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A2 living-world scheduler engine; live scheduler catalog intentionally empty"
+  "foundationMilestone": "A3 first live living-world content; mission-critical progression remains legacy-protected"
 }

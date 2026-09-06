@@ -1,40 +1,31 @@
-# BLACKBOX v0.4.0 Alpha 2 — Living-World Scheduler Engine
+# BLACKBOX v0.4.0 Alpha 3 — First Living-World Content
 
-Built from the verified **v0.4.0 Alpha 1 Compatibility Foundation** (`6829621dab4ec36fe65ee66cebe64d3aeccab72d3149feefde05aeb94ff6091a`), which itself was built directly from exact v0.3.0 RC7 SHA-256 `cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e`.
+Built from verified **v0.4.0 Alpha 2** SHA-256 `04c4bbd178b06244d7db802c6844dd0774ac9970cfff753ed22aa2f0d5aa1fc1`, itself descended directly from exact v0.3.0 RC7.
 
-This milestone intentionally adds **no new missions, Help Desk tickets, ambient conversations, Act II story beats, or migrated mission-critical mail**. It proves the scheduler machinery before current content depends on it.
+Alpha 3 is the first milestone where the new scheduler controls visible content, but the migration is intentionally tiny and non-critical.
 
-## Alpha 2 changes
+## Alpha 3 changes
 
-- Adds the new persistent living-world scheduler engine alongside the existing v0.3 world-event path.
-- Preserves all 11 current `WORLD_EVENTS` on their exact existing `afterActions` / `actionTick` semantics.
-- Adds scheduler timing modes for `afterMinutes`, `timeWindow`, `afterEvent`, `afterActions`, and explicit absolute game time.
-- Supports ordinary daytime windows and overnight windows such as 22:00–02:00.
-- Persists scheduled delivery times so save/reload never rerolls a conversation or world event.
-- Preserves the original scheduled timestamp during catch-up, so overdue content does not all acquire the same return-time timestamp.
-- Adds declarative prerequisites for flags, missions, clues, prior delivered/expired/cancelled content, dialogue choices, read state, and day bounds.
-- Adds cancellation, expiration, and replacement handling for stale conversations/content.
-- Distinguishes content delivery from content reading; scheduling a message cannot discover a clue or start a read-triggered mission.
-- Adds `content:cancelled` to autosave boundaries so stale-content state persists immediately.
-- Hardens scheduler state normalization so malformed scheduled entries cannot poison an otherwise runnable save.
-- Keeps the live scheduled-content catalog empty in Alpha 2. Existing Mail, Messenger, News, Social, NightWire, ThreatDesk, and mission-critical content still use their proven legacy visibility paths.
+- Adds three ordinary ambient Messenger lines: one each for Maya, Sam, and Chris.
+- These messages do not grant clues, start missions, change rewards, or contain mission-critical reply choices.
+- Places each new line inside a known safe gap in its existing thread. If later campaign content overtakes that gap before delivery, the ambient line is cancelled instead of appearing out of order.
+- Adds one unrelated scheduled FriendSpace post and one unrelated MetroWire story to prove the world can move without mission completion.
+- Scheduled content displays its persisted delivery time rather than receiving a fake current-time timestamp after a save/load catch-up.
+- Messenger/browser badges and open windows refresh when scheduler-managed content is delivered/cancelled/expired/replaced.
+- Existing contract mail, clue-bearing Sam/Chris messages, Old Mirror choices, mission definitions, rewards, host topology, DNS, and the 11 current world events remain on their proven legacy paths.
 
-## Compatibility target
+## Why the migration is deliberately small
 
-The existing nine-case campaign must remain mechanically identical while the new timeline engine is proven. No current mission ID, objective ID/target, reward, host, clue, dialogue choice, or contract-read trigger is changed in Alpha 2.
+The current Messenger threads were authored as fixed-order arrays. Alpha 3 does not dump arbitrary random lines into them. The first scheduled messages are placed only where chronology can be protected with explicit cancellation conditions. A later conversation-state milestone can safely support deeper branching and longer time-based threads.
 
-## Automated verification for Alpha 2
+## Alpha 3 verification target
 
-- Every JavaScript and test module passes `node --check`.
-- Existing smoke/regression/campaign/audio/device/RC7 terminal guard suites pass.
-- `tests/v040-foundation.mjs` remains green.
-- New `tests/v040-timeline.mjs` verifies persistent scheduling, no reload rerolls, daytime and overnight windows, event-relative delivery, action-delay mode, cancellation/replacement, expiration, chronological catch-up timestamps, read prerequisites, and malformed scheduler-state normalization.
-- The continuous nine-case campaign still completes with the existing expected 3,080 credits / 50 reputation result.
-
-## Next safe milestone
-
-Alpha 3 should migrate only a **small, non-mission-critical sample of ambient content** onto this scheduler first. Mission-starting emails and the existing Old Mirror reply path should remain on the legacy path until scheduled ambient content has passed save/load and iPhone testing.
-
+- Existing nine-case campaign remains mechanically unchanged.
+- Ambient delivery remains separate from read state.
+- Ambient messages cannot discover clues or start jobs.
+- Time-based background News/Social content can appear without a mission completion event.
+- Save/reload preserves scheduled and delivered timestamps.
+- Existing A2 scheduler tests and all RC7 regression/audio/device guards remain green.
 
 ---
 
