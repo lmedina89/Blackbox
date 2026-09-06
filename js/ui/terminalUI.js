@@ -264,8 +264,13 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
   function refreshPrompt(){
     const s=getState(),host=HOSTS[s.terminal.hostId];
     prompt.textContent=getPrompt();
-    label.textContent=`${s.terminal.user.toUpperCase()} @ ${host.hostname}`;
-    link.textContent=s.terminal.hostId==="home"?"LOCAL":"REMOTE";
+    if(s.terminal.serviceSession?.type==="nightwire"){
+      label.textContent="NIGHTWIRE NODE";
+      link.textContent="PRIVATE RELAY";
+    }else{
+      label.textContent=`${s.terminal.user.toUpperCase()} @ ${host.hostname}`;
+      link.textContent=s.terminal.hostId==="home"?"LOCAL":"REMOTE";
+    }
     trace.textContent=`${s.terminal.trace||0}%`;
   }
 
@@ -424,6 +429,12 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     next:`${mission.rewards?.credits||0} credits transferred. Return to NEXUS/OS when ready.`,
     tone:"success"
   }));
+  on("nightwire:unlocked",()=>deliverOrQueue({
+    title:"[ PRIVATE SERVICE DISCOVERED ]",
+    body:"NightWire relay handshake available.",
+    next:'Type "nightwire" from HOME-PC to connect.',
+    tone:"intel"
+  }));
   on("clue:discovered",({clue})=>{
     if(!isVisible())return;
     deliverOrQueue({
@@ -461,7 +472,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
         output.innerHTML="";
         print("┌──────────────────────────────────────────┐","banner");
         print("│       B L A C K B O X   S E C U R E      │","banner");
-        print("│      INTERACTIVE SHELL 0.4.0-A4.6.1        │","banner");
+        print("│      INTERACTIVE SHELL 0.4.0-A4.8.1-QA        │","banner");
         print("└──────────────────────────────────────────┘","banner");
         print("");
         print(`SESSION ${String(s.terminal.sessionCount).padStart(4,"0")} // LOCAL ENVIRONMENT`);

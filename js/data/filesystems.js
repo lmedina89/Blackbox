@@ -184,5 +184,24 @@ export const FILESYSTEMS = {
       shared:{type:"dir",children:{"lab-map.txt":{type:"file",content:"HOME LAB\nrouter 10.39.7.1\nserver CEDAR-NODE 10.39.7.41\nbackup window 19:00-23:00"}}}
     }}
   }
+  ,
+  rangeweb01:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{range:{type:"dir",children:{"readme.txt":{type:"file",content:"NightWire Range web node. No interactive shell is required for this exercise."}}}}}
+    }}
+  },
+  rangefile02:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{rangeops:{type:"dir",children:{"proof.txt":{type:"file",content:"NW-RANGE-PROOF-02\nAuthenticated access is not administrative access."},"notes.txt":{type:"file",content:"Range account: ordinary operator privileges only."}}}}},
+      root:{type:"dir",access:{minPrivilege:"root"},children:{"admin-only.txt":{type:"file",content:"This file is intentionally outside the RANGE-02 objective."}}}
+    }}
+  },
+  rangeops03:{
+    "/":{type:"dir",children:{
+      home:{type:"dir",children:{"svc-range":{type:"dir",children:{"readme.txt":{type:"file",content:"Restricted file-service context. Verify privilege before assuming authority."}}}}},
+      var:{type:"dir",children:{range:{type:"dir",children:{"policy-note.txt":{type:"file",content:"LOCAL POLICY AUDIT\nThe service context is subject to a simulated privilege-policy defect. Review fictional local profiles."}}}}},
+      root:{type:"dir",access:{minPrivilege:"root"},children:{"proof.txt":{type:"file",content:"NW-RANGE-PROOF-03\nFoothold, boundary, elevation, verification."}}}
+    }}
+  }
 
 };

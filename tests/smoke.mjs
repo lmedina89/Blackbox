@@ -32,7 +32,7 @@ initTimeline();
   delete old.player.installedSoftware;
   for(const key of ["readMessages","readThreats","completedLabs","actionTick","networkEpoch","scanCounters","deliveredEvents","eventEligibleAt","countedActions","caseHistory"])delete old.world[key];
   const migrated=migrateSave(structuredClone(old));
-  assert.equal(migrated.meta.saveVersion,13);
+  assert.equal(migrated.meta.saveVersion,15);
   assert.equal(migrated.meta.worldSchema,10);
   assert.deepEqual(migrated.player.installedSoftware,["resolver_basic"]);
   assert(migrated.world.completedMissions.includes("mission_first"));
@@ -53,7 +53,7 @@ initTimeline();
     const processIds=new Set(host.processes.map(process=>process.pid));
     for(const service of host.services)if(service.pid)assert(processIds.has(service.pid),`${host.id} ${service.name} references missing PID ${service.pid}`);
   }
-  assert.equal(Object.keys(HOSTS).length,36);
+  assert.equal(Object.keys(HOSTS).length,39);
 }
 
 // Scan ordering changes, membership is stable within an epoch, and active targets are pinned.

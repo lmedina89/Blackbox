@@ -2,8 +2,11 @@ import { DNS_RECORDS } from "../data/dns.js";
 import { identifyHost } from "./network.js";
 import { emit } from "../core/events.js";
 import { getState, setFlag } from "../core/state.js";
+import { universeOf } from "./intrusion.js";
 
 function recordAvailable(record,state){
+  const sandboxUniverse=state.intrusion?.activeSandbox?.universe||((universeOf(state.terminal.hostId)!=="campaign")?universeOf(state.terminal.hostId):null);
+  if(sandboxUniverse&&(record.universe||"campaign")!==sandboxUniverse)return false;
   const flags=new Set(state.world.flags||[]);
   if((record.visibleWhen||[]).some(flag=>!flags.has(flag)))return false;
   if((record.hiddenWhen||[]).some(flag=>flags.has(flag)))return false;
@@ -61,7 +64,7 @@ export function lookupDns(rawName,rawType="ANY",{emitEvent=true}={}){
     mailContext:mx?`${mx.name} mail host ${mxTarget}${mxAddress?` -> ${mxAddress.value}`:""}`:null
   };
 
-  if(emitEvent)emit("dns:lookup",{dnsName:name,type,records,hostIds});
+  if(emitEvent)emit("dns:lookup",{dnsName:name,type,records,hostIds,universe:state.intrusion?.activeSandbox?.universe||universeOf(state.terminal.hostId)});
   return {name,type,records,hostIds,diagnostics};
 }
 

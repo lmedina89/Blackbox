@@ -121,6 +121,18 @@ const migrations={
     save.helpDesk.remoteSession ??= null;
     save.helpDesk.job ??= {level:1,resolved:0,escalated:0,score:0};
     return save;
+  },
+  14(save){
+    save.intrusion ??= {credentials:[],sessions:{},serviceIntel:{},artifacts:[],noise:{},attempts:[],activeSandbox:null};
+    save.terminal ??= {};
+    save.terminal.accessSessionId ??= null;
+    return save;
+  },
+  15(save){
+    save.nightwire ??= {readPosts:[],readMessages:[],range:{activeLabId:null,completed:[],runs:{},results:{}}};
+    save.terminal ??= {};
+    save.terminal.serviceSession ??= null;
+    return save;
   }
 };
 
@@ -151,6 +163,8 @@ function normalize(save){
   save.communications=safePlainObject(save.communications,{});
   save.learning=safePlainObject(save.learning,{});
   save.helpDesk=safePlainObject(save.helpDesk,{});
+  save.intrusion=safePlainObject(save.intrusion,{});
+  save.nightwire=safePlainObject(save.nightwire,{});
   save.behavior=safePlainObject(save.behavior,{});
   save.nexusSystem=safePlainObject(save.nexusSystem,{});
   save.terminal=safePlainObject(save.terminal,{});
@@ -302,6 +316,65 @@ function normalize(save){
     score:asNumber(helpJob.score,0,{integer:true,min:0})
   };
 
+
+  const rawIntrusion=safePlainObject(save.intrusion,{});
+  const credentials=asArray(rawIntrusion.credentials,[]).filter(isObject).slice(-100).map((item,index)=>({
+    id:asString(item.id,`cred-${index}`).slice(0,160),
+    username:asString(item.username,"unknown").slice(0,128),
+    secret:asString(item.secret,"").slice(0,256),
+    source:asString(item.source,"unknown").slice(0,256),
+    scope:safePlainObject(item.scope,{}),
+    status:asString(item.status,"known").slice(0,64),
+    discoveredAt:asNumber(item.discoveredAt,0,{integer:true,min:0}),
+    tested:asArray(item.tested,[]).filter(isObject).slice(-30)
+  }));
+  const sessions={};
+  for(const [key,item] of Object.entries(safePlainObject(rawIntrusion.sessions,{}))){
+    if(typeof key!=="string"||!key||!isObject(item))continue;
+    sessions[key]={
+      id:asString(item.id,`session-${key}`).slice(0,192),
+      hostId:asString(item.hostId,"").slice(0,128),
+      universe:asString(item.universe,"campaign").slice(0,64),
+      user:asString(item.user,"guest").slice(0,128),
+      privilege:["guest","user","service","admin","root"].includes(item.privilege)?item.privilege:"guest",
+      service:asString(item.service,"simulated").slice(0,128),
+      source:asString(item.source,"unknown").slice(0,256),
+      establishedAt:asNumber(item.establishedAt,0,{integer:true,min:0}),
+      status:item.status==="closed"?"closed":"established"
+    };
+  }
+  const serviceIntel={};
+  for(const [key,value] of Object.entries(safePlainObject(rawIntrusion.serviceIntel,{}))){
+    if(typeof key!=="string"||!key||!isObject(value))continue;
+    serviceIntel[key]=safePlainObject(value,{});
+  }
+  const noise={};
+  for(const [key,item] of Object.entries(safePlainObject(rawIntrusion.noise,{}))){
+    if(typeof key!=="string"||!key||!isObject(item))continue;
+    noise[key]={value:asNumber(item.value,0,{integer:true,min:0}),threshold:asNumber(item.threshold,5,{integer:true,min:1,max:99}),alerted:asBoolean(item.alerted,false),lastAt:item.lastAt==null?null:asNumber(item.lastAt,0,{integer:true,min:0})};
+  }
+  save.intrusion={
+    credentials,
+    sessions,
+    serviceIntel,
+    artifacts:asArray(rawIntrusion.artifacts,[]).filter(isObject).slice(-100),
+    noise,
+    attempts:asArray(rawIntrusion.attempts,[]).filter(isObject).slice(-100),
+    activeSandbox:isObject(rawIntrusion.activeSandbox)?rawIntrusion.activeSandbox:null
+  };
+
+  const rawNightwire=safePlainObject(save.nightwire,{}),rawRange=safePlainObject(rawNightwire.range,{});
+  const runs={};
+  for(const [key,item] of Object.entries(safePlainObject(rawRange.runs,{}))){
+    if(typeof key!=="string"||!key||!isObject(item))continue;
+    runs[key]={attempt:asNumber(item.attempt,0,{integer:true,min:0}),startedAt:item.startedAt==null?null:asNumber(item.startedAt,0,{integer:true,min:0}),hintsUsed:asNumber(item.hintsUsed,0,{integer:true,min:0,max:99}),completedThisRun:asBoolean(item.completedThisRun,false),completedAt:item.completedAt==null?null:asNumber(item.completedAt,0,{integer:true,min:0})};
+  }
+  save.nightwire={
+    readPosts:uniqueStrings(rawNightwire.readPosts,[]).slice(-200),
+    readMessages:uniqueStrings(rawNightwire.readMessages,[]).slice(-100),
+    range:{activeLabId:rawRange.activeLabId==null?null:asString(rawRange.activeLabId,"").slice(0,64)||null,completed:uniqueStrings(rawRange.completed,[]).slice(-100),runs,results:safePlainObject(rawRange.results,{})}
+  };
+
   for(const key of ["autonomy","empathy","intervention","transparency","trust"])save.behavior[key]=asNumber(save.behavior[key],0);
   save.behavior.decisions=asArray(save.behavior.decisions,[]).filter(isObject);
 
@@ -354,6 +427,9 @@ function normalize(save){
   save.terminal.suspended=asBoolean(save.terminal.suspended,false);
   save.terminal.pendingAction=save.terminal.pendingAction??null;
   save.terminal.lastScanResults=uniqueStrings(save.terminal.lastScanResults,[]);
+  save.terminal.accessSessionId=save.terminal.accessSessionId==null?null:asString(save.terminal.accessSessionId,"").slice(0,192)||null;
+  const serviceSession=safePlainObject(save.terminal.serviceSession,{});
+  save.terminal.serviceSession=serviceSession.type==="nightwire"?{type:"nightwire",section:asString(serviceSession.section,"home").slice(0,32)||"home"}:null;
 
   save.ui.openApps=uniqueStrings(save.ui.openApps,[]);
   save.ui.lastBrowserSite=asString(save.ui.lastBrowserSite,d.ui.lastBrowserSite)||d.ui.lastBrowserSite;

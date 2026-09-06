@@ -5,7 +5,7 @@ import { migrateSave } from "../js/core/migrations.js";
 import { AUTOSAVE_EVENTS } from "../js/core/autosave.js";
 import { systemSnapshot, nexusNetworkOnline, nexusDnsOnline, setNetworkAdapter, repairNetwork, renewDhcp, setFirewallEnabled, setFirewallRule, setService, setDeviceEnabled } from "../js/systems/nexusSystem.js";
 
-assert.equal(SAVE_VERSION,13);
+assert.equal(SAVE_VERSION,15);
 assert.equal(WORLD_SCHEMA,10);
 assert.ok(AUTOSAVE_EVENTS.includes("nexus:system-changed"));
 
@@ -19,7 +19,7 @@ assert.ok(AUTOSAVE_EVENTS.includes("nexus:system-changed"));
   old.missions.progress={mission_recovery:{meridian_find:true}};
   delete old.nexusSystem;
   const migrated=migrateSave(structuredClone(old));
-  assert.equal(migrated.meta.saveVersion,13);
+  assert.equal(migrated.meta.saveVersion,15);
   assert.equal(migrated.meta.worldSchema,10);
   assert.equal(migrated.player.credits,1234);
   assert.deepEqual(migrated.world.completedMissions,["mission_first","mission_mirror"]);

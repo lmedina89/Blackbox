@@ -166,5 +166,47 @@ export const HOSTS = {
   cedarnode:{
     id:"cedarnode",hostname:"CEDAR-NODE",address:"10.39.7.41",owner:"Cedar Home Lab",os:"NEXUS/OS Server 4.0",filesystem:"cedarnode",users:["guest"],homeDir:"/home/guest",interfaces:[{name:"eth0",address:"10.39.7.41",cidr:24,gateway:"10.39.7.1"}],routes:[],services:[{name:"ssh",port:22,state:"open",pid:52},{name:"files",port:445,state:"open",pid:117}],processes:[{pid:1,user:"system",cpu:"0.0",mem:"0.2",name:"init"},{pid:52,user:"system",cpu:"0.0",mem:"0.7",name:"sshd"},{pid:117,user:"cedar",cpu:"0.1",mem:"2.7",name:"filesvc"}],connections:[],access:{mode:"guest"},identity:"unknown",visibleWhen:["cedar_lead_available"]
   }
+  ,
+  rangeweb01:{
+    id:"rangeweb01",hostname:"RANGE-WEB-01",address:"10.77.4.18",owner:"NightWire Range",os:"RangeNIX Web 1.0",filesystem:"rangeweb01",users:["range"],homeDir:"/home/range",
+    universe:"range",rangeLabId:"range01",accessModel:"advanced",detectionThreshold:5,identity:"known",
+    interfaces:[{name:"eth0",address:"10.77.4.18",cidr:24,gateway:"10.77.4.1"}],routes:[],
+    services:[
+      {name:"http",port:80,state:"open",pid:80,product:"Northstar Web",version:"2.4",observations:["Directory indexing enabled","Backup artifact pattern observed"]}
+    ],
+    processes:[{pid:1,user:"root",cpu:"0.0",mem:"0.2",name:"init"},{pid:80,user:"web",cpu:"0.1",mem:"2.3",name:"httpd"}],connections:[],
+    authentication:{},
+    vulnerabilities:[
+      {id:"BBX-014",state:"vulnerable",effects:{artifacts:[{id:"range01-proof",path:"/public/backup/proof.txt",label:"proof.txt",content:"NW-RANGE-PROOF-01\nEnumeration before exploitation."}]}}
+    ]
+  },
+  rangefile02:{
+    id:"rangefile02",hostname:"RANGE-FILE-02",address:"10.77.5.21",owner:"NightWire Range",os:"RangeNIX File 1.3",filesystem:"rangefile02",users:["rangeops","root"],homeDir:"/home/rangeops",
+    universe:"range",rangeLabId:"range02",accessModel:"advanced",detectionThreshold:5,identity:"known",
+    interfaces:[{name:"eth0",address:"10.77.5.21",cidr:24,gateway:"10.77.5.1"}],routes:[],
+    services:[
+      {name:"ssh",port:22,state:"open",pid:41,product:"NEXUS Secure Shell",version:"4.1",observations:["Password authentication enabled"]},
+      {name:"http",port:8080,state:"open",pid:80,product:"Northstar Web",version:"2.4",observations:["Legacy backup directory exposed","Configuration artifact signature detected"]}
+    ],
+    processes:[{pid:1,user:"root",cpu:"0.0",mem:"0.2",name:"init"},{pid:41,user:"root",cpu:"0.0",mem:"0.8",name:"sshd"},{pid:80,user:"web",cpu:"0.1",mem:"2.4",name:"httpd"}],connections:[],
+    authentication:{ssh:[{username:"rangeops",secret:"NW_RANGE_02",privilege:"user"}]},
+    vulnerabilities:[
+      {id:"BBX-014",state:"vulnerable",effects:{artifacts:[{id:"range02-service-conf",path:"/backup/service.conf",label:"service.conf",content:"service_user=rangeops\nauth_source=legacy-backup\nnote=credential material recorded by BLACKBOX"}],credentials:[{id:"cred-range02-ops",username:"rangeops",secret:"NW_RANGE_02",scope:{universes:["range"],hosts:["rangefile02"],services:["ssh"]}}]}}
+    ]
+  },
+  rangeops03:{
+    id:"rangeops03",hostname:"RANGE-OPS-03",address:"10.77.6.30",owner:"NightWire Range",os:"RangeNIX Ops 2.0",filesystem:"rangeops03",users:["svc-range","root"],homeDir:"/home/svc-range",
+    universe:"range",rangeLabId:"range03",accessModel:"advanced",detectionThreshold:6,identity:"known",
+    interfaces:[{name:"eth0",address:"10.77.6.30",cidr:24,gateway:"10.77.6.1"}],routes:[],
+    services:[
+      {name:"files",port:445,state:"open",pid:90,product:"Range File Service",version:"1.2",observations:["Guest boundary disabled","Service-account context exposed"]}
+    ],
+    processes:[{pid:1,user:"root",cpu:"0.0",mem:"0.2",name:"init"},{pid:90,user:"svc-range",cpu:"0.1",mem:"2.7",name:"filesvc"}],connections:[],
+    authentication:{},
+    vulnerabilities:[
+      {id:"BBX-021",state:"vulnerable",effects:{session:{user:"svc-range",privilege:"service",service:"files"}}},
+      {id:"BBX-037",state:"vulnerable",requiresPrivilege:"service",effects:{elevateTo:"root"}}
+    ]
+  }
 
 };

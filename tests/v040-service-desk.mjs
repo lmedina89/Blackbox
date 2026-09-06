@@ -6,7 +6,7 @@ import { migrateSave } from "../js/core/migrations.js";
 import { advanceElapsedTime } from "../js/systems/timeline.js";
 import { initServiceDesk, serviceDeskSnapshot, acceptTicket, connectRemote, disconnectRemote, remoteMachineSnapshot, observeRemoteTool, setRemoteDevice, setRemoteService, renewRemoteDhcp, repairRemoteNetwork, runRemoteCommand, verifyTicket, resolveTicket } from "../js/systems/serviceDesk.js";
 
-assert.equal(SAVE_VERSION,13);
+assert.equal(SAVE_VERSION,15);
 assert.equal(WORLD_SCHEMA,10);
 
 // Foundation seeds only the first structured training incident and three isolated remote machines.
@@ -131,7 +131,7 @@ assert.equal(WORLD_SCHEMA,10);
   const old=resetState();old.meta.saveVersion=12;old.player.alias="legacy-helpdesk";old.player.credits=901;old.world.completedMissions=["mission_first","mission_mirror"];old.missions.active=["mission_recovery"];
   old.helpDesk={availableTickets:[],activeTickets:[],completedTickets:[],ticketProgress:{}};
   const migrated=migrateSave(structuredClone(old));
-  assert.equal(migrated.meta.saveVersion,13);
+  assert.equal(migrated.meta.saveVersion,15);
   assert.equal(migrated.player.credits,901);
   assert.deepEqual(migrated.world.completedMissions,["mission_first","mission_mirror"]);
   assert.deepEqual(migrated.missions.active,["mission_recovery"]);

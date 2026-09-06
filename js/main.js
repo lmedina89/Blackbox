@@ -1,5 +1,5 @@
 import { getState, setFlag } from "./core/state.js";
-import { saveGame, loadProfile, getProfileSummary, beginNewIdentity, restoreArchivedIdentity, archiveCurrentIdentity, hasActiveIdentity } from "./core/save.js";
+import { saveGame, loadProfile, getProfileSummary, beginNewIdentity, beginQaNightwireIdentity, restoreArchivedIdentity, archiveCurrentIdentity, hasActiveIdentity } from "./core/save.js";
 import { startClock } from "./core/clock.js";
 import { initMissions } from "./systems/missions.js";
 import { initClues } from "./systems/clues.js";
@@ -10,6 +10,7 @@ import { initAudio, playSound } from "./systems/audio.js";
 import { initTimeline } from "./systems/timeline.js";
 import { initCommunications } from "./systems/communications.js";
 import { initServiceDesk } from "./systems/serviceDesk.js";
+import { initNightwire } from "./systems/nightwire.js";
 import { initAutosave } from "./core/autosave.js";
 import { escapeHtml } from "./ui/safeText.js";
 
@@ -25,6 +26,7 @@ const archivesPanel=document.querySelector("#archives-panel");
 const continueButton=document.querySelector("#continue-button");
 const newIdentityButton=document.querySelector("#new-identity-button");
 const archivesButton=document.querySelector("#archives-button");
+const qaNightwireButton=document.querySelector("#qa-nightwire-button");
 const activeSummary=document.querySelector("#active-identity-summary");
 const bootStatus=document.querySelector("#boot-status");
 const newWarning=document.querySelector("#new-identity-warning");
@@ -49,7 +51,7 @@ function renderBoot(){
 
   if(summary.active){
     activeSummary.classList.remove("hidden");
-    activeSummary.innerHTML=`<b>ACTIVE IDENTITY</b><strong>${escapeHtml(summary.active.alias)}</strong><span>Day ${summary.active.day} · ${summary.active.credits} cr · Rep ${summary.active.reputation}</span>`;
+    activeSummary.innerHTML=`<b>${summary.active.qaMode?"QA TEST IDENTITY":"ACTIVE IDENTITY"}</b><strong>${escapeHtml(summary.active.alias)}</strong><span>Day ${summary.active.day} · ${summary.active.credits} cr · Rep ${summary.active.reputation}${summary.active.qaMode?" · NightWire Range":""}</span>`;
     continueButton.classList.remove("hidden");
     newWarning.textContent="Creating a new identity will archive the current active identity first.";
   }else{
@@ -91,6 +93,7 @@ function renderArchives(){
 
 function initializeGameUI(){
   initServiceDesk();
+  initNightwire();
   desktopUI=initDesktopUI({enterBlackbox});
   terminalUI=initTerminalUI({onExit:closeBlackbox,onSuspend:suspendBlackbox,onPurge:purgeIdentity});
   document.querySelector("#start-alias").textContent=getState().player.alias;
@@ -158,6 +161,12 @@ window.addEventListener("pagehide",()=>{
 
 continueButton.addEventListener("click",()=>initializeGameUI());
 newIdentityButton.addEventListener("click",()=>showPanel("new"));
+
+qaNightwireButton.addEventListener("click",()=>{
+  beginQaNightwireIdentity("range_qa",{archiveActive:true});
+  initializeGameUI();
+  setTimeout(()=>desktopUI.toast("QA identity ready. Enter BLACKBOX and type nightwire."),500);
+});
 document.querySelector("#new-identity-back").addEventListener("click",()=>showPanel("home"));
 archivesButton.addEventListener("click",()=>{renderArchives();showPanel("archives");});
 document.querySelector("#archives-back").addEventListener("click",()=>showPanel("home"));

@@ -1,7 +1,7 @@
 {
-  "name": "Human Layer / Remote Assistance Mobile Polish",
-  "version": "0.4.0-alpha.4.6.1",
-  "saveVersion": 13,
+  "name": "NightWire Range QA Test Access",
+  "version": "0.4.0-alpha.4.8.1-qa",
+  "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
     "version": "0.2.3.4",
@@ -9,7 +9,7 @@
     "sha256": "ed0529188940f771399297ea228a3ce6ae7322454e6145a16ba9fa5c35924343"
   },
   "content": {
-    "hosts": 36,
+    "hosts": 39,
     "missions": 9,
     "emails": 14,
     "messengerThreads": 4,
@@ -24,9 +24,41 @@
     "worldEvents": 11,
     "scheduledContent": 5,
     "serviceDeskTickets": 3,
-    "remoteSupportMachines": 3
+    "remoteSupportMachines": 3,
+    "exploitProfiles": 3,
+    "nightwireNodePosts": 4,
+    "nightwirePrivateMessages": 1,
+    "nightwireRangeLabs": 3
   },
   "features": [
+    "QA-only boot entry creates a separate NightWire Range test identity without changing normal New Identity progression",
+    "QA identity archives any current active identity before switching so normal player progress remains recoverable from Archived Identities",
+    "QA identity marks all nine legacy Act-I missions complete and derives the canonical 3,080 credits / 50 reputation directly from mission definitions",
+    "QA identity intentionally does not seed the old mission-complete communication flags, preventing a wall of catch-up Messenger/Mail content during Range testing",
+    "QA identity starts with NightWire private node unlocked through completed Glass Harbor state, zero Range completions, no active sandbox, and clean intrusion runtime state",
+    "normal New Identity remains a clean save with zero completed missions, zero credits/reputation, and NightWire gated normally",
+    "SAVE_VERSION remains 15 and WORLD_SCHEMA remains 10; QA marker is optional metadata only",
+    "A4.8.1 QA regression verifies normal New Identity remains clean, current active progress is archived before QA switch, the QA identity unlocks NightWire at 3,080 credits / 50 reputation with zero Range completions, and restoring the real identity returns its prior state",
+    "NightWire private node is accessed from the BLACKBOX CLI after Glass Harbor completes; the existing NEXUS NightWire website remains the public-facing mirror",
+    "NightWire node provides terminal/BBS-style General, Field Reports, Jobs, Range and Private Messages sections without adding or redesigning a BLACKBOX desktop app",
+    "three isolated Range labs teach enumeration/exposed information, credential footholds and privilege boundaries before Act II uses the advanced access model",
+    "Range target routes are mounted only while a lab is active and detached on finish/abort so practice hosts never enter normal campaign scans or saved discovery state",
+    "Range scan output always includes service ports independent of hardware upgrades so beginner labs teach the intended workflow consistently",
+    "fictional profile catalog is available through probe list; profile browsing does not count as an attack action or advance simulated time",
+    "exposed simulated artifacts can be reviewed through access artifacts and access artifact <#>; artifact inspection can satisfy isolated Range objectives",
+    "NightWire Range records completion, attempts, hints, noise and failed authentication while campaign actionTick/networkEpoch remain isolated",
+    "Range runtime credentials, sessions, artifacts, noise and target discovery are detached when a lab finishes or is aborted; only training results persist",
+    "SAVE_VERSION 15 adds NightWire/Range progress and terminal private-service session state while WORLD_SCHEMA remains 10",
+    "advanced BLACKBOX access model is opt-in per host; all existing hosts remain legacy-access by default so the original nine missions keep their proven connect behavior",
+    "fictional vulnerability-profile engine with BBX-only identifiers, simulated prerequisites/effects, no real CVEs, payloads, sockets, malware, or external network execution",
+    "service enumeration records product/version/observations separately from broad scan discovery",
+    "persistent BLACKBOX access register for simulated credentials, credential scope/testing history, established sessions, exposed artifacts, and per-target detection noise",
+    "advanced authentication stages a host-specific session with explicit guest/user/service/admin/root privilege rather than granting automatic full access",
+    "advanced filesystem resources may declare minimum simulated privilege while legacy host filesystem behavior remains unrestricted for compatibility",
+    "meaningful simulated failure states distinguish access denial, missing route/service, rejected credentials, credential-scope mismatch, mitigated profiles, and profile mismatch",
+    "range/sandbox namespace isolation foundation filters reachability and converts BLACKBOX command time to elapsed-only time so practice activity cannot increment campaign actionTick or networkEpoch",
+    "all nine current scenario metadata records are explicitly classified as legacy access in preparation for Act II advanced-access content",
+    "SAVE_VERSION 14 migration adds intrusion/access state and active advanced-session identity while WORLD_SCHEMA remains 10",
     "phone-portrait Remote Assistance uses replacement navigation: active troubleshooting tools take over the remote workspace instead of stacking below the simulated desktop",
     "active phone-portrait remote tools expose a dedicated Remote Desktop return control and independently touch-scrollable full-height content",
     "A4.6.1 preserves save version 13/world schema 10 and leaves all Service Desk fault logic, campaign missions, communications, BLACKBOX hosts and terminal semantics unchanged",
@@ -123,6 +155,16 @@
     "IPv6"
   ],
   "verification": [
+    "A4.8 NightWire regression verifies private-node gating after Glass Harbor, BBS prompt navigation and Range launch/finish flow",
+    "A4.8 Range regression completes all three labs through the actual scan/enum/probe/auth/connect/permission/elevation command path",
+    "A4.8 isolation regression verifies Range hosts are absent from permanent HOME-PC routes, campaign hosts are unreachable during a mounted lab, and campaign actionTick/networkEpoch do not advance",
+    "A4.8 ergonomics regression verifies Range scan exposes ports without FastLink hardware, probe list is reference-only, and exposed artifacts are readable through the access register",
+    "A4.8 save regression upgrades save 14 to save 15 with empty NightWire state and preserves Range completion data through normalization",
+    "A4.7 exploit-engine regression verifies advanced connect denial, service enumeration, fictional probe effects, credential discovery, failed/successful authentication, staged USER access, permission denial, simulated ROOT elevation, and proof access",
+    "A4.7 isolation regression verifies active Range context cannot reach campaign hosts and does not advance campaign actionTick/networkEpoch while elapsed time still advances",
+    "A4.7 credential-scope and repeated-auth regressions verify out-of-scope/rejected access produces distinct feedback and target noise crosses the configured detection threshold",
+    "A4.7 save migration regression upgrades A4.6.1 save 13 to save 14 with empty access state and preserves advanced credentials/sessions/noise through normalization",
+    "A4.7 namespace regression verifies Service Desk workstation identifiers are not resolvable through the BLACKBOX host registry",
     "A4.6 Service Desk regression completes all three starter tickets against persistent remote-machine state and verifies sequential unlocking",
     "A4.6 isolation regression proves Service Desk elapsed time does not change BLACKBOX actionTick/networkEpoch, campaign missions, communications choices, credits or terminal host context",
     "A4.6 DNS regression verifies IP ping works, hostname ping fails with local DNS Client stopped, and direct nslookup still queries configured DNS before the service repair",
@@ -195,5 +237,9 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.6.1 Remote Assistance mobile polish: full-height replacement tool navigation on phone portrait with A4.6 Service Desk behavior unchanged"
+  "foundationMilestone": "A4.8.1 QA Test Access: separate boot-time NightWire Range identity for immediate physical-device testing without replaying Act I",
+  "immediateBaseline": {
+    "version": "0.4.0-A4.8",
+    "sha256": "5fe9ef2a56b4a17d04365fd983806644765f358f58a4ce0a9c8b157208a2745a"
+  }
 }

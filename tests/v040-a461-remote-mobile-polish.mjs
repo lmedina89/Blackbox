@@ -9,7 +9,7 @@ const appsCss=fs.readFileSync(path.join(root,"css/apps.css"),"utf8");
 const mobileCss=fs.readFileSync(path.join(root,"css/mobile.css"),"utf8");
 
 // This is a presentation-only repair. No state migration is warranted.
-assert.equal(SAVE_VERSION,13);
+assert.equal(SAVE_VERSION,15);
 assert.equal(WORLD_SCHEMA,10);
 
 // Remote desktop and tools are now explicit mutually-exclusive mobile workspace modes.

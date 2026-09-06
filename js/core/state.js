@@ -1,6 +1,6 @@
 import { emit } from "./events.js";
 
-export const SAVE_VERSION=13;
+export const SAVE_VERSION=15;
 export const WORLD_SCHEMA=10;
 
 function id(prefix="id"){
@@ -54,6 +54,8 @@ export const baseState=()=>({
   communications:{choicesMade:[],choiceTimes:{},threads:{}},
   learning:{questionAttempts:{},topicStats:{},reviewQueue:[]},
   helpDesk:{availableTickets:[],activeTickets:[],completedTickets:[],ticketProgress:{},machines:{},remoteSession:null,job:{level:1,resolved:0,escalated:0,score:0}},
+  intrusion:{credentials:[],sessions:{},serviceIntel:{},artifacts:[],noise:{},attempts:[],activeSandbox:null},
+  nightwire:{readPosts:[],readMessages:[],range:{activeLabId:null,completed:[],runs:{},results:{}}},
   behavior:{autonomy:0,empathy:0,intervention:0,transparency:0,trust:0,decisions:[]},
   nexusSystem:{
     network:{adapterEnabled:true,dhcp:true,ip:"192.168.1.24",subnet:"255.255.255.0",gateway:"192.168.1.1",dns:["192.168.1.1"],leaseRenewals:0,lastRepairAt:null},
@@ -76,7 +78,9 @@ export const baseState=()=>({
     sessionOpen:false,
     suspended:false,
     pendingAction:null,
-    lastScanResults:[]
+    lastScanResults:[],
+    accessSessionId:null,
+    serviceSession:null
   },
   ui:{openApps:[],lastBrowserSite:"news",terminalInputMode:"auto",nexusInputMode:"auto"}
 });

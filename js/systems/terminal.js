@@ -8,12 +8,15 @@ import { emit } from "../core/events.js";
 import { missionView } from "./missions.js";
 import { learn, proficiencyLabel } from "./progression.js";
 import { saveTarget, removeTarget, getSavedTargets, missionTitle, activeMissionForHost } from "./targets.js";
-import { advanceWorld } from "./timeline.js";
+import { advanceWorld, advanceElapsedTime } from "./timeline.js";
 import { lookupDns, formatDnsResult, resolveDnsTarget } from "./dns.js";
 import { MISSIONS } from "../data/missions.js";
+import { enumerateService, probeProfile, authenticate, accessSnapshot, artifactByRef, canAccessNode, isIsolatedBlackboxContext, currentPrivilege, accessModel, universeOf } from "./intrusion.js";
+import { EXPLOIT_PROFILES } from "../data/exploits.js";
+import { openNightwire, handleNightwireInput, nightwirePrompt, nightwireUnlocked } from "./nightwire.js";
 
 const commands=new Map(),aliases=new Map();
-const MEANINGFUL_COMMANDS=new Set(["scan","connect","ip","services","netstat","ping","nslookup","traceroute","cat","head","tail","grep","find","download"]);
+const MEANINGFUL_COMMANDS=new Set(["scan","connect","ip","services","netstat","ping","nslookup","traceroute","cat","head","tail","grep","find","download","enum","probe","auth"]);
 const line=t=>({lines:[{text:t}]});
 
 export function registerCommand(def){
@@ -23,6 +26,8 @@ export function registerCommand(def){
 function localUser(s){return (s.player.alias||"user").toLowerCase().replace(/\s+/g,"_");}
 export function getPrompt(){
   const s=getState(),h=HOSTS[s.terminal.hostId],home=h.homeDir||"/home";
+  const servicePrompt=nightwirePrompt();
+  if(servicePrompt)return servicePrompt;
   if(s.terminal.hostId==="home")s.terminal.user=localUser(s);
   const tail=s.terminal.cwd===home?"~":s.terminal.cwd;
   return `${s.terminal.user}@${h.hostname.toLowerCase()}:${tail}$`;
@@ -30,9 +35,10 @@ export function getPrompt(){
 function preprocess(raw){
   return raw.trim();
 }
-function emitCommand(name,args,actionKey){emit("command:used",{name,args,hostId:getState().terminal.hostId,actionKey});}
+function commandUniverse(state=getState()){return state.intrusion?.activeSandbox?.universe||universeOf(state.terminal.hostId);}
+function emitCommand(name,args,actionKey){const state=getState();emit("command:used",{name,args,hostId:state.terminal.hostId,actionKey,universe:commandUniverse(state)});}
 function scanRecord(h,index){
-  const s=getState(),detail=s.player.installedHardware.includes("nic_fast");
+  const s=getState(),detail=s.player.installedHardware.includes("nic_fast")||universeOf(h)==="range";
   const name=displayName(h.id);
   const serviceCount=h.services.filter(x=>x.port).length;
   const serviceSummary=`${serviceCount} service${serviceCount===1?"":"s"}`;
@@ -62,8 +68,22 @@ function savedTarget(state,value){
   const entry=(state.player.savedTargets||[])[Number(value)];
   return entry?HOSTS[entry.hostId]:null;
 }
+function pathAccessAllowed(state,path){
+  const pieces=String(path||"/").split("/").filter(Boolean);
+  let current="/",node=getNode(state.terminal.hostId,current);
+  if(node&&!canAccessNode(node,state))return false;
+  for(const piece of pieces){
+    current=current==="/"?`/${piece}`:`${current}/${piece}`;
+    node=getNode(state.terminal.hostId,current);
+    if(node&&!canAccessNode(node,state))return false;
+  }
+  return true;
+}
 function fileText(state,arg){
-  const path=normalizePath(state.terminal.cwd,arg,state.terminal.hostId);
+  const path=normalizePath(state.terminal.cwd,arg,state.terminal.hostId),node=getNode(state.terminal.hostId,path);
+  if(!node)throw new Error("No such file");
+  if(node.type!=="file")throw new Error("Is a directory");
+  if(!pathAccessAllowed(state,path))throw new Error(`Permission denied: ${path} requires higher privilege`);
   return {path,body:readFile(state.terminal.hostId,path)};
 }
 
@@ -84,6 +104,7 @@ function connectTargetId(state,args){
 
 export function semanticActionKey(name,args,state=getState()){
   const hostId=state.terminal.hostId;
+  if(name==="probe"&&String(args[0]||"").toLowerCase()==="list")return null;
   if(name==="connect")return `cmd:connect:${connectTargetId(state,args)}`;
   if(name==="nslookup"){
     const dnsName=canonicalToken(args[0]),type=String(args[1]||"ANY").trim().toUpperCase();
@@ -108,6 +129,10 @@ export async function executeCommand(raw){
   s.terminal.history.push(text);
   if(s.terminal.history.length>100)s.terminal.history.shift();
   s.terminal.historyIndex=s.terminal.history.length;
+  if(s.terminal.serviceSession?.type==="nightwire"){
+    try{return handleNightwireInput(text)||{lines:[]};}
+    catch(err){return {lines:[{text:err.message||"NightWire command failed",type:"error"}]};}
+  }
   const [rawHead,...args]=text.split(/\s+/),head=rawHead.toLowerCase(),name=aliases.get(head)||head,cmd=commands.get(name);
   if(!cmd){
     if(head==="cd..")return {lines:[
@@ -122,9 +147,15 @@ export async function executeCommand(raw){
   }
   try{
     const actionKey=MEANINGFUL_COMMANDS.has(name)?semanticActionKey(name,args,s):null;
+    const isolatedBefore=isIsolatedBlackboxContext(s);
     const result=await cmd.execute({state:s,args})||{lines:[]};
     emitCommand(name,args,actionKey);
-    const advancedWorld=actionKey?advanceWorld(actionKey,{minutes:name==="scan"?4:3,once:true}):false;
+    let advancedWorld=false;
+    if(actionKey){
+      const minutes=name==="scan"?4:3,isolated=isolatedBefore||isIsolatedBlackboxContext(s);
+      if(isolated)advanceElapsedTime(minutes,{reason:`blackbox-isolated:${name}`});
+      else advancedWorld=advanceWorld(actionKey,{minutes,once:true});
+    }
     emit("command:committed",{name,args,hostId:s.terminal.hostId,actionKey,advancedWorld});
     return result;
   }
@@ -165,8 +196,13 @@ registerCommand({name:"help",aliases:["?"],execute(){return line([
 "  target info <#>     inspect known target data",
 "  connect scan <#>   connect to recent scan result",
 "  connect target <#> connect to saved target",
-"  connect <host|ip>  connect by known name/address",
-"  traceroute <host> show simulated route","",
+"  connect <host|ip>  use an established/legacy session",
+"  traceroute <host> show simulated route",
+"  enum <host> <service> inspect an exposed service",
+"  probe <BBX-id> [host] test a fictional vulnerability profile",
+"  auth <host> <service> <credential> attempt known simulated access",
+"  access            known credentials, sessions, artifacts and noise",
+...(nightwireUnlocked()?["  nightwire         connect to the NightWire private node"]:[]),"",
 "GAME",
 "  missions          active objectives",
 "  clues             discovered information",
@@ -191,7 +227,7 @@ registerCommand({name:"services",execute({state,args}){
   }
   learn(`services:${h.id}`,"systems");
   const rows=h.services.filter(x=>x.port);
-  if(remote&&!state.player.installedHardware.includes("nic_fast")){
+  if(remote&&!state.player.installedHardware.includes("nic_fast")&&universeOf(h)!=="range"){
     return line(`SERVICES ${h.address}\n${rows.length} network service${rows.length===1?"":"s"} detected.\nFastLink 100 required for remote port/service detail.`);
   }
   return line([`SERVICES ${displayName(h.id)} (${h.address})`,"PORT     SERVICE        STATE",...rows.map(x=>`${String(x.port).padEnd(8)} ${x.name.padEnd(14)} ${x.state}`)].join("\n"));
@@ -199,14 +235,14 @@ registerCommand({name:"services",execute({state,args}){
 registerCommand({name:"netstat",execute({state}){const h=HOSTS[state.terminal.hostId];learn(`netstat:${state.terminal.hostId}`,"network");return line(["Proto Local Address          Remote Address         State",...h.connections.map(x=>`${x.proto.padEnd(5)} ${x.local.padEnd(22)} ${x.remote.padEnd(22)} ${x.state}`)].join("\n"));}});
 registerCommand({name:"skills",execute({state}){const p=state.player.proficiencies;return line(["PROFICIENCIES","",...Object.entries(p).map(([k,v])=>`${k.toUpperCase().padEnd(10)} ${proficiencyLabel(v).padEnd(10)} (${v})`)].join("\n"));}});
 
-registerCommand({name:"ls",execute({state,args}){const path=normalizePath(state.terminal.cwd,args[0]||".",state.terminal.hostId),rows=listDir(state.terminal.hostId,path);learn("ls","systems");return line(rows.map(x=>x.type==="dir"?`${x.name}/`:x.name).join("  "));}});
-registerCommand({name:"cd",execute({state,args}){const path=normalizePath(state.terminal.cwd,args[0]||"~",state.terminal.hostId),node=getNode(state.terminal.hostId,path);if(!node)throw new Error("cd: no such directory");if(node.type!=="dir")throw new Error("cd: not a directory");state.terminal.cwd=path;learn("cd","systems");return {lines:[]};}});
-registerCommand({name:"cat",execute({state,args}){if(!args[0])throw new Error("cat: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path});learn("cat","systems");return line(body);}});
-registerCommand({name:"head",execute({state,args}){if(!args[0])throw new Error("head: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path});learn(`head:${state.terminal.hostId}`,"analysis");return line(body.split("\n").slice(0,5).join("\n"));}});
-registerCommand({name:"tail",execute({state,args}){if(!args[0])throw new Error("tail: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path});learn(`tail:${state.terminal.hostId}`,"analysis");return line(body.split("\n").slice(-5).join("\n"));}});
-registerCommand({name:"grep",execute({state,args}){if(args.length<2)throw new Error("usage: grep <text> <file>");const needle=args[0],canonicalQuery=needle.toLowerCase(),{path,body}=fileText(state,args[1]),matches=body.split("\n").filter(x=>x.toLowerCase().includes(canonicalQuery));emit("file:searched",{hostId:state.terminal.hostId,path,query:canonicalQuery,canonicalQuery,rawQuery:needle});learn(`grep:${state.terminal.hostId}`,"analysis",2);const result=matches.length?matches.join("\n"):"grep: no matches";return line((state.player.installedSoftware||[]).includes("logscope")?`${result}\n\nLogScope: ${matches.length} matching line${matches.length===1?"":"s"}; query recorded for correlation.`:result);}});
-function walk(node,path,out,needle){if(node.type==="file"){if(path.toLowerCase().includes(needle.toLowerCase()))out.push(path);return;}for(const [name,child] of Object.entries(node.children||{}))walk(child,`${path==="/"?"/":path+"/"}${name}`,out,needle);}
-registerCommand({name:"find",execute({state,args}){if(!args.length)throw new Error("usage: find [path] <name>");const needle=args.at(-1),base=args.length>1?normalizePath(state.terminal.cwd,args[0],state.terminal.hostId):state.terminal.cwd,node=getNode(state.terminal.hostId,base);if(!node)throw new Error("find: path not found");const out=[];walk(node,base,out,needle);learn(`find:${state.terminal.hostId}`,"analysis");return line(out.length?out.join("\n"):"find: no matches");}});
+registerCommand({name:"ls",execute({state,args}){const path=normalizePath(state.terminal.cwd,args[0]||".",state.terminal.hostId),node=getNode(state.terminal.hostId,path);if(!node)throw new Error("ls: no such directory");if(node.type!=="dir")throw new Error("ls: not a directory");if(!pathAccessAllowed(state,path))throw new Error(`ls: permission denied: ${path}`);const rows=listDir(state.terminal.hostId,path);learn("ls","systems");return line(rows.map(x=>x.type==="dir"?`${x.name}/`:x.name).join("  "));}});
+registerCommand({name:"cd",execute({state,args}){const path=normalizePath(state.terminal.cwd,args[0]||"~",state.terminal.hostId),node=getNode(state.terminal.hostId,path);if(!node)throw new Error("cd: no such directory");if(node.type!=="dir")throw new Error("cd: not a directory");if(!pathAccessAllowed(state,path))throw new Error(`cd: permission denied: ${path}`);state.terminal.cwd=path;learn("cd","systems");return {lines:[]};}});
+registerCommand({name:"cat",execute({state,args}){if(!args[0])throw new Error("cat: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path,universe:commandUniverse(state)});learn("cat","systems");return line(body);}});
+registerCommand({name:"head",execute({state,args}){if(!args[0])throw new Error("head: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path,universe:commandUniverse(state)});learn(`head:${state.terminal.hostId}`,"analysis");return line(body.split("\n").slice(0,5).join("\n"));}});
+registerCommand({name:"tail",execute({state,args}){if(!args[0])throw new Error("tail: missing file operand");const {path,body}=fileText(state,args[0]);emit("file:read",{hostId:state.terminal.hostId,path,universe:commandUniverse(state)});learn(`tail:${state.terminal.hostId}`,"analysis");return line(body.split("\n").slice(-5).join("\n"));}});
+registerCommand({name:"grep",execute({state,args}){if(args.length<2)throw new Error("usage: grep <text> <file>");const needle=args[0],canonicalQuery=needle.toLowerCase(),{path,body}=fileText(state,args[1]),matches=body.split("\n").filter(x=>x.toLowerCase().includes(canonicalQuery));emit("file:searched",{hostId:state.terminal.hostId,path,query:canonicalQuery,canonicalQuery,rawQuery:needle,universe:commandUniverse(state)});learn(`grep:${state.terminal.hostId}`,"analysis",2);const result=matches.length?matches.join("\n"):"grep: no matches";return line((state.player.installedSoftware||[]).includes("logscope")?`${result}\n\nLogScope: ${matches.length} matching line${matches.length===1?"":"s"}; query recorded for correlation.`:result);}});
+function walk(node,path,out,needle,state){if(!canAccessNode(node,state))return;if(node.type==="file"){if(path.toLowerCase().includes(needle.toLowerCase()))out.push(path);return;}for(const [name,child] of Object.entries(node.children||{}))walk(child,`${path==="/"?"/":path+"/"}${name}`,out,needle,state);}
+registerCommand({name:"find",execute({state,args}){if(!args.length)throw new Error("usage: find [path] <name>");const needle=args.at(-1),base=args.length>1?normalizePath(state.terminal.cwd,args[0],state.terminal.hostId):state.terminal.cwd,node=getNode(state.terminal.hostId,base);if(!node)throw new Error("find: path not found");if(!pathAccessAllowed(state,base))throw new Error(`find: permission denied: ${base}`);const out=[];walk(node,base,out,needle,state);learn(`find:${state.terminal.hostId}`,"analysis");return line(out.length?out.join("\n"):"find: no matches");}});
 function requiredEvidenceIds(){
   return new Set(MISSIONS.flatMap(m=>m.objectives||[]).filter(o=>o.type==="file_downloaded").map(o=>o.target));
 }
@@ -223,7 +259,7 @@ registerCommand({name:"download",execute({state,args}){
     if(!REQUIRED_EVIDENCE.has(id)&&optionalCount>=capacity)throw new Error(`download: optional evidence storage full (${capacity} files)`);
     state.player.downloads.push(id);
   }
-  emit("file:downloaded",{hostId:state.terminal.hostId,path,alreadyStored});
+  emit("file:downloaded",{hostId:state.terminal.hostId,path,alreadyStored,universe:commandUniverse(state)});
   learn("download","systems");
   return line(alreadyStored
     ? `Evidence already recorded: ${path}\nExisting HOME-PC evidence reference reused.`
@@ -350,6 +386,108 @@ registerCommand({name:"connect",execute({state,args}){
   discoverHost(connected.id);
   learn(`connect:${connected.id}`,"network");
   return line(`Resolving ${connected.hostname}...\nRoute found from ${from}.\nNegotiating session...\nIdentity: ${state.terminal.user}\nHandshake accepted.\nConnected to ${connected.hostname} (${connected.address}).`);
+}});
+
+registerCommand({name:"enum",aliases:["enumerate"],execute({state,args}){
+  if(args.length<2)throw new Error("usage: enum <host|ip> <service|port>");
+  const h=scanTarget(state,args[0])||savedTarget(state,args[0]);
+  if(!h)throw new Error("enum: target is not known to BLACKBOX; discover it first");
+  const intel=enumerateService(h,args[1]);
+  learn(`enum:${h.id}:${intel.service}`,"analysis",2);
+  return line([
+    `SERVICE ENUMERATION // ${displayName(h.id)} (${h.address})`,
+    `Port:         ${intel.port}/tcp`,
+    `Service:      ${intel.service}`,
+    `Product:      ${intel.product||"unidentified"}`,
+    `Version:      ${intel.version||"unidentified"}`,
+    ...(intel.observations.length?["","Observations:",...intel.observations.map(x=>`- ${x}`)]:["","No additional service observations identified."])
+  ].join("\n"));
+}});
+
+registerCommand({name:"probe",execute({state,args}){
+  if(String(args[0]||"").toLowerCase()==="list"){
+    return line(["FICTIONAL BBX PROFILE CATALOG","",...Object.values(EXPLOIT_PROFILES).map(p=>`${p.id}  ${p.title}\n  service: ${p.requiredService} · class: ${p.class}\n  ${p.summary}`),"","Profiles are simulation-only. Enumerate a target before choosing a service-specific profile."].join("\n"));
+  }
+  if(!args[0])throw new Error('usage: probe <BBX-profile> [host|ip] | probe list');
+  const target=args[1]||state.terminal.hostId,h=scanTarget(state,target)||savedTarget(state,target);
+  if(!h)throw new Error("probe: target is not known to BLACKBOX; discover it first");
+  const result=probeProfile(h,args[0]),noise=result.noise;
+  learn(`probe:${result.profile.id}`,"analysis",2);
+  if(!result.ok)return line([
+    `PROBE ${result.profile.id} // ${displayName(h.id)}`,
+    `[-] ${result.message}`,
+    `Noise: ${noise.value}/${noise.threshold}${noise.alerted?"  ALERTED":""}`
+  ].join("\n"));
+  const lines=[`PROBE ${result.profile.id} // ${displayName(h.id)}`,`[+] ${result.message}`];
+  for(const artifact of result.effects.artifacts)lines.push(`[+] Artifact exposed: ${artifact.label}`);
+  for(const credential of result.effects.credentials)lines.push(`[+] Access material recorded: ${credential.username} (${credential.id})`);
+  if(result.effects.session)lines.push(`[+] Restricted session established: ${result.effects.session.user} [${result.effects.session.privilege.toUpperCase()}]`);
+  if(result.effects.elevated)lines.push(`[+] Session privilege updated: ${result.effects.elevated.toUpperCase()}`);
+  lines.push(`Noise: ${noise.value}/${noise.threshold}${noise.alerted?"  ALERTED":""}`);
+  return line(lines.join("\n"));
+}});
+
+registerCommand({name:"auth",execute({state,args}){
+  if(args.length<3)throw new Error("usage: auth <host|ip> <service|port> <credential|username>");
+  const h=scanTarget(state,args[0])||savedTarget(state,args[0]);
+  if(!h)throw new Error("auth: target is not known to BLACKBOX; discover it first");
+  const result=authenticate(h,args[1],args[2]);
+  learn(`auth:${h.id}:${result.service.name}`,"systems",2);
+  if(!result.ok)return line([
+    `AUTHENTICATION // ${displayName(h.id)}`,
+    `[-] ${result.message}`,
+    `Noise: ${result.noise.value}/${result.noise.threshold}${result.noise.alerted?"  ALERTED":""}`,
+    ...(result.noise.alerted?["SECURITY EVENT: target detection threshold reached."]:[])
+  ].join("\n"));
+  return line([
+    `AUTHENTICATION // ${displayName(h.id)}`,
+    `[+] ${result.credential.username} accepted by ${result.service.name}`,
+    `[+] Session staged: ${result.session.user}@${h.hostname.toLowerCase()}`,
+    `Privilege: ${result.session.privilege.toUpperCase()}`,
+    "Use connect to enter the established session."
+  ].join("\n"));
+}});
+
+registerCommand({name:"access",execute({state,args}){
+  const snap=accessSnapshot(),mode=String(args[0]||"all").toLowerCase(),out=["BLACKBOX ACCESS REGISTER",""];
+  if(mode==="artifact"){
+    if(args[1]===undefined)throw new Error("usage: access artifact <#|id>");
+    const artifact=artifactByRef(args[1]);if(!artifact)throw new Error("access: artifact not found");
+    emit("artifact:inspected",{artifactId:artifact.id,hostId:artifact.hostId,universe:artifact.universe||"campaign"});
+    return line(["EXPOSED ARTIFACT",`ID:     ${artifact.id}`,`Source: ${artifact.hostId}`,`Path:   ${artifact.path||"unknown"}`,"",artifact.content||"No readable content was preserved for this artifact."].join("\n"));
+  }
+  if(mode==="all"||mode==="credentials"||mode==="creds"){
+    out.push("KNOWN CREDENTIALS");
+    if(!snap.credentials.length)out.push("  none recorded");
+    else snap.credentials.forEach((c,i)=>out.push(`  [${i}] ${c.username.padEnd(16)} ${c.id}\n      secret ${c.secret} · source ${c.source}`));
+    out.push("");
+  }
+  if(mode==="all"||mode==="sessions"){
+    out.push("ESTABLISHED SESSIONS");
+    if(!snap.sessions.length)out.push("  none established");
+    else snap.sessions.forEach((session,i)=>out.push(`  [${i}] ${session.user}@${session.hostId}  ${session.privilege.toUpperCase()}  via ${session.service}`));
+    out.push("");
+  }
+  if(mode==="all"||mode==="artifacts"){
+    out.push("EXPOSED ARTIFACTS");
+    if(!snap.artifacts.length)out.push("  none recorded");
+    else snap.artifacts.forEach((artifact,i)=>out.push(`  [${i}] ${artifact.hostId}: ${artifact.label} (${artifact.id})`));
+    if(snap.artifacts.length)out.push('  Read with: access artifact <#>');
+    out.push("");
+  }
+  if(mode==="all"||mode==="noise"||mode==="status"){
+    out.push("DETECTION / NOISE");
+    if(!snap.noise.length)out.push("  no probe/authentication noise recorded");
+    else for(const n of snap.noise)out.push(`  ${n.key.padEnd(28)} ${n.value}/${n.threshold}${n.alerted?" ALERTED":""}`);
+  }
+  if(!["all","credentials","creds","sessions","artifacts","noise","status"].includes(mode))throw new Error("usage: access [credentials|sessions|artifacts|artifact <#>|noise]");
+  if(accessModel(HOSTS[state.terminal.hostId])==="advanced")out.push("",`CURRENT PRIVILEGE: ${currentPrivilege(state).toUpperCase()}`);
+  return line(out.join("\n"));
+}});
+
+registerCommand({name:"nightwire",execute({state,args}){
+  const section=String(args[0]||"").toLowerCase();
+  return line(openNightwire(["general","field","jobs","range","messages"].includes(section)?section:null));
 }});
 
 registerCommand({name:"missions",aliases:["jobs"],execute(){const a=missionView();if(!a.length)return line("No active jobs.");return line(a.map(m=>`${m.title}\n${m.objectives.map(o=>`${m.progress[o.id]?"[x]":"[ ]"} ${o.label}`).join("\n")}`).join("\n\n"));}});

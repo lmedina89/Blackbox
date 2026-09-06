@@ -2,6 +2,7 @@ import { HOSTS } from "../data/hosts.js";
 import { getState } from "../core/state.js";
 import { emit } from "../core/events.js";
 import { MISSIONS } from "../data/missions.js";
+import { accessModel, getEstablishedSession, universeOf } from "./intrusion.js";
 
 export function isIdentified(id){
   const s=getState(),h=HOSTS[id];
@@ -35,6 +36,19 @@ function available(host,s){
   return true;
 }
 
+function effectiveRoutes(current,s){
+  const sandbox=s.intrusion?.activeSandbox;
+  if(sandbox?.universe&&sandbox.universe!=="campaign"){
+    if(current.id==="home"){
+      const explicit=(sandbox.targetIds||[]).filter(id=>HOSTS[id]&&universeOf(HOSTS[id])===sandbox.universe);
+      if(explicit.length)return explicit;
+      return (current.routes||[]).filter(id=>HOSTS[id]&&universeOf(HOSTS[id])===sandbox.universe);
+    }
+    return (current.routes||[]).filter(id=>HOSTS[id]&&universeOf(HOSTS[id])===sandbox.universe);
+  }
+  return current.routes||[];
+}
+
 function activeMissionHosts(s){
   const ids=new Set();
   for(const missionId of s.missions.active||[]){
@@ -55,7 +69,9 @@ function activeMissionHosts(s){
 }
 
 export function scan(){
-  const s=getState(),current=HOSTS[s.terminal.hostId],routes=(current.routes||[]).filter(id=>HOSTS[id]&&available(HOSTS[id],s));
+  const s=getState(),current=HOSTS[s.terminal.hostId];
+  const isolatedUniverse=s.intrusion?.activeSandbox?.universe||((universeOf(current)!=="campaign")?universeOf(current):null);
+  const routes=effectiveRoutes(current,s).filter(id=>HOSTS[id]&&available(HOSTS[id],s)&&(!isolatedUniverse||universeOf(HOSTS[id])===isolatedUniverse));
   s.world.scanCounters??={};
   const count=(s.world.scanCounters[current.id]||0)+1;
   s.world.scanCounters[current.id]=count;
@@ -72,8 +88,11 @@ export function scan(){
 }
 
 export function canReach(targetId){
-  const s=getState(),current=HOSTS[s.terminal.hostId];
-  return targetId==="home" ? s.terminal.hostId==="home" : (current.routes||[]).includes(targetId);
+  const s=getState(),current=HOSTS[s.terminal.hostId],target=HOSTS[targetId];
+  if(!current||!target)return false;
+  const isolatedUniverse=s.intrusion?.activeSandbox?.universe||((universeOf(current)!=="campaign")?universeOf(current):null);
+  if(isolatedUniverse&&universeOf(target)!==isolatedUniverse)return false;
+  return targetId==="home" ? s.terminal.hostId==="home" : effectiveRoutes(current,s).includes(targetId);
 }
 
 export function connect(target){
@@ -84,11 +103,15 @@ export function connect(target){
   if(!available(wanted,s))throw new Error("Host is not currently available in the simulated network");
   if(!canReach(wanted.id))throw new Error("No route to host");
   if(wanted.connectable===false)throw new Error("Connection refused. Remote shell service unavailable.");
+  const advanced=accessModel(wanted)==="advanced";
+  const accessSession=advanced?getEstablishedSession(wanted.id):null;
+  if(advanced&&!accessSession)throw new Error(`ACCESS DENIED\nNo authenticated BLACKBOX session is available for ${wanted.hostname}.\nEnumerate exposed services, recover valid access, or establish a simulated foothold first.`);
   s.terminal.hostId=wanted.id;
   s.terminal.lastScanResults=[];
-  s.terminal.user=wanted.access?.mode||"guest";
+  s.terminal.accessSessionId=accessSession?.id||null;
+  s.terminal.user=accessSession?.user||wanted.access?.mode||"guest";
   s.terminal.cwd=wanted.homeDir||"/";
-  emit("host:connected",{hostId:wanted.id,fromHostId:current.id});
+  emit("host:connected",{hostId:wanted.id,fromHostId:current.id,universe:universeOf(wanted)});
   return wanted;
 }
 
@@ -96,9 +119,10 @@ export function disconnect(){
   const s=getState();
   s.terminal.hostId="home";
   s.terminal.lastScanResults=[];
+  s.terminal.accessSessionId=null;
   s.terminal.user=s.player.alias||"user";
   s.terminal.cwd=HOSTS.home.homeDir||"/home";
-  emit("host:connected",{hostId:"home"});
+  emit("host:connected",{hostId:"home",universe:"campaign"});
 }
 
 export function resolveTarget(target){

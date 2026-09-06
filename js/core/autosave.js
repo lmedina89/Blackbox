@@ -10,7 +10,8 @@ export const AUTOSAVE_EVENTS=[
   "forum:read","social:read","news:read","message:read","thread:read",
   "host:connected","command:committed","notes:changed","browser:navigated",
   "timeline:scheduled","content:delivered","content:cancelled","content:expired","content:replaced",
-  "conversation:advanced","helpdesk:changed","training:attempted","behavior:decision","ui:terminal-input-mode","ui:nexus-input-mode","nexus:system-changed"
+  "conversation:advanced","helpdesk:changed","training:attempted","behavior:decision","ui:terminal-input-mode","ui:nexus-input-mode","nexus:system-changed",
+  "nightwire:changed","range:started","range:reset","range:aborted","range:completed"
 ];
 
 let initialized=false;

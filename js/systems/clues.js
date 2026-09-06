@@ -45,6 +45,7 @@ export function initClues(){
   const events=[...new Set(CLUES.map(c=>c.discoverOn?.event).filter(Boolean))];
   for(const eventName of events){
     on(eventName,payload=>{
+      if(payload?.universe&&payload.universe!=="campaign")return;
       const target=eventTarget(payload);
       for(const clue of CLUES){
         if(clue.discoverOn?.event!==eventName||clue.discoverOn.target!==target)continue;

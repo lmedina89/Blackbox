@@ -1,357 +1,67 @@
-# BLACKBOX v0.4.0 Alpha 4.6.1 — Remote Assistance Mobile Polish
+# BLACKBOX v0.4.0 Alpha 4.8.1 QA — NightWire Range Test Access
 
-Built directly from verified **v0.4.0 Alpha 4.6** archive SHA-256 `b0224cca67840b3eca310998618a2296fd782acee1cd84f69819808e24eb513f`.
+Built directly from the verified A4.8 NightWire Node + The Range checkpoint. This is a **QA convenience build**, not a progression redesign.
 
-Alpha 4.6.1 is a narrow phone-UX repair for the Service Desk Remote Assistance workspace. It changes presentation only: ticket logic, remote-machine faults, campaign state, messages, missions, rewards, host topology, BLACKBOX networking, and save schema are unchanged.
+## QA test identity
 
-## Alpha 4.6.1 — Remote Assistance Mobile Polish
+The boot screen adds **QA: NightWire Range**. Selecting it:
 
-- On phone portrait, the remote desktop and troubleshooting tool no longer stack vertically into two cramped scroll regions.
-- Selecting Device Manager, Network, Services, Event Viewer, Firewall, My Computer, or Command Prompt now **replaces the remote desktop workspace** and receives the full available remote-workspace height.
-- Active tools expose a clear **← REMOTE DESKTOP** control to return to the user's simulated workstation desktop.
-- The active tool content is independently touch-scrollable with iOS momentum scrolling.
-- Larger/desktop layouts retain the A4.6 split remote-desktop + tool-pane presentation. Short landscape also retains its established two-pane arrangement.
-- SAVE_VERSION remains **13** and WORLD_SCHEMA remains **10**; no migration is needed.
-- The three A4.6 incidents and their modeled fault/verification behavior are unchanged.
+- archives the current active identity first, if one exists;
+- creates a separate `range_qa` identity;
+- marks all nine legacy Act-I missions complete;
+- derives the canonical **3,080 credits / 50 reputation** from the existing mission definitions;
+- leaves all three Range labs uncompleted;
+- clears any active Range sandbox, exploit credentials, sessions, artifacts, noise, and scan history;
+- unlocks the private NightWire node through the completed Glass Harbor mission;
+- intentionally does **not** seed the legacy mission-complete message/mail flags, so the QA identity stays quiet and focused on Range testing.
 
-## A4.6.1 physical-device acceptance focus
+Normal **New Identity** behavior is unchanged and still starts from a clean world with NightWire locked until Glass Harbor is genuinely completed.
 
-1. Open Service Desk → INC-0001 → Remote Support in iPhone portrait.
-2. Tap Device Manager. The remote desktop should disappear and Device Manager should occupy the full remote workspace instead of appearing as a thin bar below it.
-3. Scroll Device Manager comfortably, enable the NIC, and confirm the tool remains usable after rerender.
-4. Tap **← REMOTE DESKTOP** and confirm Maria's remote desktop returns.
-5. Repeat with Services and Event Viewer, including enough content to require scrolling.
-6. Rotate landscape and confirm the established split remote-desktop/tool presentation still behaves acceptably.
-7. Verify/resolve INC-0001 and confirm ticket behavior is unchanged.
+`SAVE_VERSION = 15` and `WORLD_SCHEMA = 10` remain unchanged because the QA marker is optional metadata rather than gameplay schema.
 
 ---
 
-# BLACKBOX v0.4.0 Alpha 4.6 — Service Desk Foundation
-
-Built directly from verified **v0.4.0 Alpha 4.5.1** archive SHA-256 `a06bbf3de37563d1f848cacf434a9fc186ec7d5cef43c4254f0f184df8a74107`.
-
-Alpha 4.6 adds the first playable NEXUS Service Desk career foundation without changing the nine BLACKBOX missions, rewards, evidence, host topology, or mission objective logic. The Service Desk uses separate remote-workstation state and a dedicated Remote Assistance UI, while elapsed ticket time may naturally make scheduled communications due.
-
-## Alpha 4.6 — Service Desk Foundation
-
-- Adds **NEXUS Service Desk** to the normal NEXUS desktop with an assigned/in-progress/closed ticket queue, ticket metadata, work notes, verification, resolution, escalation, and persistent job statistics.
-- Adds one dedicated **NEXUS Remote Assistance** workspace for remote users. It visibly identifies the employee, department, hostname, remote transport, ticket, and workstation context and includes a simulated remote desktop plus troubleshooting tool window.
-- Seeds three sequential, authored starter incidents:
-  1. **INC-0001 — No network connection:** disabled Ethernet adapter / Device Manager Code 22. FIN-WS-07 remains reachable through an explicitly labeled out-of-band NEXUS Support Modem so the scenario does not imply Ethernet-based remote access through a disabled NIC.
-  2. **INC-0002 — Names do not resolve:** working IP connectivity with a stopped local DNS Client service; direct `nslookup` can still query the configured DNS server while normal hostname use fails.
-  3. **INC-0003 — Limited connectivity after docking:** APIPA `169.254.44.17`, stopped DHCP Client, then lease renewal to the corporate subnet. This laptop also uses the separately labeled out-of-band support transport while its corporate IP path is unusable.
-- Remote machines have independent persistent device, TCP/IP, service, firewall, and Event Viewer state. Changes to FIN-WS-07 / OPS-WS-12 / HR-LT-03 do not mutate HOME-PC or BLACKBOX campaign hosts.
-- Remote Command Prompt currently supports `hostname`, `whoami`, `ipconfig`, `ipconfig /all`, `ipconfig /renew`, `ping`, `nslookup`, `help`, and `cls`.
-- Ticket resolution is state-verified; pressing Resolve cannot close a ticket while its modeled fault remains.
-- Ticket reviews reward relevant diagnostics/tools and avoiding unrelated configuration changes. Escalation requires a work note.
-- Help Desk work advances **elapsed world time** through a new isolated clock path. This allows Maya/messages and other time-based content to become due naturally, but does **not** increment BLACKBOX `actionTick`, rotate `networkEpoch`, satisfy mission objectives, set campaign flags, or modify campaign host state.
-- Existing A4.5.1 landscape BLACKBOX keyboard and conversation timing fixes are preserved.
-
-## Save compatibility
-
-- SAVE_VERSION: **13**
-- WORLD_SCHEMA: **10**
-- A4.5.1/v12 identities migrate by adding persistent Service Desk machine/session/job fields.
-- Earlier supported identities continue through the existing migration chain.
-- Campaign state, communications state, NEXUS HOME-PC state, terminal context, rewards and evidence remain preserved.
-
-## A4.6 physical-device acceptance focus
-
-1. Confirm normal BLACKBOX portrait/landscape presentation still matches A4.5.1.
-2. Open **Service Desk**, accept INC-0001, and enter **Remote Support**. The remote UI should clearly feel like a separate workstation session rather than HOME-PC.
-3. Confirm FIN-WS-07 shows the out-of-band support transport while its production NIC is disabled.
-4. Open remote Device Manager, observe Code 22, enable the adapter, run `ipconfig`, verify, and resolve the ticket.
-5. Confirm INC-0002 unlocks only after INC-0001 closes; test IP ping vs hostname ping vs `nslookup`, start DNS Client, verify and resolve.
-6. Confirm INC-0003 begins with a `169.254.x.x` APIPA address, DHCP renewal fails while DHCP Client is stopped, then succeeds after the service starts.
-7. Let ticket actions move the clock across a scheduled Messenger time and confirm messages arrive naturally without changing BLACKBOX mission progress.
-8. Save → refresh → Continue during an active ticket/remote-machine fault and confirm the Service Desk state persists.
-
----
-
-# BLACKBOX v0.4.0 Alpha 4.5.1 — Device Polish & Conversation Timing
-
-Built directly from the verified **v0.4.0 Alpha 4.5** archive SHA-256 `346925fe82bd9b5db8e159276ff9d8079ef40bd0506cbe4c876b1dc379a07bed`.
-
-Alpha 4.5.1 is a narrow repair/polish pass over the A4.5 retro-web and NEXUS troubleshooting foundation. It preserves the BLACKBOX desktop/terminal identity and A4.5 gameplay/content while repairing late-choice Messenger chronology and replacing the vertically compressed landscape keyboard with a right-side dock.
-
-## Alpha 4.5.1 — Device Polish & Conversation Timing
-
-- Persists the exact in-game timestamp of each dialogue choice.
-- Player reply lines now display at the actual choice time; Maya's Old Mirror follow-up is anchored three in-game minutes after that choice.
-- A4.5 saves migrate the already-persisted per-thread latest choice timestamp into the new per-choice timing map.
-- Short coarse-pointer landscape BLACKBOX uses a right-side keyboard dock instead of vertically flattening the 90s keycaps beneath the terminal.
-- Portrait BLACKBOX input, NEXUS/OS system tools, retro web presentation, missions, rewards, host topology, evidence, DNS, and world schema remain unchanged.
-
-## Alpha 4.5 changes
-
-### Late-90s NEXUS Internet presentation
-
-NEXUS Explorer now gives the existing sites distinct late-90s identities while preserving their current data IDs and gameplay hooks:
-
-- **MetroWire** — early online newspaper/portal.
-- **FriendSpace** — primitive social/personal-homepage feed.
-- **NightWire** — plaintext underground message board.
-- **Packet Underground** — technical field-note/resource page.
-- **DeadDrop** — stripped-down contract/mirror index.
-- **ByteBarn** — local computer-parts classifieds/shop.
-
-NEXUS Explorer also gains working local Back, Home, Refresh, Favorites, and address navigation rather than a permanently disabled Back control.
-
-### NEXUS/OS troubleshooting sandbox
-
-My Computer is now a Windows-style shell with:
-
-- **File Explorer / My Computer** folders and drive view.
-- **My Documents** and **Downloads** views tied to the player's notes/evidence state.
-- **BLACKBOX Data** view preserving Saved Targets, case clues, World Intel, evidence, and the BLACKBOX launch path.
-- **Control Panel**.
-- **System Properties**.
-- **Device Manager** with simulated device enable/disable state and Code 22 behavior for disabled devices.
-- **Network Connections** with adapter state, DHCP, IPv4 address, subnet mask, gateway, DNS, lease renewal, and Repair.
-- **NEXUS Firewall** with on/off state and explicit exceptions.
-- **Administrative Tools / Services** with start/stop controls.
-- **Event Viewer** with entries generated by system changes.
-- **Add or Remove Programs** showing NEXUS apps and installed BLACKBOX tools.
-
-The workstation state is persistent and is designed to become the shared substrate for future Help Desk and certification-aligned troubleshooting scenarios.
-
-### Safe troubleshooting consequences
-
-- Disabling the network adapter makes NEXUS Explorer report an offline connection and points the player to Network Connections.
-- Stopping DNS Client leaves the link up but causes NEXUS Explorer and ThreatDesk resolver lookups to report a name-resolution problem.
-- Network Repair re-enables the adapter, restarts DHCP/DNS Client, and renews the simulated DHCP lease.
-- Firewall/service/device changes are written to Event Viewer.
-- These controls do **not** alter BLACKBOX mission hosts, routes, DNS records, rewards, evidence, or campaign definitions.
-
-### Certification-learning direction
-
-The system tools are structured around practical concepts seen in current A+, Network+, and Security+ preparation: operating-system administration, device status, TCP/IP configuration, DHCP/DNS troubleshooting, host firewall controls, services, logs, and structured troubleshooting. They are scenario tools, not multiple-choice quizzes; direct certification questions remain a ThreatDesk Training Lab responsibility.
-
-### Compact BLACKBOX landscape input
-
-The BLACKBOX visual identity is unchanged. On short coarse-pointer landscape screens only, the existing custom keyboard becomes significantly shorter: decorative keyboard branding is hidden, rows/control bars are compressed, and more terminal history remains visible while typing.
-
-## Save compatibility
-
-- SAVE_VERSION: **12**
-- WORLD_SCHEMA: **10**
-- v11/A4.5 identities migrate automatically to per-choice conversation timing while preserving their existing latest choice timestamp.
-- Earlier supported identities still pass through the existing migration chain, including the A4.5 NEXUS workstation state.
-- Existing mission/campaign progress is preserved.
-
-## Device acceptance focus
-
-Physical iPhone testing should verify:
-
-1. The BLACKBOX icon/terminal still look like A4.4.
-2. Landscape BLACKBOX docks the custom keyboard on the right and preserves substantially more terminal history height on the left.
-3. Each NEXUS website remains readable in portrait and landscape.
-4. My Computer → Control Panel → Device Manager / Network / Firewall / Services / Event Viewer remains usable on touch screens.
-5. Disable Local Area Connection → NEXUS Explorer shows Offline → Repair restores browsing.
-6. Stop DNS Client → link remains up but browsing/ThreatDesk name resolution fails → start DNS Client or Repair restores it.
-7. Save → refresh → Continue preserves NEXUS system state.
-
----
-
-# BLACKBOX v0.4.0 Alpha 4.3 — Mobile Terminal Input
-
-Built directly from the verified **v0.4.0 Alpha 4.2** repair checkpoint (SHA-256 `768b35cbf1b2b7e2ee4da5b780920ac1bb3d1d3dcd184bc0aa44a618c7233f87`).
-
-Alpha 4.3 is an isolated mobile-terminal UX milestone. Mission definitions, objectives, rewards, evidence behavior, living-world scheduling, conversations, host topology, DNS progression, and save schema are unchanged.
-
-## Alpha 4.3 changes
-
-- Adds a first-party **BLACKBOX KEYS** touch keyboard that becomes the default terminal input mode on coarse-pointer/touch devices.
-- Custom mode keeps the real text input `readonly`, sets `inputmode=none`, blocks touch focus, and blurs defensively so the mobile software keyboard is not intentionally summoned.
-- Adds a one-tap **SYSTEM KEYBOARD** fallback that restores the normal editable input and focuses it, preserving iOS dictation/accessibility and normal typing.
-- Saves the player's input preference (`auto`, `blackbox`, or `system`) without changing SAVE_VERSION/WORLD_SCHEMA.
-- Adds alphabet and number/symbol pages with terminal-useful punctuation including `/`, `.`, `-`, `_`, `~`, `..`, `|`, `\`, `:`, and `;`, plus Space, Backspace, Enter, and command-history ↑/↓ controls.
-- Custom keys can be collapsed completely while reading terminal output.
-- The `↓ LATEST` control dynamically clears the custom keyboard instead of being covered by it.
-- Hardware/Bluetooth keyboard events remain accepted while custom mode is active.
-- Removes the old convenience normalization for `cd..` and `cd/`; BLACKBOX now teaches the real shell forms `cd ..` and `cd /` with corrective hints for the old shorthand.
-- Tab completion is intentionally **not faked** in this milestone; a future Tab key should perform real completion rather than insert misleading behavior.
-
-## Mobile acceptance gate
-
-This feature specifically requires physical iPhone/Safari testing. Automated/static tests can verify command buffering, preference state, syntax behavior, fallback wiring, and responsive CSS, but cannot certify that iOS never presents the software keyboard under every focus/lifecycle condition.
-
----
-
-# BLACKBOX v0.4.0 Alpha 4.2 — Interactive QA Repair
-
-Built directly from the exact Work-audited **v0.4.0 Alpha 4.1** archive SHA-256 `9760ea55e248ea2c924f53b6139b088e20d77c496e7607e8eb59aac87fdd3cc0`.
-
-Alpha 4.2 repairs only findings established during the interactive Work audit.
-
-## Alpha 4.2 repairs
-
-- Messenger now withholds legacy messages until their canonical effective timestamp instead of merely sorting future-dated messages correctly.
-- Messenger unread badges use the same chronology gate, so a hidden future message cannot create an early unread count.
-- FriendSpace no longer bypasses chronology for Old Mirror's Sam post. The existing Maya reply action advances three in-game minutes, allowing Sam's authored 19:05 post to appear naturally without changing mission logic.
-- Simulated DNS names become usable by network commands after an explicit `nslookup` has identified the backing host. This makes `ping updates.lumen.test`, `connect updates.lumen.test`, and `traceroute updates.lumen.test` behave consistently with the resolver while preserving the required DNS-learning step.
-- DNS resolution remains network-context aware; internal names do not resolve from the wrong simulated network.
-- My Computer and visible runtime labels consistently report A4.2.
-- Mission IDs, objectives, rewards, evidence behavior, host topology, save schema, and world-event timing are unchanged.
-
----
-
-# BLACKBOX v0.4.0 Alpha 4.1 — Cross-App Timestamp Consistency
-
-Built directly from verified **v0.4.0 Alpha 4** SHA-256 `5183d162b3f2f3ff6f333b923d9654c5135267cfac5380f553d542267e7a3db1`, descended from exact v0.3.0 RC7.
-
-Alpha 4.1 is a narrow chronology-consistency hotfix built on Alpha 4 after physical iPhone testing exposed a remaining World Timeline ↔ app timestamp mismatch.
-
-
-## Alpha 4.1 hotfix
-
-- Event-generated Cedar FriendSpace content now inherits the actual `cedar_lead` event timestamp instead of displaying the old authored 19:26 placeholder.
-- Event-generated Lumen/Iris/Harbor MetroWire follow-ups inherit their actual world-event timestamps.
-- Event-generated ThreatDesk reports carry the timestamp of the world event that created them.
-- MetroWire renders the canonical content timestamp when one exists.
-- ThreatDesk displays the canonical event time beside event-generated report severity.
-- Content merely unlocked by an event but intended as a later reaction remains on its authored time.
-- Added cross-app timestamp regression coverage.
-
-## Alpha 4 changes
-
-- Adds one canonical effective-time model shared by Messenger/FriendSpace presentation.
-- Messenger now renders visible messages chronologically by their real effective timestamp rather than source-array position.
-- Scheduled messages use their persisted scheduler delivery time.
-- Existing `timeFromEvent` messages use the actual recorded world-event time.
-- Legacy event/mission-linked content can infer a stable event anchor from case history.
-- Equal-minute messages retain deterministic authored order.
-- FriendSpace now withholds non-mission-critical posts whose effective publication time is still in the future.
-- FriendSpace renders due posts newest-first.
-- Old Mirror's required Sam FriendSpace post remains explicitly legacy-available so presentation chronology cannot block mission progression.
-- Adds persistent per-thread conversation state for delivered/presented node, waiting-for-reply, last choice, and future cooldown support.
-- Records mission-start timestamps in case history for future coherent event-relative conversations.
-- No new missions, rewards, hosts, DNS records, clues, contract emails, ThreatDesk content, or story progression were added.
-
-## Device findings addressed
-
-Physical A3 testing showed Maya's scheduled 18:55 ambient message rendering above an existing 18:46 ThreatDesk line. Alpha 4 sorts by effective time so 18:46 now renders first.
-
-The same test showed FriendSpace displaying 19:26 and 20:08 posts while the NEXUS clock was 19:05. Alpha 4 time-gates non-critical legacy posts so they cannot appear before their publication time.
-
-## Safety strategy
-
-This remains a compatibility-first migration. Existing mission-critical contracts and dialogue are not moved to the scheduler in Alpha 4. The new conversation-state layer is foundation only; larger ambient branching comes after chronology is proven on device.
-
----
-
-## RC7 baseline notes retained for reference
-
-
-# BLACKBOX v0.3.0 — The Wider Net
-
-**RC7 candidate:** focused terminal/readability and mobile-taskbar polish built directly from the exact RC6 candidate (SHA-256 `1bfd86ac94844e9f53a25c900bb5dfed858d98c0f41f0f53a498ea88aa89faf6`) after on-device testing confirmed the RC6 responsive layout and BLACKBOX shortcut. RC7 adds semantic terminal colors, a fixed BLACKBOX status header, an independently scrollable terminal history with pinned prompt and Latest control, compact portrait taskbar restore icons, and clearer World Intel destination feedback. Missions, saves, progression, host topology, content, command syntax, rewards, and network behavior are unchanged.
-
-Built from the exact stable **v0.2.3.4** iPhone-tested package. v0.3.0 is a major playable expansion that preserves the original six-investigation sequence and expands BLACKBOX into a larger, changing fictional network.
-
-## What is new
-
-- **Dynamic scans:** each scan can reorder its results, while optional membership rotates on a saved world cadence. Current mission targets are pinned only when the active objective requires them.
-- **36-host world:** the persistent simulation now contains public infrastructure, internal pivots, hobby systems, home labs, resolvers, mail nodes, archives, ordinary devices, and harmless dead ends. One scan never dumps the whole world.
-- **Explicit target syntax:** use `connect scan <#>` for a recent scan result and `connect target <#>` for Saved Targets. Ambiguous bare numbers produce an explanation instead of silently selecting the wrong list.
-- **Simulated DNS:** `nslookup` supports fictional A, CNAME, and MX records. Case-specific records are gated to the appropriate contract/network context; DNS can identify an UNKNOWN host, but it does not grant reachability or shell access.
-- **NEXUS ThreatDesk:** a normal-desktop app with a Threat Feed, fictional Lookup Tools, concise Field Notes, and three optional Training Labs.
-- **Three investigations:** False Name, Quiet Hours, and Glass Harbor apply DNS, scanning, interfaces, internal routes, log filtering, evidence reading, and downloads.
-- **Living world:** eleven persistent events pace new contracts, replies, stories, messages, advisories, and optional leads through meaningful actions and game time. Harmless terminal toggling does not fast-forward the world clock.
-- **Progression:** FastLink 100 widens scans and service detail; the RAM upgrade unlocks LogScope; the CPU upgrade unlocks Resolver Pro; storage still expands evidence capacity.
-- **Unread feedback:** relevant desktop apps show visible numeric badges, while important changes also remain available after the notification disappears.
-
-## RC7 terminal and navigation polish
-
-- **Semantic BLACKBOX palette:** green remains the primary identity; cyan marks network/intel structure, amber marks caution/unknown states, red marks errors and denied actions, pale text separates typed commands, and violet is reserved for rare anomalous BLACKBOX events. IP addresses, hostnames, ports, quoted commands, and UNKNOWN scan entries receive consistent token styling.
-- **True terminal viewport:** the compact BLACKBOX status header stays visible, terminal history scrolls independently, and the command prompt remains pinned at the bottom. When the player manually scrolls upward, new output no longer yanks the view back down; a `↓ LATEST` control returns to current output.
-- **Compact portrait taskbar:** open/minimized NEXUS apps use icon-sized restore buttons in portrait so more than two remain visible. Desktop and phone landscape retain icon + label buttons.
-- **World Intel routing feedback:** discovery toasts now explicitly say that optional World Intel is stored in `My Computer → World Intel` and available through BLACKBOX `clues`.
-
-## RC6 device-polish repairs
-
-- **Long-background Safari audio recovery:** when iOS backgrounds or page-suspends BLACKBOX, the old Web Audio graph is treated as stale even if Safari later reports it as `running`. The next trusted tap/key gesture retires that graph, creates a fresh context, restores the master gain, and resumes sound without loading a save.
-- **Visible phone taskbar apps:** portrait no longer hides open/minimized app buttons. The center task strip scrolls horizontally while Start, sound, and clock remain available.
-- **Intentional phone landscape:** coarse-pointer landscape screens with short height keep a compact multi-column desktop, viewport-fitted app windows, smaller browser chrome, and reachable app/taskbar controls instead of falling back to desktop geometry.
-- **Notepad mobile sizing:** the editor now owns the full content width/height rather than using Safari's intrinsic textarea width.
-- **BLACKBOX desktop shortcut:** the approved single-eye A2 SVG is embedded directly as vector markup and launches the existing BLACKBOX terminal transition. The Start-menu launcher remains available.
-
-## Core sequence
-
-The original progression remains intact:
-
-1. Easy Money
-2. Old Mirror
-3. Recovery Index
-4. Ghost Account
-5. Dead Drop
-6. The Relay
-7. False Name
-8. Quiet Hours
-9. Glass Harbor
-
-The three new cases arrive gradually after The Relay. Existing v0.2.3.4 identities resume from their real completion, choice, read, target, clue, download, and relationship state; completed work is not replayed.
-
-## Useful commands
-
-```text
-scan
-connect scan 0
-targets
-connect target 0
-target add scan 0
-nslookup updates.lumen.test
-nslookup lumen.test MX
-ip
-services
-netstat
-traceroute <host>
-grep <text> <file>
-download <file>
-```
-
-The resolver never contacts real DNS. Every address, hostname, organization, person, service, and network in the game is fictional simulation data.
-
-## Save compatibility
-
-- SAVE_VERSION: **9**
-- WORLD_SCHEMA: **9**
-- Profile format: **1**
-- Automatic migration: v0.2.3.4 save 8 → v0.3.0 save 9
-- Stable IDs prevent event redelivery after save, reload, app reopening, or identity restoration.
-
-The original v0.2.3.4 ZIP and the audited RC2 candidate are not modified by this release and remain rollback checkpoints.
-
-## Verification
-
-Run the deterministic gameplay suites with:
-
-```text
-node tests/smoke.mjs
-node tests/rc4-regression.mjs
-node tests/rc4-campaign.mjs
-node tests/audio-rc4.mjs
-node tests/audio-rc5-gesture.mjs
-node tests/audio-rc6-background.mjs
-node tests/rc6-device-ui-static.mjs
-node tests/rc7-terminal-ui-static.mjs
-```
-
-Together they verify migration, unique host addressing, filesystem and service-process coverage, scan variation, mission-target reliability, explicit numeric namespaces, post-command save/reload behavior, contextual objective rejection, semantic anti-spam equivalence, clock-poll-invariant event timing, safe mutable-text boundaries, all nine investigations, full-storage mandatory evidence, corrupt/future-save handling, purge lifecycle safety, storage-write failures, DNS fact matching, migrated Messenger clue recovery, and instrumented Web Audio interruption/closed-context recovery.
-
-Automated JavaScript syntax checks and all campaign/regression/UI/audio suites pass in the release workspace, including the RC5 gesture-retry regression and the RC6 stale-`running` long-background lifecycle regression and RC7 terminal/navigation static guards. The packaged RC5 ZIP was also extracted and verified byte-identical to the RC5 working tree before RC6 was created. The available container Chromium still blocks local/file navigation by administrator policy, so the new responsive layout and real iPhone/Safari long-background recovery remain direct-device acceptance gates before stable promotion.
-
-## Explicitly deferred
-
-Packet capture/sniffing simulation, multiplayer, procedural missions, free-form AI conversations, real network access, and IPv6 are not part of v0.3.0. Packet analysis remains a strong candidate for a later investigation-focused update.
-
-## Root-ready layout
-
-```text
-index.html
-README.md
-build-manifest.json
-css/
-js/
-tests/
-```
+## A4.8 foundation retained
+
+Alpha 4.8 is the first player-facing home for the advanced access model. The existing NEXUS NightWire website remains the **public message-board mirror**. After the nine legacy Act-I missions culminate in Glass Harbor, BLACKBOX discovers a separate **NightWire private node** that is accessed from the CLI with `nightwire`.
+
+## What this milestone adds
+
+### NightWire private node
+- CLI/BBS-style service inside the existing BLACKBOX terminal; no new BLACKBOX desktop app and no redesign of the black/green shell.
+- General Board, Field Reports, Jobs, The Range, and Private Messages sections.
+- Number shortcuts and readable commands (`4` or `range`, `5` or `messages`, etc.) for phone-friendly navigation.
+- Private node unlocks after Glass Harbor / `mission_cascade` completes.
+- The NEXUS website is explicitly labeled **NightWire Public Message Board** so the two access layers are understandable in-world.
+
+### The Range
+Three sequential, isolated practice images:
+
+1. **Enumeration Basics** — scan → enumerate HTTP → choose a fictional profile → expose and inspect a proof artifact. No shell is required.
+2. **Credential Foothold** — enumerate a web service → expose configuration/credential material → authenticate to SSH → enter a USER session → verify the permission boundary → read proof.
+3. **Privilege Boundaries** — enumerate a file service → establish a restricted SERVICE foothold → encounter permission denial → use a fictional local policy profile → elevate → read root-only proof.
+
+Range hosts exist in the BLACKBOX host registry only as simulation definitions. They are **not permanent HOME-PC routes**. Starting a lab mounts only that lab's target routes; finishing or aborting detaches the runtime state, credentials, artifacts, sessions, noise, scan history, and target discovery so practice systems do not pollute the campaign.
+
+### Exploit-model usability polish
+- `probe list` shows the three fictional BBX profiles and does not count as an attack action or advance time.
+- Range `scan` always displays service ports independent of the FastLink hardware upgrade.
+- `access credentials`, `access sessions`, and `access artifacts` use numbered entries.
+- `access artifact <#|id>` reads content exposed by an information-disclosure profile and can complete an isolated Range objective.
+- Existing compact commands already work with scan numbers, e.g. `enum 0 80`, `probe BBX-014 0`, `auth 0 ssh rangeops`, keeping phone input short without replacing explicit host/service concepts.
+- Failure messages remain stage-specific: no route, service unavailable, missing enumeration, profile mismatch/mitigation, authentication rejection, access denial, and permission denial communicate different evidence.
+
+## Compatibility / isolation
+- Original nine campaign missions remain legacy-access and are not retrofitted.
+- Range commands use elapsed-only time: living-world messages may become due naturally, but campaign `actionTick` and `networkEpoch` do not advance.
+- Range `lab:completed` events carry the Range universe and cannot satisfy campaign objectives.
+- Service Desk workstation identifiers remain outside the BLACKBOX host namespace.
+- No real sockets, CVEs, payload execution, malware, brute forcing, or external networking were added. BBX profiles operate only on in-memory fictional host state.
+
+## Save schema
+- `SAVE_VERSION = 15`
+- `WORLD_SCHEMA = 10`
+- Save 14 migrates with empty NightWire state and a null private-service session.
+
+## Intended next milestone
+A5 / Act II can now introduce the first story investigation that expects the player to apply Range concepts against a non-legacy target. Before that, A4.8 should receive physical iPhone acceptance and, ideally, a resumed interactive Work audit of the remaining Act-I paths.

@@ -17,16 +17,16 @@ export function initMissions(){
   on("social:read",({postId})=>{startByEvent("social:read",postId);recordObjective("social_read",postId);});
   on("dialogue:choice",({choiceId})=>{startByEvent("dialogue:choice",choiceId);recordObjective("dialogue_choice",choiceId);});
   on("threat:read",({threatId})=>{startByEvent("threat:read",threatId);recordObjective("threat_read",threatId);});
-  on("dns:lookup",({dnsName})=>recordObjective("dns_lookup",dnsName));
-  on("lab:completed",({labId})=>recordObjective("lab_completed",labId));
-  on("host:connected",({hostId})=>recordObjective("host_connected",hostId));
-  on("file:read",({hostId,path})=>recordObjective("file_read",`${hostId}:${path}`));
-  on("file:downloaded",({hostId,path})=>recordObjective("file_downloaded",`${hostId}:${path}`));
-  on("file:searched",({hostId,path,query,canonicalQuery})=>recordObjective("file_searched",`${hostId}:${path}:${canonicalQuery??query}`));
-  on("command:used",({name,hostId,args=[]})=>{
-    recordObjective("command_used",name);
-    recordObjective("command_used_at",`${hostId}:${name}`);
-    if(name==="traceroute"&&args[0])recordObjective("command_used_at",`${hostId}:${name}:${String(args[0]).trim().toLowerCase().replace(/\.$/,"")}`);
+  on("dns:lookup",({dnsName,universe})=>recordObjective("dns_lookup",dnsName,universe));
+  on("lab:completed",({labId,universe})=>recordObjective("lab_completed",labId,universe));
+  on("host:connected",({hostId,universe})=>recordObjective("host_connected",hostId,universe));
+  on("file:read",({hostId,path,universe})=>recordObjective("file_read",`${hostId}:${path}`,universe));
+  on("file:downloaded",({hostId,path,universe})=>recordObjective("file_downloaded",`${hostId}:${path}`,universe));
+  on("file:searched",({hostId,path,query,canonicalQuery,universe})=>recordObjective("file_searched",`${hostId}:${path}:${canonicalQuery??query}`,universe));
+  on("command:used",({name,hostId,args=[],universe})=>{
+    recordObjective("command_used",name,universe);
+    recordObjective("command_used_at",`${hostId}:${name}`,universe);
+    if(name==="traceroute"&&args[0])recordObjective("command_used_at",`${hostId}:${name}:${String(args[0]).trim().toLowerCase().replace(/\.$/,"")}`,universe);
   });
 }
 export function startMission(id){
@@ -37,7 +37,8 @@ export function startMission(id){
   autoSaveSeenTargetsForMission(m);
   emit("mission:started",{mission:m});
 }
-function recordObjective(type,target){
+function recordObjective(type,target,universe="campaign"){
+  if(universe&&universe!=="campaign")return;
   const s=getState();
   for(const id of [...s.missions.active]){
     const m=mission(id);if(!m)continue;

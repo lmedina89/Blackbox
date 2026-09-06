@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0c1630" />
-  <title>BLACKBOX — v0.4.0 A4.6.1</title>
+  <title>BLACKBOX — v0.4.0 A4.8.1 QA</title>
   <link rel="stylesheet" href="./css/base.css" />
   <link rel="stylesheet" href="./css/desktop.css" />
   <link rel="stylesheet" href="./css/apps.css" />
@@ -18,12 +18,14 @@
     <section id="boot-screen" class="boot-screen">
       <div class="boot-card">
         <div class="boot-logo">NEXUS/OS</div>
-        <p class="muted">Personal Computing Environment // v0.4.0 A4.6.1</p>
+        <p class="muted">Personal Computing Environment // v0.4.0 A4.8.1 QA</p>
 
         <div id="boot-home" class="boot-home">
           <div id="active-identity-summary" class="identity-summary hidden"></div>
           <button id="continue-button" class="boot-action hidden" type="button">Continue</button>
           <button id="new-identity-button" class="boot-action" type="button">New Identity</button>
+          <button id="qa-nightwire-button" class="boot-action qa-boot-action" type="button">QA: NightWire Range</button>
+          <p class="qa-boot-note">Development-only test identity. Archives the current identity, marks Act I complete, and leaves all Range labs untouched.</p>
           <button id="archives-button" class="boot-action hidden" type="button">Archived Identities</button>
           <p id="boot-status" class="boot-status muted"></p>
         </div>
@@ -123,7 +125,7 @@
       </div>
 
       <footer class="blackbox-footer">
-        <span>BLACKBOX/0.4.0-A4.6.1</span>
+        <span>BLACKBOX/0.4.0-A4.8.1-QA</span>
         <span>Type <b>help</b> for commands · <b>exit</b> to return</span>
       </footer>
     </section>

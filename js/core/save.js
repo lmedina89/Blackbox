@@ -2,6 +2,7 @@ import { getState, replaceState, resetState, touch } from "./state.js";
 import { migrateSave } from "./migrations.js";
 import { emit } from "./events.js";
 import { HOSTS } from "../data/hosts.js";
+import { MISSIONS } from "../data/missions.js";
 import { getNode } from "../systems/filesystem.js";
 
 const KEY="blackbox_firstboot_save";
@@ -72,12 +73,18 @@ function validateRunnableState(state){
     state.terminal.suspended=false;
     state.terminal.pendingAction=null;
     state.terminal.lastScanResults=[];
+    state.terminal.accessSessionId=null;
     host=HOSTS.home;
   }
   const cwdNode=getNode(state.terminal.hostId,state.terminal.cwd);
   if(!cwdNode||cwdNode.type!=="dir")state.terminal.cwd=host.homeDir||"/";
-  if(state.terminal.hostId==="home")state.terminal.user=(state.player.alias||"user").toLowerCase().replace(/\s+/g,"_");
-  else if(!host.users.includes(state.terminal.user))state.terminal.user=host.users[0]||"guest";
+  if(state.terminal.hostId==="home"){state.terminal.user=(state.player.alias||"user").toLowerCase().replace(/\s+/g,"_");state.terminal.accessSessionId=null;}
+  else if((host.accessModel||"legacy")==="advanced"){
+    const session=Object.values(state.intrusion?.sessions||{}).find(x=>x&&x.hostId===host.id&&x.status==="established");
+    if(!session){
+      state.terminal.hostId="home";state.terminal.cwd=HOSTS.home.homeDir;state.terminal.user=(state.player.alias||"user").toLowerCase().replace(/\s+/g,"_");state.terminal.accessSessionId=null;
+    }else{state.terminal.user=session.user;state.terminal.accessSessionId=session.id;}
+  }else if(!host.users.includes(state.terminal.user))state.terminal.user=host.users[0]||"guest";
   return state;
 }
 
@@ -196,7 +203,7 @@ export function getProfileSummary(){
   const active=profile.activeIdentity;
   return {
     profileId:profile.profileId,
-    active:active?{identityId:active.meta?.identityId,alias:active.player?.alias||"unknown",day:active.world?.day||1,credits:active.player?.credits||0,reputation:active.player?.reputation||0}:null,
+    active:active?{identityId:active.meta?.identityId,alias:active.player?.alias||"unknown",day:active.world?.day||1,credits:active.player?.credits||0,reputation:active.player?.reputation||0,qaMode:active.meta?.qaMode||null}:null,
     archives:profile.archivedIdentities.map(a=>({archiveId:a.archiveId,alias:a.alias,day:a.day,credits:a.credits,reputation:a.reputation,archivedAt:a.archivedAt,reason:a.reason})),
     quarantinedCount:(profile.recovery?.quarantinedArchives||[]).length+(profile.recovery?.quarantinedActive?1:0)+(profile.recovery?.rawProfile?1:0)
   };
@@ -237,6 +244,50 @@ export function beginNewIdentity(alias,{archiveActive=true}={}){
   profile.activeIdentity=getState();
   persist();
   return getState();
+}
+
+export function beginQaNightwireIdentity(alias="range_qa",{archiveActive=true}={}){
+  if(!profile)loadProfile();
+  if(profile.activeIdentity&&archiveActive){
+    const active=clone(profile.activeIdentity);
+    profile.archivedIdentities.unshift({archiveId:makeId("archive"),alias:active.player.alias,day:active.world.day,credits:active.player.credits,reputation:active.player.reputation,archivedAt:Date.now(),reason:"qa_nightwire_test",state:active});
+  }
+
+  resetState();
+  const state=getState();
+  state.player.alias=String(alias||"range_qa").slice(0,18)||"range_qa";
+  state.meta.qaMode="nightwire_range";
+  state.meta.qaSource="A4.8.1";
+  state.world.completedMissions=MISSIONS.map(m=>m.id);
+  state.world.flags=["qa_nightwire_range"];
+  state.world.caseHistory=MISSIONS.map((m,index)=>({
+    id:`mission:${m.id}`,kind:"mission",refId:m.id,day:1,minute:state.world.minute,index,historical:true,qaSeeded:true
+  }));
+  state.missions.active=[];
+  state.missions.progress={};
+  state.player.credits=MISSIONS.reduce((sum,m)=>sum+(m.rewards?.credits||0),0);
+  state.player.reputation=MISSIONS.reduce((sum,m)=>sum+(m.rewards?.reputation||0),0);
+  state.intrusion.credentials=[];
+  state.intrusion.sessions={};
+  state.intrusion.serviceIntel={};
+  state.intrusion.artifacts=[];
+  state.intrusion.noise={};
+  state.intrusion.attempts=[];
+  state.intrusion.activeSandbox=null;
+  state.nightwire={readPosts:[],readMessages:[],range:{activeLabId:null,completed:[],runs:{},results:{}}};
+  state.terminal.hostId="home";
+  state.terminal.user=state.player.alias.toLowerCase().replace(/\s+/g,"_");
+  state.terminal.cwd=HOSTS.home.homeDir;
+  state.terminal.sessionOpen=false;
+  state.terminal.suspended=false;
+  state.terminal.pendingAction=null;
+  state.terminal.lastScanResults=[];
+  state.terminal.accessSessionId=null;
+  state.terminal.serviceSession=null;
+
+  profile.activeIdentity=state;
+  persist();
+  return state;
 }
 
 export function restoreArchivedIdentity(archiveId){
