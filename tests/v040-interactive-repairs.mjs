@@ -32,9 +32,9 @@ import { chronologyAvailable } from "../js/systems/contentChronology.js";
 {
   const desktop=fs.readFileSync(new URL("../js/ui/desktop.js",import.meta.url),"utf8");
   const index=fs.readFileSync(new URL("../index.html",import.meta.url),"utf8");
-  assert.match(desktop,/0\.4\.0-A4\.2 installed/);
+  assert.match(desktop,/0\.4\.0-A4\.3 installed/);
   assert.doesNotMatch(desktop,/0\.4\.0-A4 installed/);
-  assert.match(index,/BLACKBOX\/0\.4\.0-A4\.2/);
+  assert.match(index,/BLACKBOX\/0\.4\.0-A4\.3/);
 }
 
-console.log("BLACKBOX v0.4.0 Alpha 4.2 interactive-audit repair guards passed");
+console.log("BLACKBOX v0.4.0 Alpha 4.3 interactive-audit repair compatibility guards passed");

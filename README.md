@@ -1,3 +1,28 @@
+# BLACKBOX v0.4.0 Alpha 4.3 — Mobile Terminal Input
+
+Built directly from the verified **v0.4.0 Alpha 4.2** repair checkpoint (SHA-256 `768b35cbf1b2b7e2ee4da5b780920ac1bb3d1d3dcd184bc0aa44a618c7233f87`).
+
+Alpha 4.3 is an isolated mobile-terminal UX milestone. Mission definitions, objectives, rewards, evidence behavior, living-world scheduling, conversations, host topology, DNS progression, and save schema are unchanged.
+
+## Alpha 4.3 changes
+
+- Adds a first-party **BLACKBOX KEYS** touch keyboard that becomes the default terminal input mode on coarse-pointer/touch devices.
+- Custom mode keeps the real text input `readonly`, sets `inputmode=none`, blocks touch focus, and blurs defensively so the mobile software keyboard is not intentionally summoned.
+- Adds a one-tap **SYSTEM KEYBOARD** fallback that restores the normal editable input and focuses it, preserving iOS dictation/accessibility and normal typing.
+- Saves the player's input preference (`auto`, `blackbox`, or `system`) without changing SAVE_VERSION/WORLD_SCHEMA.
+- Adds alphabet and number/symbol pages with terminal-useful punctuation including `/`, `.`, `-`, `_`, `~`, `..`, `|`, `\`, `:`, and `;`, plus Space, Backspace, Enter, and command-history ↑/↓ controls.
+- Custom keys can be collapsed completely while reading terminal output.
+- The `↓ LATEST` control dynamically clears the custom keyboard instead of being covered by it.
+- Hardware/Bluetooth keyboard events remain accepted while custom mode is active.
+- Removes the old convenience normalization for `cd..` and `cd/`; BLACKBOX now teaches the real shell forms `cd ..` and `cd /` with corrective hints for the old shorthand.
+- Tab completion is intentionally **not faked** in this milestone; a future Tab key should perform real completion rather than insert misleading behavior.
+
+## Mobile acceptance gate
+
+This feature specifically requires physical iPhone/Safari testing. Automated/static tests can verify command buffering, preference state, syntax behavior, fallback wiring, and responsive CSS, but cannot certify that iOS never presents the software keyboard under every focus/lifecycle condition.
+
+---
+
 # BLACKBOX v0.4.0 Alpha 4.2 — Interactive QA Repair
 
 Built directly from the exact Work-audited **v0.4.0 Alpha 4.1** archive SHA-256 `9760ea55e248ea2c924f53b6139b088e20d77c496e7607e8eb59aac87fdd3cc0`.

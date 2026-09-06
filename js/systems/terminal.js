@@ -28,10 +28,7 @@ export function getPrompt(){
   return `${s.terminal.user}@${h.hostname.toLowerCase()}:${tail}$`;
 }
 function preprocess(raw){
-  const trimmed=raw.trim();
-  if(/^cd\.\.$/i.test(trimmed))return "cd ..";
-  if(/^cd\/$/i.test(trimmed))return "cd /";
-  return trimmed;
+  return raw.trim();
 }
 function emitCommand(name,args,actionKey){emit("command:used",{name,args,hostId:getState().terminal.hostId,actionKey});}
 function scanRecord(h,index){
@@ -112,7 +109,17 @@ export async function executeCommand(raw){
   if(s.terminal.history.length>100)s.terminal.history.shift();
   s.terminal.historyIndex=s.terminal.history.length;
   const [rawHead,...args]=text.split(/\s+/),head=rawHead.toLowerCase(),name=aliases.get(head)||head,cmd=commands.get(name);
-  if(!cmd)return {lines:[{text:`${rawHead}: command not found`,type:"error"}]};
+  if(!cmd){
+    if(head==="cd..")return {lines:[
+      {text:"cd..: command not found",type:"error"},
+      {text:'hint: use "cd .." to move to the parent directory',type:"dim"}
+    ]};
+    if(head==="cd/")return {lines:[
+      {text:"cd/: command not found",type:"error"},
+      {text:'hint: use "cd /" to move to the filesystem root',type:"dim"}
+    ]};
+    return {lines:[{text:`${rawHead}: command not found`,type:"error"}]};
+  }
   try{
     const actionKey=MEANINGFUL_COMMANDS.has(name)?semanticActionKey(name,args,s):null;
     const result=await cmd.execute({state:s,args})||{lines:[]};

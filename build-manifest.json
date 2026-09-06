@@ -1,6 +1,6 @@
 {
   "name": "Human Layer / Act II Foundation",
-  "version": "0.4.0-alpha.4.2",
+  "version": "0.4.0-alpha.4.3",
   "saveVersion": 10,
   "worldSchema": 10,
   "baseline": {
@@ -25,6 +25,12 @@
     "scheduledContent": 5
   },
   "features": [
+    "touch-device BLACKBOX terminal keyboard with compact alpha and number/symbol pages plus terminal-specific punctuation and command-history controls",
+    "one-tap System Keyboard fallback with persisted input-mode preference and desktop/fine-pointer system-input compatibility",
+    "custom keyboard mode suppresses the mobile software keyboard by keeping the real terminal input readonly, inputmode none, and unfocused",
+    "collapsible custom keyboard with dynamic Latest-button offset so terminal history remains readable in phone portrait and landscape",
+    "hardware/Bluetooth key events remain usable in custom keyboard mode without requiring the mobile software keyboard",
+    "real shell syntax cleanup removes cd.. and cd/ normalization and provides corrective hints for cd .. and cd /",
     "Messenger visibility and unread badges now honor canonical effective timestamps so future-dated legacy reactions stay hidden until due",
     "mission-critical FriendSpace content now follows the same chronology gate; Old Mirror remains playable because the existing reply action advances time past Sam's authored post time",
     "known simulated DNS aliases resolved through nslookup can be reused by ping, traceroute, connect, services, and target commands without enabling scan-index shortcuts",
@@ -88,6 +94,9 @@
     "IPv6"
   ],
   "verification": [
+    "A4.3 mobile-keyboard suite verifies custom/system input controls, software-keyboard suppression mechanics, hardware-keyboard event path, preference normalization/autosave, history hooks, and landscape compact-keyboard CSS",
+    "A4.3 syntax regression verifies cd.. is rejected with a cd .. hint while real cd .. changes to the parent directory",
+    "continuous nine-case campaign and all prior audio, scheduler, chronology, DNS, save, and UI suites remain green after the terminal-input milestone",
     "A4.1 cross-app timestamp suite verifies Cedar, Lumen, Iris, Harbor, Juno, and contract/advisory content times match their generating world-event history",
     "A4.1 regression verifies content merely unlocked by an event, such as Maya's later ThreatDesk reaction, is not incorrectly pulled to the event instant",
     "A4 physical-device regression reproduced in automation: a ThreatDesk event at 18:46 sorts before an ambient Maya delivery at 18:55 even when source-array order is reversed",
@@ -143,5 +152,5 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.2 interactive QA repair: future-content visibility, known DNS alias command resolution, and version-label consistency; mission progression/rewards unchanged"
+  "foundationMilestone": "A4.3 mobile terminal input: compact touch keyboard, system-keyboard fallback, persisted input preference, and real cd syntax; mission/story/network progression unchanged"
 }

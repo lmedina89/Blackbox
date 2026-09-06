@@ -306,7 +306,7 @@ export function initDesktopUI({enterBlackbox}){
         <div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div>
         <div class="stat"><b>Credits</b><br>${s.player.credits}</div>
         <div class="stat"><b>Reputation</b><br>${s.player.reputation}</div>
-        <div class="stat"><b>BLACKBOX</b><br>0.4.0-A4.2 installed</div>
+        <div class="stat"><b>BLACKBOX</b><br>0.4.0-A4.3 installed</div>
       </div>
       <div class="card"><h3>Installed software</h3><p>${(s.player.installedSoftware||[]).map(id=>({resolver_basic:"Basic Resolver",resolver_pro:"Resolver Pro",scan_suite:"WideScan Suite",logscope:"LogScope"}[id]||id)).join(" · ")}</p></div>
       <div class="card"><h3>BLACKBOX proficiencies</h3><div class="system-grid">${Object.entries(s.player.proficiencies||{}).map(([skill,value])=>`<div class="stat"><b>${skill[0].toUpperCase()+skill.slice(1)}</b><br>${proficiencyLabel(value)} (${value})</div>`).join("")}</div><p class="muted">Proficiency grows by using real CLI and investigation concepts, not by spending skill points.</p></div>

@@ -1,7 +1,7 @@
 import { executeCommand, getPrompt } from "../systems/terminal.js";
 import { getState } from "../core/state.js";
 import { HOSTS } from "../data/hosts.js";
-import { on } from "../core/events.js";
+import { on, emit } from "../core/events.js";
 import { playSound } from "../systems/audio.js";
 
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -20,11 +20,136 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
   const remoteReturn=document.querySelector("#bb-remote-return");
   const bbNotifications=document.querySelector("#bb-notifications");
   const latestButton=document.querySelector("#terminal-latest");
+  const inputControls=document.querySelector("#terminal-input-controls");
+  const customKeyboard=document.querySelector("#terminal-custom-keyboard");
+  const inputModeButton=document.querySelector("#terminal-input-mode");
+  const keysCollapseButton=document.querySelector("#terminal-keys-collapse");
   let running=false;
   let autoFollow=true;
+  let currentInputMode="system";
+  let keysCollapsed=false;
+  let keyboardPage="alpha";
+  let shifted=false;
   const queuedNotices=[];
 
   function isVisible(){return !document.querySelector("#blackbox").classList.contains("hidden");}
+  function coarsePointer(){return !!globalThis.matchMedia?.("(pointer: coarse)")?.matches;}
+  function preferredInputMode(){
+    if(!coarsePointer())return "system";
+    const pref=getState().ui?.terminalInputMode||"auto";
+    return pref==="system"?"system":"blackbox";
+  }
+
+  function updateLatestOffset(){
+    if(!coarsePointer()){latestButton.style.removeProperty("bottom");return;}
+    requestAnimationFrame(()=>{
+      const controls=inputControls?.offsetHeight||0;
+      const keys=customKeyboard?.classList.contains("is-active")?(customKeyboard.offsetHeight||0):0;
+      latestButton.style.bottom=`${Math.max(54,(form.offsetHeight||0)+controls+keys+8)}px`;
+    });
+  }
+
+  function focusCommandInput(){
+    if(currentInputMode!=="system")return;
+    try{input.focus({preventScroll:true});}catch{input.focus();}
+  }
+
+  function setKeyboardDisabled(disabled){
+    for(const button of customKeyboard?.querySelectorAll("button")||[])button.disabled=!!disabled;
+    if(inputModeButton)inputModeButton.disabled=!!disabled;
+    if(keysCollapseButton)keysCollapseButton.disabled=!!disabled;
+  }
+
+  function insertInput(text){
+    input.value+=String(text||"");
+  }
+
+  function backspaceInput(){
+    input.value=Array.from(input.value).slice(0,-1).join("");
+  }
+
+  function historyStep(direction){
+    const s=getState(),h=s.terminal.history;
+    if(!h.length)return;
+    if(direction<0)s.terminal.historyIndex=Math.max(0,s.terminal.historyIndex-1);
+    else s.terminal.historyIndex=Math.min(h.length,s.terminal.historyIndex+1);
+    input.value=h[s.terminal.historyIndex]||"";
+  }
+
+  function submitInput(){
+    if(typeof form.requestSubmit==="function")form.requestSubmit();
+    else form.dispatchEvent(new Event("submit",{bubbles:true,cancelable:true}));
+  }
+
+  function keySpec(label,{value=label,action="",wide=false,aria=label}={}){
+    return {label,value,action,wide,aria};
+  }
+
+  function renderCustomKeyboard(){
+    if(!customKeyboard)return;
+    const letters=shifted?"QWERTYUIOP":"qwertyuiop";
+    const middle=shifted?"ASDFGHJKL":"asdfghjkl";
+    const lower=shifted?"ZXCVBNM":"zxcvbnm";
+    const alphaRows=[
+      Array.from(letters).map(ch=>keySpec(ch)),
+      Array.from(middle).map(ch=>keySpec(ch)),
+      [keySpec("⇧",{action:"shift",aria:"Shift"}),...Array.from(lower).map(ch=>keySpec(ch)),keySpec("/"),keySpec("."),keySpec("-")]
+    ];
+    const numberRows=[
+      Array.from("1234567890").map(ch=>keySpec(ch)),
+      ["!","@","#","$","%","^","&","*","(",")"].map(ch=>keySpec(ch)),
+      ["[","]","{","}","\\","|","?","+","=",":",";"].map(ch=>keySpec(ch))
+    ];
+    const rows=keyboardPage==="numeric"?numberRows:alphaRows;
+    rows.push([
+      keySpec(keyboardPage==="numeric"?"ABC":"123",{action:"page",aria:keyboardPage==="numeric"?"Letters":"Numbers and symbols"}),
+      keySpec("_"),keySpec("~"),keySpec(".."),
+      keySpec("SPACE",{value:" ",wide:true,aria:"Space"}),
+      keySpec("↑",{action:"history-up",aria:"Previous command"}),
+      keySpec("↓",{action:"history-down",aria:"Next command"}),
+      keySpec("⌫",{action:"backspace",aria:"Backspace"}),
+      keySpec("ENTER",{action:"enter",wide:true,aria:"Enter command"})
+    ]);
+    customKeyboard.innerHTML="";
+    rows.forEach((specs,rowIndex)=>{
+      const row=document.createElement("div");
+      row.className=`terminal-key-row terminal-key-row-${rowIndex+1}`;
+      specs.forEach(spec=>{
+        const button=document.createElement("button");
+        button.type="button";button.className=`terminal-key${spec.wide?" terminal-key-wide":""}`;
+        button.textContent=spec.label;button.setAttribute("aria-label",spec.aria);
+        if(spec.action)button.dataset.action=spec.action;else button.dataset.value=spec.value;
+        row.appendChild(button);
+      });
+      customKeyboard.appendChild(row);
+    });
+  }
+
+  function setInputMode(mode,{persist=false,focus=false}={}){
+    const next=coarsePointer()&&mode!=="system"?"blackbox":"system";
+    currentInputMode=next;
+    const custom=next==="blackbox";
+    input.readOnly=custom;
+    input.setAttribute("inputmode",custom?"none":"text");
+    input.classList.toggle("terminal-input-custom",custom);
+    form.classList.toggle("terminal-form-custom",custom);
+    customKeyboard?.classList.toggle("is-active",custom&&!keysCollapsed);
+    inputControls?.classList.toggle("is-custom",custom);
+    if(inputModeButton)inputModeButton.textContent=custom?"SYSTEM KEYBOARD":"BLACKBOX KEYS";
+    if(keysCollapseButton){
+      keysCollapseButton.classList.toggle("hidden",!custom);
+      keysCollapseButton.textContent=keysCollapsed?"SHOW KEYS":"HIDE KEYS";
+      keysCollapseButton.setAttribute("aria-expanded",String(!keysCollapsed));
+    }
+    if(custom)input.blur();else if(focus)focusCommandInput();
+    if(persist){
+      getState().ui.terminalInputMode=next;
+      emit("ui:terminal-input-mode",{mode:next});
+    }
+    updateLatestOffset();
+  }
+
+  renderCustomKeyboard();
 
   function nearLatest(){
     return output.scrollHeight-output.scrollTop-output.clientHeight<52;
@@ -131,6 +256,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
   async function performPurge(){
     form.classList.add("terminal-locked");
     input.disabled=true;
+    setKeyboardDisabled(true);
     for(const [line,delay] of [
       ["Scrubbing session state...",350],
       ["Revoking identity keys...",430],
@@ -147,8 +273,9 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     if(purged===false){
       print("PURGE FAILED: identity archive could not be saved. Original identity remains active.","error");
       form.classList.remove("terminal-locked");input.disabled=false;
+      setKeyboardDisabled(false);
       refreshPrompt();
-      try{input.focus({preventScroll:true});}catch{input.focus();}
+      focusCommandInput();
     }
   }
 
@@ -174,18 +301,56 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     await run(raw);
   });
 
+  input.addEventListener("pointerdown",e=>{
+    if(currentInputMode!=="blackbox")return;
+    e.preventDefault();
+    input.blur();
+  });
+  input.addEventListener("focus",()=>{
+    if(currentInputMode==="blackbox")input.blur();
+  });
   input.addEventListener("keydown",e=>{
-    const s=getState(),h=s.terminal.history;
-    if(e.key==="ArrowUp"){
-      e.preventDefault();
-      if(!h.length)return;
-      s.terminal.historyIndex=Math.max(0,s.terminal.historyIndex-1);
-      input.value=h[s.terminal.historyIndex]||"";
-    }else if(e.key==="ArrowDown"){
-      e.preventDefault();
-      s.terminal.historyIndex=Math.min(h.length,s.terminal.historyIndex+1);
-      input.value=h[s.terminal.historyIndex]||"";
-    }
+    if(e.key==="ArrowUp"){e.preventDefault();historyStep(-1);}
+    else if(e.key==="ArrowDown"){e.preventDefault();historyStep(1);}
+  });
+
+  customKeyboard?.addEventListener("click",e=>{
+    const button=e.target.closest("button");
+    if(!button||button.disabled)return;
+    const action=button.dataset.action;
+    if(!action){insertInput(button.dataset.value||"");return;}
+    if(action==="backspace")backspaceInput();
+    else if(action==="history-up")historyStep(-1);
+    else if(action==="history-down")historyStep(1);
+    else if(action==="enter")submitInput();
+    else if(action==="page"){keyboardPage=keyboardPage==="numeric"?"alpha":"numeric";shifted=false;renderCustomKeyboard();}
+    else if(action==="shift"){shifted=!shifted;renderCustomKeyboard();}
+  });
+
+  inputModeButton?.addEventListener("click",()=>{
+    if(currentInputMode==="blackbox")setInputMode("system",{persist:true,focus:true});
+    else setInputMode("blackbox",{persist:true});
+  });
+
+  keysCollapseButton?.addEventListener("click",()=>{
+    if(currentInputMode!=="blackbox")return;
+    keysCollapsed=!keysCollapsed;
+    customKeyboard?.classList.toggle("is-active",!keysCollapsed);
+    keysCollapseButton.textContent=keysCollapsed?"SHOW KEYS":"HIDE KEYS";
+    keysCollapseButton.setAttribute("aria-expanded",String(!keysCollapsed));
+    updateLatestOffset();
+  });
+
+  document.addEventListener("keydown",e=>{
+    if(!isVisible()||currentInputMode!=="blackbox"||running||!remoteModal.classList.contains("hidden"))return;
+    const target=e.target,tag=target?.tagName;
+    if(tag==="BUTTON"||tag==="INPUT"||tag==="TEXTAREA"||target?.isContentEditable)return;
+    if(e.metaKey||e.ctrlKey||e.altKey)return;
+    if(e.key==="Enter"){e.preventDefault();submitInput();}
+    else if(e.key==="Backspace"){e.preventDefault();backspaceInput();}
+    else if(e.key==="ArrowUp"){e.preventDefault();historyStep(-1);}
+    else if(e.key==="ArrowDown"){e.preventDefault();historyStep(1);}
+    else if(e.key.length===1){e.preventDefault();insertInput(e.key);}
   });
 
   desktopButton.addEventListener("click",()=>{
@@ -202,7 +367,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
 
   remoteCancel.addEventListener("click",()=>{
     remoteModal.classList.add("hidden");
-    try{input.focus({preventScroll:true});}catch{input.focus();}
+    focusCommandInput();
   });
 
   remoteReturn.addEventListener("click",async()=>{
@@ -256,7 +421,9 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     autoFollow=nearLatest();
     updateLatestButton();
   },{passive:true});
-  latestButton.addEventListener("click",()=>{scrollLatest(true);try{input.focus({preventScroll:true});}catch{input.focus();}});
+  latestButton.addEventListener("click",()=>{scrollLatest(true);focusCommandInput();});
+  window.addEventListener("resize",updateLatestOffset,{passive:true});
+  globalThis.visualViewport?.addEventListener?.("resize",updateLatestOffset,{passive:true});
 
   return {
     showSession({resume=false}={}){
@@ -277,7 +444,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
         output.innerHTML="";
         print("┌──────────────────────────────────────────┐","banner");
         print("│       B L A C K B O X   S E C U R E      │","banner");
-        print("│          INTERACTIVE SHELL 0.4.0-A4.2           │","banner");
+        print("│          INTERACTIVE SHELL 0.4.0-A4.3           │","banner");
         print("└──────────────────────────────────────────┘","banner");
         print("");
         print(`SESSION ${String(s.terminal.sessionCount).padStart(4,"0")} // LOCAL ENVIRONMENT`);
@@ -287,9 +454,9 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
       }
       print("");
       refreshPrompt();
-      setTimeout(()=>{
-        try{input.focus({preventScroll:true});}catch{input.focus();}
-      },0);
+      setInputMode(preferredInputMode());
+      setKeyboardDisabled(false);
+      setTimeout(()=>{focusCommandInput();updateLatestOffset();},0);
     }
   };
 }

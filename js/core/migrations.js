@@ -274,6 +274,8 @@ function normalize(save){
 
   save.ui.openApps=uniqueStrings(save.ui.openApps,[]);
   save.ui.lastBrowserSite=asString(save.ui.lastBrowserSite,d.ui.lastBrowserSite)||d.ui.lastBrowserSite;
+  const terminalInputMode=asString(save.ui.terminalInputMode,d.ui.terminalInputMode);
+  save.ui.terminalInputMode=["auto","blackbox","system"].includes(terminalInputMode)?terminalInputMode:"auto";
   return save;
 }
 
