@@ -31,7 +31,8 @@ function at(s,h,m){s.world.day=1;s.world.minute=h*60+m;}
   s.world.caseHistory.push({id:"event:cedar_lead",day:1,minute:19*60+2});
   const cedar=SOCIAL_POSTS.find(x=>x.id==="s11"),threat=SOCIAL_POSTS.find(x=>x.id==="s12"),orchid=SOCIAL_POSTS.find(x=>x.id==="s10");
   assert.equal(chronologyAvailable(orchid,{kind:"social",state:s}),true,"18:55 post should be visible by 19:05");
-  assert.equal(chronologyAvailable(cedar,{kind:"social",state:s}),false,"19:26 Cedar post must not appear at 19:05");
+  assert.equal(chronologyAvailable(cedar,{kind:"social",state:s}),true,"Cedar post generated at 19:02 must be visible by 19:05");
+  assert.equal(contentTimeLabel(cedar,s),"19:02","Cedar post must inherit the cedar_lead event timestamp");
   assert.equal(chronologyAvailable(threat,{kind:"social",state:s}),false,"20:08 ThreatDesk post must not appear at 19:05");
   at(s,20,9);
   assert.equal(chronologyAvailable(cedar,{kind:"social",state:s}),true);
@@ -60,4 +61,4 @@ function at(s,h,m){s.world.day=1;s.world.minute=h*60+m;}
   }
 }
 
-console.log("BLACKBOX v0.4.0 Alpha 4 chronology tests passed");
+console.log("BLACKBOX v0.4.0 Alpha 4.1 chronology tests passed");

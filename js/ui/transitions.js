@@ -24,7 +24,7 @@ export async function enterBlackboxTransition({desktop,transition,blackbox,lines
     "DISPLAY INTERRUPT 0x0B",
     "Saving desktop context........ OK",
     "Dropping graphical session.... OK","",
-    "BLACKBOX BOOTSTRAP 0.4.0-A4",
+    "BLACKBOX BOOTSTRAP 0.4.0-A4.1",
     "VT100 compatibility........... OK",
     "SIMNET transport.............. OK",
     "Filesystem bridge............. OK",

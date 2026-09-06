@@ -1,8 +1,19 @@
-# BLACKBOX v0.4.0 Alpha 4 — Chronology & Conversation State
+# BLACKBOX v0.4.0 Alpha 4.1 — Cross-App Timestamp Consistency
 
-Built directly from verified **v0.4.0 Alpha 3** SHA-256 `899d4ce1d15feb78c86f30895f17ce981f72f34aec429cca0563d1b2a0c06298`, descended from exact v0.3.0 RC7.
+Built directly from verified **v0.4.0 Alpha 4** SHA-256 `5183d162b3f2f3ff6f333b923d9654c5135267cfac5380f553d542267e7a3db1`, descended from exact v0.3.0 RC7.
 
-Alpha 4 fixes the chronology defects found during physical iPhone testing before any larger conversation migration occurs.
+Alpha 4.1 is a narrow chronology-consistency hotfix built on Alpha 4 after physical iPhone testing exposed a remaining World Timeline ↔ app timestamp mismatch.
+
+
+## Alpha 4.1 hotfix
+
+- Event-generated Cedar FriendSpace content now inherits the actual `cedar_lead` event timestamp instead of displaying the old authored 19:26 placeholder.
+- Event-generated Lumen/Iris/Harbor MetroWire follow-ups inherit their actual world-event timestamps.
+- Event-generated ThreatDesk reports carry the timestamp of the world event that created them.
+- MetroWire renders the canonical content timestamp when one exists.
+- ThreatDesk displays the canonical event time beside event-generated report severity.
+- Content merely unlocked by an event but intended as a later reaction remains on its authored time.
+- Added cross-app timestamp regression coverage.
 
 ## Alpha 4 changes
 

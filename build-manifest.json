@@ -1,6 +1,6 @@
 {
   "name": "Human Layer / Act II Foundation",
-  "version": "0.4.0-alpha.4",
+  "version": "0.4.0-alpha.4.1",
   "saveVersion": 10,
   "worldSchema": 10,
   "baseline": {
@@ -25,6 +25,8 @@
     "scheduledContent": 5
   },
   "features": [
+    "event-generated News, FriendSpace, and ThreatDesk content inherits the canonical timestamp of the world event that created it",
+    "MetroWire and ThreatDesk display canonical event-derived timestamps while later reaction content retains authored timing",
     "canonical content chronology for Messenger and FriendSpace using scheduler delivery times, world-event history, mission history, and authored clock times",
     "Messenger renders visible messages by effective timestamp with deterministic source-order tie breaking instead of raw data-array order",
     "FriendSpace hides non-mission-critical legacy posts until their effective publication time and renders the feed newest-first",
@@ -82,6 +84,8 @@
     "IPv6"
   ],
   "verification": [
+    "A4.1 cross-app timestamp suite verifies Cedar, Lumen, Iris, Harbor, Juno, and contract/advisory content times match their generating world-event history",
+    "A4.1 regression verifies content merely unlocked by an event, such as Maya's later ThreatDesk reaction, is not incorrectly pulled to the event instant",
     "A4 physical-device regression reproduced in automation: a ThreatDesk event at 18:46 sorts before an ambient Maya delivery at 18:55 even when source-array order is reversed",
     "FriendSpace chronology regression verifies 19:26 and 20:08 posts remain hidden at world time 19:05, then unlock when their effective publication time arrives",
     "Old Mirror mission-critical FriendSpace target s5 is explicitly exempt from the new legacy time gate",
@@ -135,5 +139,5 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4 chronology + conversation-state foundation; mission-critical progression remains legacy-protected"
+  "foundationMilestone": "A4.1 cross-app timestamp consistency hotfix; chronology/conversation foundation retained; mission progression unchanged"
 }
