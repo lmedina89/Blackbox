@@ -1,3 +1,23 @@
+# BLACKBOX v0.4.0 Alpha 4.4 — Dual Keyboard Visual Polish
+
+Built directly from **v0.4.0 Alpha 4.3**. This is a presentation/input polish milestone: gameplay, missions, rewards, evidence, scheduler, DNS, host topology, and save/world schema versions remain unchanged.
+
+## Alpha 4.4 changes
+
+- Restyles the BLACKBOX touch keyboard as a compact **90s wedge-key keyboard** while preserving the black/green secure-terminal palette.
+- Adds a matching **NEXUS beige 90s keyboard** to Notepad on touch devices, with System Keyboard fallback and a saved NEXUS input preference.
+- Both custom keyboards use beveled/trapezoid keycaps, a period-style keyboard case, readable abbreviated control labels, and dedicated portrait/landscape sizing.
+- NEXUS Notepad includes complete A-Z and 0-9 typing plus Backspace, Enter, Tab, Caps, Shift, Space, punctuation, and left/right cursor controls.
+- BLACKBOX retains its complete A-Z layout, number/symbol page, terminal punctuation, command history, collapse control, and System Keyboard fallback.
+- Adds explicit keyboard inventory regression guards so A-Z / 0-9 omissions (such as a missing L) cannot ship unnoticed.
+- No fake one-tap hacking commands were added; real terminal command entry remains unchanged.
+
+## Device acceptance focus
+
+Physical iPhone testing should verify that every visible label fits inside its keycap in portrait and landscape, both keyboards remain smaller than the native iOS keyboard, and switching to System Keyboard still behaves normally.
+
+---
+
 # BLACKBOX v0.4.0 Alpha 4.3 — Mobile Terminal Input
 
 Built directly from the verified **v0.4.0 Alpha 4.2** repair checkpoint (SHA-256 `768b35cbf1b2b7e2ee4da5b780920ac1bb3d1d3dcd184bc0aa44a618c7233f87`).

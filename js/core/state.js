@@ -68,7 +68,7 @@ export const baseState=()=>({
     pendingAction:null,
     lastScanResults:[]
   },
-  ui:{openApps:[],lastBrowserSite:"news",terminalInputMode:"auto"}
+  ui:{openApps:[],lastBrowserSite:"news",terminalInputMode:"auto",nexusInputMode:"auto"}
 });
 
 let state=baseState();

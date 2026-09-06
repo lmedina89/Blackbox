@@ -32,8 +32,8 @@ assert.match(ui,/document\.addEventListener\("keydown"/);
 assert.match(ui,/e\.key\.length===1/);
 assert.match(ui,/updateLatestOffset/);
 assert.match(terminalCss,/\.terminal-custom-keyboard\.is-active\{display:block\}/);
-assert.match(mobileCss,/@media \(pointer:coarse\)[\s\S]*\.terminal-input-controls\{display:flex/);
-assert.match(mobileCss,/@media \(orientation:landscape\) and \(max-height:520px\) and \(pointer:coarse\)[\s\S]*\.terminal-key\{min-height:31px/);
+assert.match(mobileCss,/@media \(pointer:coarse\)[\s\S]*\.terminal-input-controls,\.nexus-input-controls\{display:flex/);
+assert.match(mobileCss,/@media \(orientation:landscape\) and \(max-height:520px\) and \(pointer:coarse\)[\s\S]*\.terminal-key,\.nexus-key\{min-height:29px/);
 
 // Preference is safe in old/malformed saves without a schema bump.
 {
@@ -68,4 +68,4 @@ assert.match(mobileCss,/@media \(orientation:landscape\) and \(max-height:520px\
   assert.equal(s.terminal.cwd,"/");
 }
 
-console.log("BLACKBOX v0.4.0 Alpha 4.3 mobile terminal keyboard guards passed");
+console.log("BLACKBOX v0.4.0 Alpha 4.4 mobile terminal keyboard guards passed");

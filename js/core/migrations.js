@@ -276,6 +276,8 @@ function normalize(save){
   save.ui.lastBrowserSite=asString(save.ui.lastBrowserSite,d.ui.lastBrowserSite)||d.ui.lastBrowserSite;
   const terminalInputMode=asString(save.ui.terminalInputMode,d.ui.terminalInputMode);
   save.ui.terminalInputMode=["auto","blackbox","system"].includes(terminalInputMode)?terminalInputMode:"auto";
+  const nexusInputMode=asString(save.ui.nexusInputMode,d.ui.nexusInputMode);
+  save.ui.nexusInputMode=["auto","nexus","system"].includes(nexusInputMode)?nexusInputMode:"auto";
   return save;
 }
 

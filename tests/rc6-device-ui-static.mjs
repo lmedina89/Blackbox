@@ -17,8 +17,10 @@ assert.match(mobile,/grid-template-columns:repeat\(4,minmax\(72px,1fr\)\)/,
   "landscape desktop does not use a reachable multi-column icon grid");
 assert.match(mobile,/\.app-window\{[\s\S]*?right:max\(6px,env\(safe-area-inset-right\)\);[\s\S]*?bottom:5px;/,
   "landscape app windows are not constrained to the short viewport");
-assert.match(appsCss,/\.notepad\{[^}]*width:100%;[^}]*height:calc\(100% - 29px\);[^}]*box-sizing:border-box/,
-  "Notepad does not fill its app window");
+assert.match(appsCss,/\.notepad-shell\{[^}]*height:100%;[^}]*display:flex;[^}]*flex-direction:column/,
+  "Notepad shell does not fill its app window");
+assert.match(appsCss,/\.notepad\{[^}]*width:100%;[^}]*flex:1 1 auto;[^}]*box-sizing:border-box/,
+  "Notepad editor does not flex to fill remaining app space");
 assert.match(apps,/export const BLACKBOX_SHORTCUT/);
 assert.match(apps,/A2: sharper single-eye housing/);
 assert.match(desktop,/BLACKBOX_SHORTCUT/);

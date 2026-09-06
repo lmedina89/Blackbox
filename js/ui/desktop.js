@@ -29,6 +29,9 @@ function visible(item){return contentAvailable(item);}
 function visibleSocial(item){return contentAvailable(item)&&chronologyAvailable(item,{kind:"social"});}
 function visibleMessage(item){return contentAvailable(item)&&chronologyAvailable(item,{kind:"message"});}
 
+const NEXUS_KEYBOARD_ROWS=["1234567890","qwertyuiop","asdfghjkl","zxcvbnm"];
+const isCoarsePointer=()=>!!globalThis.matchMedia?.("(pointer: coarse)")?.matches;
+
 export function initDesktopUI({enterBlackbox}){
   const icons=document.querySelector("#desktop-icons"),startList=document.querySelector("#start-app-list"),startMenu=document.querySelector("#start-menu"),layer=document.querySelector("#window-layer"),taskApps=document.querySelector("#taskbar-apps"),toastBox=document.querySelector("#notifications"),audioButton=document.querySelector("#audio-button");
   // Identity restore can initialize the desktop again in the same page lifetime.
@@ -306,7 +309,7 @@ export function initDesktopUI({enterBlackbox}){
         <div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div>
         <div class="stat"><b>Credits</b><br>${s.player.credits}</div>
         <div class="stat"><b>Reputation</b><br>${s.player.reputation}</div>
-        <div class="stat"><b>BLACKBOX</b><br>0.4.0-A4.3 installed</div>
+        <div class="stat"><b>BLACKBOX</b><br>0.4.0-A4.4 installed</div>
       </div>
       <div class="card"><h3>Installed software</h3><p>${(s.player.installedSoftware||[]).map(id=>({resolver_basic:"Basic Resolver",resolver_pro:"Resolver Pro",scan_suite:"WideScan Suite",logscope:"LogScope"}[id]||id)).join(" · ")}</p></div>
       <div class="card"><h3>BLACKBOX proficiencies</h3><div class="system-grid">${Object.entries(s.player.proficiencies||{}).map(([skill,value])=>`<div class="stat"><b>${skill[0].toUpperCase()+skill.slice(1)}</b><br>${proficiencyLabel(value)} (${value})</div>`).join("")}</div><p class="muted">Proficiency grows by using real CLI and investigation concepts, not by spending skill points.</p></div>
@@ -348,7 +351,81 @@ export function initDesktopUI({enterBlackbox}){
     });
   }
 
-  function renderNotes(el){const s=getState();el.innerHTML='<div class="notepad-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; Format&nbsp;&nbsp; Help</div><textarea id="player-notes" class="notepad" spellcheck="false" placeholder="Write anything you want to remember..."></textarea>';const ta=el.querySelector("#player-notes");ta.value=s.player.notes||"";ta.addEventListener("input",()=>{s.player.notes=ta.value;emit("notes:changed",{notes:ta.value});});}
+  function renderNotes(el){
+    const s=getState();
+    el.innerHTML=`<div class="notepad-shell">
+      <div class="notepad-menu">File&nbsp;&nbsp; Edit&nbsp;&nbsp; Format&nbsp;&nbsp; Help</div>
+      <textarea id="player-notes" class="notepad" spellcheck="false" autocomplete="off" autocapitalize="sentences" placeholder="Write anything you want to remember..."></textarea>
+      <div class="nexus-input-controls" aria-label="Notepad input controls">
+        <button class="nexus-keys-collapse" type="button" aria-expanded="true">HIDE KEYS</button>
+        <button class="nexus-input-mode" type="button">SYSTEM KEYBOARD</button>
+      </div>
+      <div class="nexus-custom-keyboard" role="group" aria-label="NEXUS 90s keyboard"></div>
+    </div>`;
+    const ta=el.querySelector("#player-notes"),keyboard=el.querySelector(".nexus-custom-keyboard"),modeButton=el.querySelector(".nexus-input-mode"),collapseButton=el.querySelector(".nexus-keys-collapse");
+    ta.value=s.player.notes||"";
+    let caps=false,shift=false,collapsed=false,currentMode="system";
+
+    const key=(label,{value=label,action="",wide=false,space=false,aria=label,shiftValue=""}={})=>({label,value,action,wide,space,aria,shiftValue});
+    function renderKeyboard(){
+      const rows=[
+        [...NEXUS_KEYBOARD_ROWS[0]].map(ch=>key(ch)).concat(key("BKSP",{action:"backspace",wide:true,aria:"Backspace"})),
+        [key("TAB",{action:"tab",wide:true}),...NEXUS_KEYBOARD_ROWS[1].split("").map(ch=>key(ch))],
+        [key("CAPS",{action:"caps",wide:true,aria:"Caps Lock"}),...NEXUS_KEYBOARD_ROWS[2].split("").map(ch=>key(ch)),key("ENTER",{action:"enter",wide:true})],
+        [key("SHIFT",{action:"shift",wide:true}),...NEXUS_KEYBOARD_ROWS[3].split("").map(ch=>key(ch)),key(",",{shiftValue:"<"}),key(".",{shiftValue:">"}),key("/",{shiftValue:"?"})],
+        [key("CTRL",{action:"noop"}),key("ALT",{action:"noop"}),key("'",{shiftValue:'"'}),key("-",{shiftValue:"_"}),key("SPACE",{value:" ",space:true,aria:"Space"}),key("←",{action:"left",aria:"Move cursor left"}),key("→",{action:"right",aria:"Move cursor right"})]
+      ];
+      keyboard.replaceChildren();
+      const shell=document.createElement("div");shell.className="nexus-keyboard-case";
+      const brand=document.createElement("div");brand.className="nexus-keyboard-brand";brand.innerHTML="<span>NEXUS PERSONAL KEYBOARD</span><span>MODEL N95</span>";shell.appendChild(brand);
+      rows.forEach((specs,index)=>{
+        const row=document.createElement("div");row.className=`nexus-key-row nexus-key-row-${index+1}`;
+        for(const spec of specs){
+          const button=document.createElement("button");button.type="button";button.className=`nexus-key${spec.wide?" nexus-key-wide":""}${spec.space?" nexus-key-space":""}`;
+          button.textContent=spec.label;button.setAttribute("aria-label",spec.aria);
+          if(spec.action)button.dataset.action=spec.action;else button.dataset.value=spec.value;
+          if(spec.shiftValue)button.dataset.shiftValue=spec.shiftValue;
+          if(spec.action==="caps"&&caps||spec.action==="shift"&&shift)button.classList.add("is-on");
+          row.appendChild(button);
+        }
+        shell.appendChild(row);
+      });
+      keyboard.appendChild(shell);
+    }
+    function commit(){s.player.notes=ta.value;emit("notes:changed",{notes:ta.value});}
+    function selection(){const start=Number.isInteger(ta.selectionStart)?ta.selectionStart:ta.value.length;const end=Number.isInteger(ta.selectionEnd)?ta.selectionEnd:start;return {start,end};}
+    function replaceSelection(text){const {start,end}=selection(),value=String(text);ta.value=ta.value.slice(0,start)+value+ta.value.slice(end);const next=start+value.length;ta.setSelectionRange(next,next);commit();}
+    function backspace(){const {start,end}=selection();if(start!==end){ta.value=ta.value.slice(0,start)+ta.value.slice(end);ta.setSelectionRange(start,start);}else if(start>0){const before=Array.from(ta.value.slice(0,start)),removed=before.pop()||"";const next=start-removed.length;ta.value=before.join("")+ta.value.slice(end);ta.setSelectionRange(next,next);}commit();}
+    function moveCursor(delta){const {start,end}=selection(),base=delta<0?start:end,next=Math.max(0,Math.min(ta.value.length,base+delta));ta.setSelectionRange(next,next);}
+    function preferredMode(){if(!isCoarsePointer())return "system";return s.ui?.nexusInputMode==="system"?"system":"nexus";}
+    function setMode(mode,{persist=false,focus=false}={}){
+      currentMode=isCoarsePointer()&&mode!=="system"?"nexus":"system";const custom=currentMode==="nexus";
+      ta.readOnly=custom;ta.setAttribute("inputmode",custom?"none":"text");ta.classList.toggle("notepad-custom-input",custom);
+      keyboard.classList.toggle("is-active",custom&&!collapsed);
+      modeButton.textContent=custom?"SYSTEM KEYBOARD":"NEXUS KEYS";
+      collapseButton.classList.toggle("hidden",!custom);collapseButton.textContent=collapsed?"SHOW KEYS":"HIDE KEYS";collapseButton.setAttribute("aria-expanded",String(!collapsed));
+      if(custom)ta.blur();else if(focus){try{ta.focus({preventScroll:true});}catch{ta.focus();}}
+      if(persist){s.ui.nexusInputMode=currentMode;emit("ui:nexus-input-mode",{mode:currentMode});}
+    }
+
+    renderKeyboard();setMode(preferredMode());
+    ta.addEventListener("input",commit);
+    ta.addEventListener("pointerdown",e=>{if(currentMode!=="nexus")return;e.preventDefault();ta.blur();});
+    ta.addEventListener("focus",()=>{if(currentMode==="nexus")ta.blur();});
+    keyboard.addEventListener("click",e=>{
+      const button=e.target.closest("button");if(!button)return;const action=button.dataset.action;
+      if(!action){let value=button.dataset.value||"";if(button.dataset.shiftValue&&shift)value=button.dataset.shiftValue;else if(/^[a-z]$/i.test(value)){const upper=caps!==shift;value=upper?value.toUpperCase():value.toLowerCase();}replaceSelection(value);if(shift){shift=false;renderKeyboard();}return;}
+      if(action==="backspace")backspace();
+      else if(action==="enter")replaceSelection("\n");
+      else if(action==="tab")replaceSelection("    ");
+      else if(action==="left")moveCursor(-1);
+      else if(action==="right")moveCursor(1);
+      else if(action==="caps"){caps=!caps;renderKeyboard();}
+      else if(action==="shift"){shift=!shift;renderKeyboard();}
+    });
+    modeButton.addEventListener("click",()=>setMode(currentMode==="nexus"?"system":"nexus",{persist:true,focus:currentMode==="nexus"}));
+    collapseButton.addEventListener("click",()=>{collapsed=!collapsed;keyboard.classList.toggle("is-active",currentMode==="nexus"&&!collapsed);collapseButton.textContent=collapsed?"SHOW KEYS":"HIDE KEYS";collapseButton.setAttribute("aria-expanded",String(!collapsed));});
+  }
 
   return {openApp,toast,refresh:renderOpenApps};
 }

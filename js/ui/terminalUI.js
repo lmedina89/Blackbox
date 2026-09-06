@@ -5,6 +5,8 @@ import { on, emit } from "../core/events.js";
 import { playSound } from "../systems/audio.js";
 
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const BLACKBOX_KEYBOARD_ROWS=["qwertyuiop","asdfghjkl","zxcvbnm"];
+
 
 export function initTerminalUI({onExit,onSuspend,onPurge}){
   const output=document.querySelector("#terminal-output");
@@ -87,9 +89,9 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
 
   function renderCustomKeyboard(){
     if(!customKeyboard)return;
-    const letters=shifted?"QWERTYUIOP":"qwertyuiop";
-    const middle=shifted?"ASDFGHJKL":"asdfghjkl";
-    const lower=shifted?"ZXCVBNM":"zxcvbnm";
+    const letters=shifted?BLACKBOX_KEYBOARD_ROWS[0].toUpperCase():BLACKBOX_KEYBOARD_ROWS[0];
+    const middle=shifted?BLACKBOX_KEYBOARD_ROWS[1].toUpperCase():BLACKBOX_KEYBOARD_ROWS[1];
+    const lower=shifted?BLACKBOX_KEYBOARD_ROWS[2].toUpperCase():BLACKBOX_KEYBOARD_ROWS[2];
     const alphaRows=[
       Array.from(letters).map(ch=>keySpec(ch)),
       Array.from(middle).map(ch=>keySpec(ch)),
@@ -110,7 +112,9 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
       keySpec("⌫",{action:"backspace",aria:"Backspace"}),
       keySpec("ENTER",{action:"enter",wide:true,aria:"Enter command"})
     ]);
-    customKeyboard.innerHTML="";
+    customKeyboard.replaceChildren();
+    const shell=document.createElement("div");shell.className="terminal-keyboard-case";
+    const brand=document.createElement("div");brand.className="terminal-keyboard-brand";brand.innerHTML="<span>BLACKBOX SECURE INPUT DEVICE</span><span>BBX-90</span>";shell.appendChild(brand);
     rows.forEach((specs,rowIndex)=>{
       const row=document.createElement("div");
       row.className=`terminal-key-row terminal-key-row-${rowIndex+1}`;
@@ -121,8 +125,9 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
         if(spec.action)button.dataset.action=spec.action;else button.dataset.value=spec.value;
         row.appendChild(button);
       });
-      customKeyboard.appendChild(row);
+      shell.appendChild(row);
     });
+    customKeyboard.appendChild(shell);
   }
 
   function setInputMode(mode,{persist=false,focus=false}={}){
@@ -444,7 +449,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
         output.innerHTML="";
         print("┌──────────────────────────────────────────┐","banner");
         print("│       B L A C K B O X   S E C U R E      │","banner");
-        print("│          INTERACTIVE SHELL 0.4.0-A4.3           │","banner");
+        print("│          INTERACTIVE SHELL 0.4.0-A4.4           │","banner");
         print("└──────────────────────────────────────────┘","banner");
         print("");
         print(`SESSION ${String(s.terminal.sessionCount).padStart(4,"0")} // LOCAL ENVIRONMENT`);
