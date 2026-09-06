@@ -1,3 +1,31 @@
+# BLACKBOX v0.4.0 Alpha 4.6.1 — Remote Assistance Mobile Polish
+
+Built directly from verified **v0.4.0 Alpha 4.6** archive SHA-256 `b0224cca67840b3eca310998618a2296fd782acee1cd84f69819808e24eb513f`.
+
+Alpha 4.6.1 is a narrow phone-UX repair for the Service Desk Remote Assistance workspace. It changes presentation only: ticket logic, remote-machine faults, campaign state, messages, missions, rewards, host topology, BLACKBOX networking, and save schema are unchanged.
+
+## Alpha 4.6.1 — Remote Assistance Mobile Polish
+
+- On phone portrait, the remote desktop and troubleshooting tool no longer stack vertically into two cramped scroll regions.
+- Selecting Device Manager, Network, Services, Event Viewer, Firewall, My Computer, or Command Prompt now **replaces the remote desktop workspace** and receives the full available remote-workspace height.
+- Active tools expose a clear **← REMOTE DESKTOP** control to return to the user's simulated workstation desktop.
+- The active tool content is independently touch-scrollable with iOS momentum scrolling.
+- Larger/desktop layouts retain the A4.6 split remote-desktop + tool-pane presentation. Short landscape also retains its established two-pane arrangement.
+- SAVE_VERSION remains **13** and WORLD_SCHEMA remains **10**; no migration is needed.
+- The three A4.6 incidents and their modeled fault/verification behavior are unchanged.
+
+## A4.6.1 physical-device acceptance focus
+
+1. Open Service Desk → INC-0001 → Remote Support in iPhone portrait.
+2. Tap Device Manager. The remote desktop should disappear and Device Manager should occupy the full remote workspace instead of appearing as a thin bar below it.
+3. Scroll Device Manager comfortably, enable the NIC, and confirm the tool remains usable after rerender.
+4. Tap **← REMOTE DESKTOP** and confirm Maria's remote desktop returns.
+5. Repeat with Services and Event Viewer, including enough content to require scrolling.
+6. Rotate landscape and confirm the established split remote-desktop/tool presentation still behaves acceptably.
+7. Verify/resolve INC-0001 and confirm ticket behavior is unchanged.
+
+---
+
 # BLACKBOX v0.4.0 Alpha 4.6 — Service Desk Foundation
 
 Built directly from verified **v0.4.0 Alpha 4.5.1** archive SHA-256 `a06bbf3de37563d1f848cacf434a9fc186ec7d5cef43c4254f0f184df8a74107`.
