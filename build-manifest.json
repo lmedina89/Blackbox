@@ -1,8 +1,8 @@
 {
-  "name": "The Wider Net",
-  "version": "0.3.0",
-  "saveVersion": 9,
-  "worldSchema": 9,
+  "name": "Human Layer / Act II Foundation",
+  "version": "0.4.0-alpha.1",
+  "saveVersion": 10,
+  "worldSchema": 10,
   "baseline": {
     "version": "0.2.3.4",
     "archive": "BLACKBOX-v0.2.3.4-GitHub.zip",
@@ -24,6 +24,10 @@
     "worldEvents": 11
   },
   "features": [
+    "v0.4.0 save/world schema scaffolding with v9 migration",
+    "compatibility-aware scheduled-content visibility with legacy flag fallback",
+    "persistent timeline, conversation, learning, Help Desk, and behavioral state foundations",
+    "sidecar scenario metadata for all nine existing missions without changing mission completion logic",
     "deterministic dynamic scan subsets with per-scan ordering variation",
     "active-objective mission host pinning without future-target spoilers",
     "refresh-resistant scan epochs and saved scan counters",
@@ -65,6 +69,10 @@
     "IPv6"
   ],
   "verification": [
+    "protected current content and gameplay files are byte-identical to exact RC7: missions, messages, emails, news, social, forums, threats, world events, hosts, DNS, clues, mission system, timeline system, communications system, network system, and terminal command system",
+    "v040-foundation migration/metadata/content-availability suite passes",
+    "existing continuous nine-case campaign + reload suite passes unchanged in gameplay behavior",
+    "all JavaScript and test modules pass node --check under the v0.4.0 A1 tree",
     "all JavaScript files pass node --check",
     "tests/smoke.mjs passes",
     "all 36 addresses are unique",
@@ -99,5 +107,10 @@
     "RC7 static UI guards verify semantic terminal classes/tokens, fixed-shell scroll architecture, Latest behavior hooks, compact portrait taskbar icons, and explicit World Intel routing feedback",
     "RC7 retains save version 9 and world schema 9; command semantics and gameplay state are unchanged"
   ],
-  "releaseCandidate": 7
+  "releaseCandidate": null,
+  "sourceBaseline": {
+    "version": "0.3.0-RC7",
+    "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
+  },
+  "foundationMilestone": "A1 compatibility scaffolding"
 }

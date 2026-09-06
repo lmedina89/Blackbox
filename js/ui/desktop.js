@@ -22,12 +22,9 @@ import { displayName } from "../systems/network.js";
 import { playSound, toggleAudio, isAudioEnabled } from "../systems/audio.js";
 import { lookupDns, formatDnsResult } from "../systems/dns.js";
 import { escapeHtml } from "./safeText.js";
+import { contentAvailable } from "../systems/contentAvailability.js";
 
-function visible(item){
-  if((item.visibleWhen||[]).some(f=>!hasFlag(f))) return false;
-  if((item.hiddenWhen||[]).some(f=>hasFlag(f))) return false;
-  return true;
-}
+function visible(item){return contentAvailable(item);}
 
 export function initDesktopUI({enterBlackbox}){
   const icons=document.querySelector("#desktop-icons"),startList=document.querySelector("#start-app-list"),startMenu=document.querySelector("#start-menu"),layer=document.querySelector("#window-layer"),taskApps=document.querySelector("#taskbar-apps"),toastBox=document.querySelector("#notifications"),audioButton=document.querySelector("#audio-button");
@@ -74,7 +71,7 @@ export function initDesktopUI({enterBlackbox}){
     const s=getState();
     if(appId==="mail")return EMAILS.filter(visible).filter(x=>!s.world.readEmails.includes(x.id)).length;
     if(appId==="threatdesk")return hasFlag("threatdesk_online")?THREATS.filter(visible).filter(x=>!(s.world.readThreats||[]).includes(x.id)).length:0;
-    if(appId==="chat")return THREADS.flatMap(x=>x.messages).filter(x=>x.from!=="player"&&(x.visibleWhen||[]).every(hasFlag)&&!(s.world.readMessages||[]).includes(x.id)).length;
+    if(appId==="chat")return THREADS.flatMap(x=>x.messages).filter(x=>x.from!=="player"&&contentAvailable(x)&&!(s.world.readMessages||[]).includes(x.id)).length;
     if(appId==="browser")return NEWS.filter(x=>x.clueId&&visible(x)&&!s.world.readNewsStories.includes(x.id)).length+FORUM_POSTS.filter(x=>x.clueId&&visible(x)&&!s.world.readForumPosts.includes(x.id)).length+SOCIAL_POSTS.filter(x=>x.clueId&&visible(x)&&!s.world.readSocialPosts.includes(x.id)).length;
     if(appId==="missions")return (s.missions.active||[]).length;
     return 0;
@@ -246,7 +243,7 @@ export function initDesktopUI({enterBlackbox}){
     const s=getState();
     const thread=THREADS.find(x=>x.id===activeThreadId)||THREADS[0];
     activeThreadId=thread.id;
-    const messages=thread.messages.filter(m=>(m.visibleWhen||[]).every(hasFlag));
+    const messages=thread.messages.filter(contentAvailable);
     const pending=messages.find(m=>m.choice && !m.choice.options.some(o=>choiceMade(o.id)));
     const online=THREADS.filter(x=>x.status==="online");
     const others=THREADS.filter(x=>x.status!=="online");
@@ -297,7 +294,7 @@ export function initDesktopUI({enterBlackbox}){
         <div class="stat"><b>Network</b><br>${s.player.installedHardware.includes("nic_fast")?"FastLink 100":"EtherLink 10"}</div>
         <div class="stat"><b>Credits</b><br>${s.player.credits}</div>
         <div class="stat"><b>Reputation</b><br>${s.player.reputation}</div>
-        <div class="stat"><b>BLACKBOX</b><br>0.3.0 installed</div>
+        <div class="stat"><b>BLACKBOX</b><br>0.4.0-A1 installed</div>
       </div>
       <div class="card"><h3>Installed software</h3><p>${(s.player.installedSoftware||[]).map(id=>({resolver_basic:"Basic Resolver",resolver_pro:"Resolver Pro",scan_suite:"WideScan Suite",logscope:"LogScope"}[id]||id)).join(" · ")}</p></div>
       <div class="card"><h3>BLACKBOX proficiencies</h3><div class="system-grid">${Object.entries(s.player.proficiencies||{}).map(([skill,value])=>`<div class="stat"><b>${skill[0].toUpperCase()+skill.slice(1)}</b><br>${proficiencyLabel(value)} (${value})</div>`).join("")}</div><p class="muted">Proficiency grows by using real CLI and investigation concepts, not by spending skill points.</p></div>

@@ -83,6 +83,16 @@ const migrations={
       }
     }
     return save;
+  },
+  10(save){
+    save.world ??= {};
+    save.world.timeline ??= {scheduled:{},delivered:[],deliveryTimes:{},cancelled:[],expired:[],cooldowns:{},occurrenceCounters:{}};
+    save.communications ??= {choicesMade:[]};
+    save.communications.threads ??= {};
+    save.learning ??= {questionAttempts:{},topicStats:{},reviewQueue:[]};
+    save.helpDesk ??= {availableTickets:[],activeTickets:[],completedTickets:[],ticketProgress:{}};
+    save.behavior ??= {autonomy:0,empathy:0,intervention:0,transparency:0,trust:0,decisions:[]};
+    return save;
   }
 };
 
@@ -111,6 +121,9 @@ function normalize(save){
   save.world=safePlainObject(save.world,{});
   save.missions=safePlainObject(save.missions,{});
   save.communications=safePlainObject(save.communications,{});
+  save.learning=safePlainObject(save.learning,{});
+  save.helpDesk=safePlainObject(save.helpDesk,{});
+  save.behavior=safePlainObject(save.behavior,{});
   save.terminal=safePlainObject(save.terminal,{});
   save.ui=safePlainObject(save.ui,{});
 
@@ -169,10 +182,33 @@ function normalize(save){
   save.world.eventEligibleAt=safePlainObject(save.world.eventEligibleAt,{});
   save.world.caseHistory=asArray(save.world.caseHistory,[]).filter(isObject);
   save.world.lastActionKey=save.world.lastActionKey==null?undefined:asString(save.world.lastActionKey,"");
+  const timeline=safePlainObject(save.world.timeline,{});
+  save.world.timeline={
+    scheduled:safePlainObject(timeline.scheduled,{}),
+    delivered:uniqueStrings(timeline.delivered,[]),
+    deliveryTimes:safePlainObject(timeline.deliveryTimes,{}),
+    cancelled:uniqueStrings(timeline.cancelled,[]),
+    expired:uniqueStrings(timeline.expired,[]),
+    cooldowns:safePlainObject(timeline.cooldowns,{}),
+    occurrenceCounters:safePlainObject(timeline.occurrenceCounters,{})
+  };
 
   save.missions.active=uniqueStrings(save.missions.active,[]);
   save.missions.progress=safePlainObject(save.missions.progress,{});
   save.communications.choicesMade=uniqueStrings(save.communications.choicesMade,[]);
+  save.communications.threads=safePlainObject(save.communications.threads,{});
+
+  save.learning.questionAttempts=safePlainObject(save.learning.questionAttempts,{});
+  save.learning.topicStats=safePlainObject(save.learning.topicStats,{});
+  save.learning.reviewQueue=uniqueStrings(save.learning.reviewQueue,[]);
+
+  save.helpDesk.availableTickets=uniqueStrings(save.helpDesk.availableTickets,[]);
+  save.helpDesk.activeTickets=uniqueStrings(save.helpDesk.activeTickets,[]);
+  save.helpDesk.completedTickets=uniqueStrings(save.helpDesk.completedTickets,[]);
+  save.helpDesk.ticketProgress=safePlainObject(save.helpDesk.ticketProgress,{});
+
+  for(const key of ["autonomy","empathy","intervention","transparency","trust"])save.behavior[key]=asNumber(save.behavior[key],0);
+  save.behavior.decisions=asArray(save.behavior.decisions,[]).filter(isObject);
 
   save.terminal.hostId=asString(save.terminal.hostId,d.terminal.hostId)||d.terminal.hostId;
   save.terminal.user=asString(save.terminal.user,d.terminal.user)||d.terminal.user;

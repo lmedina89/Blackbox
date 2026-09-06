@@ -1,3 +1,33 @@
+# BLACKBOX v0.4.0 Alpha 1 — Compatibility Foundation
+
+Built directly from exact v0.3.0 RC7 SHA-256 `cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e`.
+
+This milestone intentionally adds **no new missions, Help Desk tickets, Act II story content, or changed mission objectives**. It establishes the safe v0.4.0 state/content architecture first.
+
+## Alpha 1 changes
+
+- SAVE_VERSION 10 / WORLD_SCHEMA 10 with v9 migration.
+- Persistent scaffolding for future timeline delivery, conversation state, learning stats, Help Desk state, and hidden behavioral decisions.
+- Compatibility-aware content visibility: scheduler-managed content can use persistent delivery state while all existing v0.3 content still falls back to its original `visibleWhen`/`hiddenWhen` rules.
+- Sidecar scenario metadata maps the existing nine missions to real IT/security concepts and certification-alignment categories without modifying the mission engine.
+- Existing world-event `afterActions` semantics remain unchanged.
+- Existing mission IDs, objective IDs/targets, rewards, hosts, clues, dialogue choice IDs, and command semantics remain unchanged.
+
+## Compatibility target
+
+The complete existing nine-case campaign must remain playable and save-safe before any new v0.4 content is introduced.
+
+## Automated verification for Alpha 1
+
+- Existing smoke/regression/campaign/audio/device/RC7 terminal guard suites pass.
+- New `tests/v040-foundation.mjs` passes.
+- Current mission/content/network/terminal source files remain byte-identical to the exact RC7 baseline; only new scaffolding and compatibility integration files changed.
+
+
+---
+
+## RC7 baseline notes retained for reference
+
 # BLACKBOX v0.3.0 — The Wider Net
 
 **RC7 candidate:** focused terminal/readability and mobile-taskbar polish built directly from the exact RC6 candidate (SHA-256 `1bfd86ac94844e9f53a25c900bb5dfed858d98c0f41f0f53a498ea88aa89faf6`) after on-device testing confirmed the RC6 responsive layout and BLACKBOX shortcut. RC7 adds semantic terminal colors, a fixed BLACKBOX status header, an independently scrollable terminal history with pinned prompt and Latest control, compact portrait taskbar restore icons, and clearer World Intel destination feedback. Missions, saves, progression, host topology, content, command syntax, rewards, and network behavior are unchanged.

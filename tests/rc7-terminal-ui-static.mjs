@@ -13,9 +13,10 @@ const desktopUi=read('js/ui/desktop.js');
 const html=read('index.html');
 const manifest=JSON.parse(read('build-manifest.json'));
 
-assert.equal(manifest.releaseCandidate,7);
-assert.equal(manifest.saveVersion,9);
-assert.equal(manifest.worldSchema,9);
+assert.equal(manifest.sourceBaseline?.version,'0.3.0-RC7');
+assert.equal(manifest.sourceBaseline?.sha256,'cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e');
+assert.equal(manifest.saveVersion,10);
+assert.equal(manifest.worldSchema,10);
 
 // Fixed shell: BLACKBOX itself owns viewport height, middle history scrolls, form stays outside it.
 assert.match(css,/\.blackbox\{[^}]*height:100dvh[^}]*display:flex[^}]*flex-direction:column/);
@@ -55,11 +56,11 @@ assert.match(desktopUi,/My Computer → World Intel and BLACKBOX "clues"/);
 assert.match(desktopUi,/titleText:"WORLD INTEL"/);
 assert.match(terminalUi,/Stored in My Computer → World Intel and BLACKBOX "clues"/);
 
-// No state migration is introduced by this visual/UX candidate.
+// RC7 terminal/navigation implementation remains present after the v0.4.0 state-schema scaffold.
 const stateFiles=['js/systems/terminal.js','js/core/state.js','js/core/migrations.js','js/core/save.js'];
 for(const f of stateFiles){
   const data=fs.readFileSync(path.join(root,f));
   assert.ok(data.length>0,`${f} exists`);
 }
 
-console.log('BLACKBOX v0.3.0 RC7 terminal/navigation UI guards passed');
+console.log('BLACKBOX RC7 terminal/navigation compatibility guards passed under v0.4.0 A1');

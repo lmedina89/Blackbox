@@ -1,0 +1,51 @@
+export const SCENARIO_METADATA = {
+  mission_first:{
+    kind:"mission",storyStage:"act1",difficulty:"foundation",
+    concepts:["information_gathering","filesystem_navigation","remote_session_basics","evidence_identification"],
+    alignment:["a_plus","network_plus","ceh_foundations"]
+  },
+  mission_mirror:{
+    kind:"mission",storyStage:"act1",difficulty:"foundation",
+    concepts:["social_lead_interpretation","host_identification","remote_investigation","scope"],
+    alignment:["network_plus","ceh_foundations"]
+  },
+  mission_recovery:{
+    kind:"mission",storyStage:"act1",difficulty:"foundation",
+    concepts:["filesystem_search","recovery_workflow","verification","troubleshooting"],
+    alignment:["a_plus","security_plus"]
+  },
+  mission_ghost:{
+    kind:"mission",storyStage:"act1",difficulty:"intermediate",
+    concepts:["interfaces","network_position","segmentation","scanning","authentication_logs","log_filtering"],
+    alignment:["network_plus","security_plus","ceh_foundations"]
+  },
+  mission_deaddrop:{
+    kind:"mission",storyStage:"act1",difficulty:"intermediate",
+    concepts:["services","evidence_preservation","scope","non_destructive_investigation"],
+    alignment:["network_plus","security_plus","ceh_foundations"]
+  },
+  mission_relay:{
+    kind:"mission",storyStage:"act1",difficulty:"intermediate",
+    concepts:["active_connections","traceroute","configuration_analysis","significance_detection"],
+    alignment:["network_plus","security_plus","ceh_foundations"],
+    storyTags:["orbit_compat","bbx_node_04","project_blackbox_breadcrumb"]
+  },
+  mission_dns:{
+    kind:"mission",storyStage:"act1_to_act2",difficulty:"intermediate",
+    concepts:["dns","a_record","cname","hostname_address_distinction","change_verification"],
+    alignment:["network_plus","security_plus"]
+  },
+  mission_beacon:{
+    kind:"mission",storyStage:"act1_to_act2",difficulty:"intermediate",
+    concepts:["interfaces","segmentation","operational_logging","telemetry","evidence_correlation","scope"],
+    alignment:["network_plus","security_plus"]
+  },
+  mission_cascade:{
+    kind:"mission",storyStage:"act1_to_act2",difficulty:"advanced",
+    concepts:["dns","resolver_boundaries","routing","segmentation","evidence_handling","multi_step_correlation"],
+    alignment:["network_plus","security_plus","ceh_foundations"],
+    storyTags:["stage_one_capstone"]
+  }
+};
+
+export function scenarioMetadata(id){return SCENARIO_METADATA[id]||null;}

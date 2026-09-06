@@ -1,7 +1,7 @@
 import { emit } from "./events.js";
 
-export const SAVE_VERSION=9;
-export const WORLD_SCHEMA=9;
+export const SAVE_VERSION=10;
+export const WORLD_SCHEMA=10;
 
 function id(prefix="id"){
   const value=globalThis.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;
@@ -47,10 +47,14 @@ export const baseState=()=>({
     deliveredEvents:[],
     eventEligibleAt:{},
     countedActions:[],
-    caseHistory:[]
+    caseHistory:[],
+    timeline:{scheduled:{},delivered:[],deliveryTimes:{},cancelled:[],expired:[],cooldowns:{},occurrenceCounters:{}}
   },
   missions:{active:[],progress:{}},
-  communications:{choicesMade:[]},
+  communications:{choicesMade:[],threads:{}},
+  learning:{questionAttempts:{},topicStats:{},reviewQueue:[]},
+  helpDesk:{availableTickets:[],activeTickets:[],completedTickets:[],ticketProgress:{}},
+  behavior:{autonomy:0,empathy:0,intervention:0,transparency:0,trust:0,decisions:[]},
   terminal:{
     hostId:"home",
     user:"user",

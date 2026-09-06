@@ -8,7 +8,9 @@ export const AUTOSAVE_EVENTS=[
   "target:saved","target:removed","clock:tick","timeline:event",
   "dns:lookup","threat:read","lab:completed","email:read",
   "forum:read","social:read","news:read","message:read","thread:read",
-  "host:connected","command:committed","notes:changed","browser:navigated"
+  "host:connected","command:committed","notes:changed","browser:navigated",
+  "timeline:scheduled","content:delivered","content:expired","content:replaced",
+  "conversation:advanced","helpdesk:changed","training:attempted","behavior:decision"
 ];
 
 let initialized=false;
