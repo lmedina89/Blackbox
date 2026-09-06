@@ -9,6 +9,7 @@ import { enterBlackboxTransition, exitBlackboxTransition } from "./ui/transition
 import { initAudio, playSound } from "./systems/audio.js";
 import { initTimeline } from "./systems/timeline.js";
 import { initCommunications } from "./systems/communications.js";
+import { initServiceDesk } from "./systems/serviceDesk.js";
 import { initAutosave } from "./core/autosave.js";
 import { escapeHtml } from "./ui/safeText.js";
 
@@ -89,6 +90,7 @@ function renderArchives(){
 }
 
 function initializeGameUI(){
+  initServiceDesk();
   desktopUI=initDesktopUI({enterBlackbox});
   terminalUI=initTerminalUI({onExit:closeBlackbox,onSuspend:suspendBlackbox,onPurge:purgeIdentity});
   document.querySelector("#start-alias").textContent=getState().player.alias;

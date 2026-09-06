@@ -1,3 +1,45 @@
+# BLACKBOX v0.4.0 Alpha 4.6 — Service Desk Foundation
+
+Built directly from verified **v0.4.0 Alpha 4.5.1** archive SHA-256 `a06bbf3de37563d1f848cacf434a9fc186ec7d5cef43c4254f0f184df8a74107`.
+
+Alpha 4.6 adds the first playable NEXUS Service Desk career foundation without changing the nine BLACKBOX missions, rewards, evidence, host topology, or mission objective logic. The Service Desk uses separate remote-workstation state and a dedicated Remote Assistance UI, while elapsed ticket time may naturally make scheduled communications due.
+
+## Alpha 4.6 — Service Desk Foundation
+
+- Adds **NEXUS Service Desk** to the normal NEXUS desktop with an assigned/in-progress/closed ticket queue, ticket metadata, work notes, verification, resolution, escalation, and persistent job statistics.
+- Adds one dedicated **NEXUS Remote Assistance** workspace for remote users. It visibly identifies the employee, department, hostname, remote transport, ticket, and workstation context and includes a simulated remote desktop plus troubleshooting tool window.
+- Seeds three sequential, authored starter incidents:
+  1. **INC-0001 — No network connection:** disabled Ethernet adapter / Device Manager Code 22. FIN-WS-07 remains reachable through an explicitly labeled out-of-band NEXUS Support Modem so the scenario does not imply Ethernet-based remote access through a disabled NIC.
+  2. **INC-0002 — Names do not resolve:** working IP connectivity with a stopped local DNS Client service; direct `nslookup` can still query the configured DNS server while normal hostname use fails.
+  3. **INC-0003 — Limited connectivity after docking:** APIPA `169.254.44.17`, stopped DHCP Client, then lease renewal to the corporate subnet. This laptop also uses the separately labeled out-of-band support transport while its corporate IP path is unusable.
+- Remote machines have independent persistent device, TCP/IP, service, firewall, and Event Viewer state. Changes to FIN-WS-07 / OPS-WS-12 / HR-LT-03 do not mutate HOME-PC or BLACKBOX campaign hosts.
+- Remote Command Prompt currently supports `hostname`, `whoami`, `ipconfig`, `ipconfig /all`, `ipconfig /renew`, `ping`, `nslookup`, `help`, and `cls`.
+- Ticket resolution is state-verified; pressing Resolve cannot close a ticket while its modeled fault remains.
+- Ticket reviews reward relevant diagnostics/tools and avoiding unrelated configuration changes. Escalation requires a work note.
+- Help Desk work advances **elapsed world time** through a new isolated clock path. This allows Maya/messages and other time-based content to become due naturally, but does **not** increment BLACKBOX `actionTick`, rotate `networkEpoch`, satisfy mission objectives, set campaign flags, or modify campaign host state.
+- Existing A4.5.1 landscape BLACKBOX keyboard and conversation timing fixes are preserved.
+
+## Save compatibility
+
+- SAVE_VERSION: **13**
+- WORLD_SCHEMA: **10**
+- A4.5.1/v12 identities migrate by adding persistent Service Desk machine/session/job fields.
+- Earlier supported identities continue through the existing migration chain.
+- Campaign state, communications state, NEXUS HOME-PC state, terminal context, rewards and evidence remain preserved.
+
+## A4.6 physical-device acceptance focus
+
+1. Confirm normal BLACKBOX portrait/landscape presentation still matches A4.5.1.
+2. Open **Service Desk**, accept INC-0001, and enter **Remote Support**. The remote UI should clearly feel like a separate workstation session rather than HOME-PC.
+3. Confirm FIN-WS-07 shows the out-of-band support transport while its production NIC is disabled.
+4. Open remote Device Manager, observe Code 22, enable the adapter, run `ipconfig`, verify, and resolve the ticket.
+5. Confirm INC-0002 unlocks only after INC-0001 closes; test IP ping vs hostname ping vs `nslookup`, start DNS Client, verify and resolve.
+6. Confirm INC-0003 begins with a `169.254.x.x` APIPA address, DHCP renewal fails while DHCP Client is stopped, then succeeds after the service starts.
+7. Let ticket actions move the clock across a scheduled Messenger time and confirm messages arrive naturally without changing BLACKBOX mission progress.
+8. Save → refresh → Continue during an active ticket/remote-machine fault and confirm the Service Desk state persists.
+
+---
+
 # BLACKBOX v0.4.0 Alpha 4.5.1 — Device Polish & Conversation Timing
 
 Built directly from the verified **v0.4.0 Alpha 4.5** archive SHA-256 `346925fe82bd9b5db8e159276ff9d8079ef40bd0506cbe4c876b1dc379a07bed`.

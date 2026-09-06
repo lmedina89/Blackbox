@@ -1,7 +1,7 @@
 {
-  "name": "Human Layer / Act II Foundation",
-  "version": "0.4.0-alpha.4.5.1",
-  "saveVersion": 12,
+  "name": "Human Layer / Service Desk Foundation",
+  "version": "0.4.0-alpha.4.6",
+  "saveVersion": 13,
   "worldSchema": 10,
   "baseline": {
     "version": "0.2.3.4",
@@ -22,9 +22,19 @@
     "fieldNotes": 4,
     "trainingLabs": 3,
     "worldEvents": 11,
-    "scheduledContent": 5
+    "scheduledContent": 5,
+    "serviceDeskTickets": 3,
+    "remoteSupportMachines": 3
   },
   "features": [
+    "NEXUS Service Desk with persistent assigned/in-progress/closed queue, work notes, verification, resolution, escalation and job statistics",
+    "dedicated NEXUS Remote Assistance workspace with visible user, department, hostname, ticket and remote-transport identity plus a simulated remote desktop",
+    "three sequential certification-aligned starter incidents covering Device Manager Code 22, IP-vs-DNS troubleshooting, and APIPA/DHCP recovery",
+    "three isolated remote workstation state models with independent devices, TCP/IP, services, firewall and Event Viewer history",
+    "state-verified ticket closure and lightweight troubleshooting review scoring rather than button-only completion",
+    "remote diagnostic command prompt supporting hostname, whoami, ipconfig, ipconfig /all, ipconfig /renew, ping, nslookup, help and cls",
+    "isolated elapsed-time advancement for Help Desk work: scheduled communications can become due while BLACKBOX actionTick, networkEpoch, mission objectives and campaign hosts remain untouched",
+    "INC-0001 explicitly uses an out-of-band NEXUS Support Modem so remote access remains coherent while the workstation Ethernet adapter is disabled",
     "persistent per-choice conversation timestamps anchor player replies and delayed follow-ups to the actual in-game choice time instead of stale authored clock labels",
     "Maya Old Mirror reply/follow-up chronology uses the actual player choice time with a three-minute world-time follow-up offset while preserving intentional same-time NPC message bursts",
     "coarse-pointer short-landscape BLACKBOX input uses a right-side keyboard dock so terminal history retains nearly full viewport height and 90s keycaps keep usable proportions",
@@ -50,7 +60,7 @@
     "Messenger visibility and unread badges now honor canonical effective timestamps so future-dated legacy reactions stay hidden until due",
     "mission-critical FriendSpace content now follows the same chronology gate; Old Mirror remains playable because the existing reply action advances time past Sam's authored post time",
     "known simulated DNS aliases resolved through nslookup can be reused by ping, traceroute, connect, services, and target commands without enabling scan-index shortcuts",
-    "My Computer/runtime labels consistently report Alpha 4.2",
+    "runtime NEXUS/BLACKBOX labels consistently report Alpha 4.6",
     "event-generated News, FriendSpace, and ThreatDesk content inherits the canonical timestamp of the world event that created it",
     "MetroWire and ThreatDesk display canonical event-derived timestamps while later reaction content retains authored timing",
     "canonical content chronology for Messenger and FriendSpace using scheduler delivery times, world-event history, mission history, and authored clock times",
@@ -110,6 +120,11 @@
     "IPv6"
   ],
   "verification": [
+    "A4.6 Service Desk regression completes all three starter tickets against persistent remote-machine state and verifies sequential unlocking",
+    "A4.6 isolation regression proves Service Desk elapsed time does not change BLACKBOX actionTick/networkEpoch, campaign missions, communications choices, credits or terminal host context",
+    "A4.6 DNS regression verifies IP ping works, hostname ping fails with local DNS Client stopped, and direct nslookup still queries configured DNS before the service repair",
+    "A4.6 APIPA regression verifies 169.254.44.17, failed renewal while DHCP Client is stopped, and successful corporate lease/gateway/DNS restoration after repair",
+    "A4.6 static UI guards verify the dedicated Service Desk and Remote Assistance workspace, remote desktop/tool pane, workstation identity and isolated elapsed-time function",
     "A4.5.1 late-choice chronology regression reproduces the 19:27 physical-device sequence and verifies player reply/follow-up order at 19:27 and 19:30",
     "A4.5.1 migration regression preserves an A4.5 thread lastChoiceAt timestamp by normalizing it into communications.choiceTimes",
     "A4.5.1 landscape static guard verifies the right-side split-workstation grid and ensures portrait keyboard rules remain intact",
@@ -177,5 +192,5 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.5.1 device polish and conversation timing: choice-relative message chronology plus right-side landscape BLACKBOX keyboard dock; A4.5 NEXUS systems preserved"
+  "foundationMilestone": "A4.6 Service Desk foundation: isolated remote-workstation troubleshooting, dedicated Remote Assistance UI, three structured starter incidents, and campaign-safe elapsed-time integration"
 }

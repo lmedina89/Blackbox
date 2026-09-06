@@ -43,6 +43,19 @@ export function processTimeline(){
   processScheduledContent(SCHEDULED_CONTENT);
 }
 
+export function advanceElapsedTime(minutes=1,{reason="elapsed"}={}){
+  const s=getState();
+  const amount=Math.max(1,Math.trunc(Number(minutes)||1));
+  s.world.minute=(s.world.minute||0)+amount;
+  while(s.world.minute>=1440){s.world.minute-=1440;s.world.day=(s.world.day||1)+1;}
+  // Deliberately do not increment actionTick/networkEpoch. Service Desk and other
+  // elapsed-time activities may let scheduled communications become due without
+  // satisfying BLACKBOX action-count progression or rotating campaign networks.
+  processTimeline();
+  emit("clock:tick",{minute:s.world.minute,day:s.world.day,actionDriven:false,elapsed:true,reason});
+  return true;
+}
+
 export function advanceWorld(actionKey,{minutes=3,once=false}={}){
   const s=getState();s.world.countedActions??=[];
   const key=String(actionKey||"");

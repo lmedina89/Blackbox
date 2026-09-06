@@ -64,7 +64,7 @@ const due=(s)=>sortChronologically(maya.messages.filter(m=>contentAvailable(m)&&
   old.meta.saveVersion=11;
   old.communications={choicesMade:["mirror_send"],threads:{maya:{lastDeliveredNode:null,lastDeliveryAt:null,lastPresentedNode:"m5",lastPresentedAt:19*60+27,waitingForReply:null,lastChoiceId:"mirror_send",lastChoiceAt:19*60+27,cooldownUntil:null}}};
   const migrated=migrateSave(structuredClone(old));
-  assert.equal(migrated.meta.saveVersion,12);
+  assert.equal(migrated.meta.saveVersion,13);
   assert.equal(migrated.communications.choiceTimes.mirror_send,19*60+27);
 }
 

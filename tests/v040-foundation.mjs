@@ -6,7 +6,7 @@ import { SCENARIO_METADATA } from "../js/data/scenarioMetadata.js";
 import { MISSIONS } from "../js/data/missions.js";
 import { contentAvailable } from "../js/systems/contentAvailability.js";
 
-assert.equal(SAVE_VERSION,12);
+assert.equal(SAVE_VERSION,13);
 assert.equal(WORLD_SCHEMA,10);
 
 // A genuine v9 shape must migrate without altering current campaign progress.
@@ -24,7 +24,7 @@ assert.equal(WORLD_SCHEMA,10);
   // Remove fields that did not exist in v9.
   delete v9.world.timeline;delete v9.communications.threads;delete v9.learning;delete v9.helpDesk;delete v9.behavior;
   const migrated=migrateSave(structuredClone(v9));
-  assert.equal(migrated.meta.saveVersion,12);
+  assert.equal(migrated.meta.saveVersion,13);
   assert.equal(migrated.meta.worldSchema,10);
   assert.deepEqual(migrated.world.completedMissions,["mission_first"]);
   assert.deepEqual(migrated.missions.active,["mission_mirror"]);

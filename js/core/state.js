@@ -1,6 +1,6 @@
 import { emit } from "./events.js";
 
-export const SAVE_VERSION=12;
+export const SAVE_VERSION=13;
 export const WORLD_SCHEMA=10;
 
 function id(prefix="id"){
@@ -53,7 +53,7 @@ export const baseState=()=>({
   missions:{active:[],progress:{}},
   communications:{choicesMade:[],choiceTimes:{},threads:{}},
   learning:{questionAttempts:{},topicStats:{},reviewQueue:[]},
-  helpDesk:{availableTickets:[],activeTickets:[],completedTickets:[],ticketProgress:{}},
+  helpDesk:{availableTickets:[],activeTickets:[],completedTickets:[],ticketProgress:{},machines:{},remoteSession:null,job:{level:1,resolved:0,escalated:0,score:0}},
   behavior:{autonomy:0,empathy:0,intervention:0,transparency:0,trust:0,decisions:[]},
   nexusSystem:{
     network:{adapterEnabled:true,dhcp:true,ip:"192.168.1.24",subnet:"255.255.255.0",gateway:"192.168.1.1",dns:["192.168.1.1"],leaseRenewals:0,lastRepairAt:null},

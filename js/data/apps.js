@@ -4,6 +4,7 @@ export const DESKTOP_APPS = [
   {id:"chat",name:"NEXUS Messenger",shortName:"Messenger",glyph:"💬"},
   {id:"files",name:"My Computer",shortName:"My Computer",glyph:"🖥️"},
   {id:"missions",name:"Jobs",shortName:"Jobs",glyph:"📋"},
+  {id:"servicedesk",name:"NEXUS Service Desk",shortName:"Service Desk",glyph:"🎧"},
   {id:"notes",name:"Notepad",shortName:"Notepad",glyph:"📝"},
   {id:"threatdesk",name:"NEXUS ThreatDesk",shortName:"ThreatDesk",glyph:"🛡️"}
 ];

@@ -110,6 +110,17 @@ const migrations={
       if(id&&Number.isFinite(at)&&at>=0&&save.communications.choiceTimes[id]===undefined)save.communications.choiceTimes[id]=Math.trunc(at);
     }
     return save;
+  },
+  13(save){
+    save.helpDesk ??= {};
+    save.helpDesk.availableTickets ??= [];
+    save.helpDesk.activeTickets ??= [];
+    save.helpDesk.completedTickets ??= [];
+    save.helpDesk.ticketProgress ??= {};
+    save.helpDesk.machines ??= {};
+    save.helpDesk.remoteSession ??= null;
+    save.helpDesk.job ??= {level:1,resolved:0,escalated:0,score:0};
+    return save;
   }
 };
 
@@ -281,6 +292,15 @@ function normalize(save){
   save.helpDesk.activeTickets=uniqueStrings(save.helpDesk.activeTickets,[]);
   save.helpDesk.completedTickets=uniqueStrings(save.helpDesk.completedTickets,[]);
   save.helpDesk.ticketProgress=safePlainObject(save.helpDesk.ticketProgress,{});
+  save.helpDesk.machines=safePlainObject(save.helpDesk.machines,{});
+  save.helpDesk.remoteSession=isObject(save.helpDesk.remoteSession)?save.helpDesk.remoteSession:null;
+  const helpJob=safePlainObject(save.helpDesk.job,{});
+  save.helpDesk.job={
+    level:asNumber(helpJob.level,1,{integer:true,min:1,max:99}),
+    resolved:asNumber(helpJob.resolved,0,{integer:true,min:0}),
+    escalated:asNumber(helpJob.escalated,0,{integer:true,min:0}),
+    score:asNumber(helpJob.score,0,{integer:true,min:0})
+  };
 
   for(const key of ["autonomy","empathy","intervention","transparency","trust"])save.behavior[key]=asNumber(save.behavior[key],0);
   save.behavior.decisions=asArray(save.behavior.decisions,[]).filter(isObject);
