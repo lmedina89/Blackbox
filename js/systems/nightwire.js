@@ -105,6 +105,16 @@ function labNoise(lab){
   const s=getState(),ids=new Set(labHostIds(lab));
   return Object.entries(s.intrusion?.noise||{}).filter(([key])=>ids.has(key.split(":").at(-1))).reduce((sum,[,value])=>sum+(Number(value?.value)||0),0);
 }
+function labNoiseThreshold(lab){
+  const ids=labHostIds(lab);
+  return ids.reduce((sum,id)=>sum+Math.max(1,Number(HOSTS[id]?.detectionThreshold)||5),0)||5;
+}
+export function rangeTelemetry(){
+  const lab=activeRangeLab();
+  if(!lab)return null;
+  const run=runState(lab.id);
+  return {labId:lab.id,code:lab.code,title:lab.title,noise:labNoise(lab),threshold:labNoiseThreshold(lab),completedThisRun:!!run.completedThisRun};
+}
 function failedAuth(lab,startedAt){
   const ids=new Set(labHostIds(lab));
   return (getState().intrusion?.attempts||[]).filter(a=>a.kind==="authentication"&&ids.has(a.hostId)&&(a.at??0)>=startedAt&&a.result!=="accepted").length;
@@ -187,9 +197,21 @@ function labStatusLabel(lab,nw){
 function renderRange(){
   const nw=ensure(),active=activeRangeLab();
   const rows=RANGE_LABS.map(lab=>`${lab.code}  ${lab.title.padEnd(24)} ${lab.difficulty.padEnd(12)} ${labStatusLabel(lab,nw)}`);
-  const lines=[...nodeHeader("THE RANGE"),"","ID  LAB                      DIFFICULTY   STATUS",...rows,"",
-    active?`ACTIVE: ${active.code} ${active.title}`:"No Range image active.",
-    active?'Commands: status · hint · resume · reset · finish · abort · back':'Commands: start <id> · status <id> · back'];
+  const lines=[...nodeHeader("THE RANGE"),"","ID  LAB                      DIFFICULTY   STATUS",...rows,""];
+  if(!active){
+    lines.push("No Range image active.","Commands: start <id> · status <id> · back");
+    return lines.join("\n");
+  }
+  const run=runState(active.id),result=nw.range.results?.[active.id];
+  lines.push(`ACTIVE: ${active.code} ${active.title}`);
+  if(run.completedThisRun){
+    lines.push("","*** OBJECTIVE COMPLETE ***",`${active.code} // ${active.title}`,"Proof accepted. Training result recorded; the Range image is still mounted.",
+      `Noise at completion: ${result?.noise??labNoise(active)}/${labNoiseThreshold(active)} · Failed auth: ${result?.failedAuth??0} · Hints: ${result?.hintsUsed??(run.hintsUsed||0)}`,"",
+      'Type "finish" to detach the image, or "resume" / "return" to keep exploring.',
+      "Commands: finish · resume · return · status · reset · abort · back");
+  }else{
+    lines.push("Commands: status · hint · resume · return · reset · finish · abort · back");
+  }
   return lines.join("\n");
 }
 function renderMessages(){
@@ -245,7 +267,7 @@ export function handleNightwireInput(raw){
   const section=session.section||"home";
   if(!cmd)return {lines:[]};
   if(["quit","exit","disconnect","6"].includes(cmd))return {lines:[{text:closeNightwire()}]};
-  if(cmd==="help"||cmd==="?")return {lines:[{text:[...nodeHeader("HELP"),"home / 0      node menu","general / 1   general board","field / 2     field reports","jobs / 3      jobs","range / 4     Range control","messages / 5  private messages","read <#>      read a post/message","back          previous menu","quit / 6      disconnect node","","Range: start <id> · status [id] · hint · resume · reset · finish · abort"].join("\n")} ]};
+  if(cmd==="help"||cmd==="?")return {lines:[{text:[...nodeHeader("HELP"),"home / 0      node menu","general / 1   general board","field / 2     field reports","jobs / 3      jobs","range / 4     Range control","messages / 5  private messages","read <#>      read a post/message","back          previous menu","quit / 6      disconnect node","","Range: start <id> · status [id] · hint · resume/return · reset · finish · abort"].join("\n")} ]};
   if(cmd==="home"||cmd==="0")return {lines:[{text:setSection("home")}]};
   if(cmd==="back")return {lines:[{text:setSection(section==="home"?"home":"home")}]};
   if(cmd==="general"||cmd==="1")return {lines:[{text:setSection("general")}]};
@@ -272,7 +294,7 @@ export function handleNightwireInput(raw){
       const lab=activeRangeLab();if(!lab)throw new Error("No Range lab is active.");
       return {lines:[{text:nextHint(lab)}]};
     }
-    if(cmd==="resume"){
+    if(["resume","return","box"].includes(cmd)){
       const lab=activeRangeLab();if(!lab)throw new Error("No Range lab is active.");
       s.terminal.serviceSession=null;
       return {lines:[{text:`Range ${lab.code} remains mounted.\nReturned to BLACKBOX shell.\nUse scan to continue.`}]};
@@ -289,8 +311,9 @@ export function handleNightwireInput(raw){
       const lab=activeRangeLab();if(!lab)throw new Error("No Range lab is active.");
       const run=runState(lab.id);if(!run.completedThisRun)throw new Error("Range objective is not complete yet.");
       if(s.terminal.hostId!=="home")throw new Error("Disconnect from the Range host before finishing the lab.");
+      const result=ensure().range.results?.[lab.id],finalNoise=labNoise(lab),next=RANGE_LABS.find(item=>item.unlockAfter===lab.id);
       ensure().range.activeLabId=null;setActiveSandbox(null);clearLabIntrusion(lab);s.terminal.serviceSession=null;s.terminal.lastScanResults=[];emit("nightwire:changed",{action:"finish",labId:lab.id});
-      return {lines:[{text:`RANGE ${lab.code} COMPLETE\n${lab.title}\nNoise: ${labNoise(lab)}\nHints used: ${run.hintsUsed||0}\n\nRange segment detached. Returned to BLACKBOX shell.`}]};
+      return {lines:[{text:[`RANGE ${lab.code} COMPLETE`,lab.title,`Noise: ${finalNoise}/${labNoiseThreshold(lab)}`,`Failed auth: ${result?.failedAuth??0}`,`Hints used: ${run.hintsUsed||0}`,"","Training result saved. Range segment detached.",...(next?[`Next unlocked: RANGE ${next.code} // ${next.title}`]:["All currently available Range exercises complete."]),"Returned to BLACKBOX shell."].join("\n")}]};
     }
   }
   throw new Error(`nightwire: unknown node command "${cmd}"; type help`);

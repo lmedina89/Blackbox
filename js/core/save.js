@@ -257,7 +257,7 @@ export function beginQaNightwireIdentity(alias="range_qa",{archiveActive=true}={
   const state=getState();
   state.player.alias=String(alias||"range_qa").slice(0,18)||"range_qa";
   state.meta.qaMode="nightwire_range";
-  state.meta.qaSource="A4.8.1";
+  state.meta.qaSource="A4.8.2";
   state.world.completedMissions=MISSIONS.map(m=>m.id);
   state.world.flags=["qa_nightwire_range"];
   state.world.caseHistory=MISSIONS.map((m,index)=>({

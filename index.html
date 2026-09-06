@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0c1630" />
-  <title>BLACKBOX — v0.4.0 A4.8.1 QA</title>
+  <title>BLACKBOX — v0.4.0 A4.8.2 QA</title>
   <link rel="stylesheet" href="./css/base.css" />
   <link rel="stylesheet" href="./css/desktop.css" />
   <link rel="stylesheet" href="./css/apps.css" />
@@ -18,7 +18,7 @@
     <section id="boot-screen" class="boot-screen">
       <div class="boot-card">
         <div class="boot-logo">NEXUS/OS</div>
-        <p class="muted">Personal Computing Environment // v0.4.0 A4.8.1 QA</p>
+        <p class="muted">Personal Computing Environment // v0.4.0 A4.8.2 QA</p>
 
         <div id="boot-home" class="boot-home">
           <div id="active-identity-summary" class="identity-summary hidden"></div>
@@ -104,6 +104,7 @@
         <form id="terminal-form" class="terminal-form" autocomplete="off">
           <span id="terminal-prompt" class="terminal-prompt">user@home:~$</span>
           <input id="terminal-input" class="terminal-input" spellcheck="false" autocomplete="off" autocapitalize="none" autocorrect="off" enterkeyhint="send" inputmode="text" aria-label="BLACKBOX command input" />
+          <span id="terminal-custom-input-display" class="terminal-custom-input-display" aria-hidden="true"><span id="terminal-custom-input-text"></span><span id="terminal-custom-caret" class="terminal-custom-caret">█</span></span>
         </form>
         <div id="terminal-input-controls" class="terminal-input-controls" aria-label="Terminal input controls">
           <button id="terminal-keys-collapse" type="button" aria-expanded="true" aria-controls="terminal-custom-keyboard">HIDE KEYS</button>
@@ -125,7 +126,7 @@
       </div>
 
       <footer class="blackbox-footer">
-        <span>BLACKBOX/0.4.0-A4.8.1-QA</span>
+        <span>BLACKBOX/0.4.0-A4.8.2-QA</span>
         <span>Type <b>help</b> for commands · <b>exit</b> to return</span>
       </footer>
     </section>

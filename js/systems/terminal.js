@@ -389,7 +389,7 @@ registerCommand({name:"connect",execute({state,args}){
 }});
 
 registerCommand({name:"enum",aliases:["enumerate"],execute({state,args}){
-  if(args.length<2)throw new Error("usage: enum <host|ip> <service|port>");
+  if(args.length<2)throw new Error('enum: expected a target and service.\nUsage: enum <host|scan #> <service|port>\nExample: enum 0 80');
   const h=scanTarget(state,args[0])||savedTarget(state,args[0]);
   if(!h)throw new Error("enum: target is not known to BLACKBOX; discover it first");
   const intel=enumerateService(h,args[1]);
@@ -408,10 +408,12 @@ registerCommand({name:"probe",execute({state,args}){
   if(String(args[0]||"").toLowerCase()==="list"){
     return line(["FICTIONAL BBX PROFILE CATALOG","",...Object.values(EXPLOIT_PROFILES).map(p=>`${p.id}  ${p.title}\n  service: ${p.requiredService} · class: ${p.class}\n  ${p.summary}`),"","Profiles are simulation-only. Enumerate a target before choosing a service-specific profile."].join("\n"));
   }
-  if(!args[0])throw new Error('usage: probe <BBX-profile> [host|ip] | probe list');
+  if(!args[0])throw new Error('probe: expected a fictional BBX profile.\nUsage: probe list | probe <BBX-id> [target]\nExample: probe BBX-014 0');
+  const profileId=String(args[0]).toUpperCase();
+  if(!EXPLOIT_PROFILES[profileId])throw new Error(`probe: "${args[0]}" is not a fictional BBX profile.\nUsage: probe list | probe <BBX-id> [target]\nExample: probe BBX-014 0`);
   const target=args[1]||state.terminal.hostId,h=scanTarget(state,target)||savedTarget(state,target);
   if(!h)throw new Error("probe: target is not known to BLACKBOX; discover it first");
-  const result=probeProfile(h,args[0]),noise=result.noise;
+  const result=probeProfile(h,profileId),noise=result.noise;
   learn(`probe:${result.profile.id}`,"analysis",2);
   if(!result.ok)return line([
     `PROBE ${result.profile.id} // ${displayName(h.id)}`,
@@ -428,7 +430,7 @@ registerCommand({name:"probe",execute({state,args}){
 }});
 
 registerCommand({name:"auth",execute({state,args}){
-  if(args.length<3)throw new Error("usage: auth <host|ip> <service|port> <credential|username>");
+  if(args.length<3)throw new Error('auth: expected target, service, and known credential.\nUsage: auth <host|scan #> <service|port> <credential|username>\nExample: auth 0 ssh rangeops');
   const h=scanTarget(state,args[0])||savedTarget(state,args[0]);
   if(!h)throw new Error("auth: target is not known to BLACKBOX; discover it first");
   const result=authenticate(h,args[1],args[2]);

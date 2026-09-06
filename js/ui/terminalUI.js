@@ -3,6 +3,8 @@ import { getState } from "../core/state.js";
 import { HOSTS } from "../data/hosts.js";
 import { on, emit } from "../core/events.js";
 import { playSound } from "../systems/audio.js";
+import { rangeTelemetry } from "../systems/nightwire.js";
+import { rangeLab } from "../data/nightwire.js";
 
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const BLACKBOX_KEYBOARD_ROWS=["qwertyuiop","asdfghjkl","zxcvbnm"];
@@ -13,6 +15,9 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
   const shell=document.querySelector(".terminal-shell");
   const form=document.querySelector("#terminal-form");
   const input=document.querySelector("#terminal-input");
+  const customInputDisplay=document.querySelector("#terminal-custom-input-display");
+  const customInputText=document.querySelector("#terminal-custom-input-text");
+  const customCaret=document.querySelector("#terminal-custom-caret");
   const prompt=document.querySelector("#terminal-prompt");
   const label=document.querySelector("#bb-session-label");
   const link=document.querySelector("#bb-link");
@@ -71,12 +76,21 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     if(keysCollapseButton)keysCollapseButton.disabled=!!disabled;
   }
 
+  function syncCustomInputDisplay(){
+    if(customInputText)customInputText.textContent=input.value;
+    const active=currentInputMode==="blackbox"&&!running&&!input.disabled;
+    customInputDisplay?.classList.toggle("is-active",active);
+    customCaret?.classList.toggle("is-active",active);
+  }
+
   function insertInput(text){
     input.value+=String(text||"");
+    syncCustomInputDisplay();
   }
 
   function backspaceInput(){
     input.value=Array.from(input.value).slice(0,-1).join("");
+    syncCustomInputDisplay();
   }
 
   function historyStep(direction){
@@ -85,6 +99,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     if(direction<0)s.terminal.historyIndex=Math.max(0,s.terminal.historyIndex-1);
     else s.terminal.historyIndex=Math.min(h.length,s.terminal.historyIndex+1);
     input.value=h[s.terminal.historyIndex]||"";
+    syncCustomInputDisplay();
   }
 
   function submitInput(){
@@ -158,6 +173,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
       keysCollapseButton.setAttribute("aria-expanded",String(!keysCollapsed));
     }
     if(custom)input.blur();else if(focus)focusCommandInput();
+    syncCustomInputDisplay();
     if(persist){
       getState().ui.terminalInputMode=next;
       emit("ui:terminal-input-mode",{mode:next});
@@ -262,21 +278,24 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
   }
 
   function refreshPrompt(){
-    const s=getState(),host=HOSTS[s.terminal.hostId];
+    const s=getState(),host=HOSTS[s.terminal.hostId],range=rangeTelemetry();
     prompt.textContent=getPrompt();
     if(s.terminal.serviceSession?.type==="nightwire"){
       label.textContent="NIGHTWIRE NODE";
       link.textContent="PRIVATE RELAY";
+      trace.textContent=range?`${range.noise}/${range.threshold}`:`${s.terminal.trace||0}%`;
     }else{
       label.textContent=`${s.terminal.user.toUpperCase()} @ ${host.hostname}`;
-      link.textContent=s.terminal.hostId==="home"?"LOCAL":"REMOTE";
+      link.textContent=range?`RANGE-${range.code}`:(s.terminal.hostId==="home"?"LOCAL":"REMOTE");
+      trace.textContent=range?`${range.noise}/${range.threshold}`:`${s.terminal.trace||0}%`;
     }
-    trace.textContent=`${s.terminal.trace||0}%`;
+    syncCustomInputDisplay();
   }
 
   async function performPurge(){
     form.classList.add("terminal-locked");
     input.disabled=true;
+    syncCustomInputDisplay();
     setKeyboardDisabled(true);
     for(const [line,delay] of [
       ["Scrubbing session state...",350],
@@ -302,6 +321,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
 
   async function run(raw){
     running=true;
+    syncCustomInputDisplay();
     autoFollow=true;updateLatestButton();
     printCommand(getPrompt(),raw);
     playSound("terminal_enter");
@@ -309,8 +329,9 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     if((result.lines||[]).some(line=>line.type==="error"))playSound("terminal_error");
     if(result.clear)output.innerHTML="";
     for(const line of result.lines||[])print(line.text,line.type||"");
-    refreshPrompt();
     running=false;
+    refreshPrompt();
+    syncCustomInputDisplay();
     flushNotices();
     if(result.purgeIdentity)await performPurge();
   }
@@ -319,6 +340,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     e.preventDefault();
     const raw=input.value;
     input.value="";
+    syncCustomInputDisplay();
     await run(raw);
   });
 
@@ -429,6 +451,16 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     next:`${mission.rewards?.credits||0} credits transferred. Return to NEXUS/OS when ready.`,
     tone:"success"
   }));
+  on("range:completed",result=>{
+    const lab=rangeLab(result?.labId);
+    if(!lab)return;
+    deliverOrQueue({
+      title:"[ RANGE OBJECTIVE COMPLETE ]",
+      body:`${lab.code} // ${lab.title} — proof accepted.`,
+      next:`Noise ${result.noise}/${rangeTelemetry()?.threshold||5} · failed auth ${result.failedAuth} · hints ${result.hintsUsed}. Return to HOME-PC, then type "nightwire" to review or finish.`,
+      tone:"success"
+    });
+  });
   on("nightwire:unlocked",()=>deliverOrQueue({
     title:"[ PRIVATE SERVICE DISCOVERED ]",
     body:"NightWire relay handshake available.",
@@ -472,7 +504,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
         output.innerHTML="";
         print("┌──────────────────────────────────────────┐","banner");
         print("│       B L A C K B O X   S E C U R E      │","banner");
-        print("│      INTERACTIVE SHELL 0.4.0-A4.8.1-QA        │","banner");
+        print("│      INTERACTIVE SHELL 0.4.0-A4.8.2-QA        │","banner");
         print("└──────────────────────────────────────────┘","banner");
         print("");
         print(`SESSION ${String(s.terminal.sessionCount).padStart(4,"0")} // LOCAL ENVIRONMENT`);

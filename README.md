@@ -1,6 +1,17 @@
-# BLACKBOX v0.4.0 Alpha 4.8.1 QA — NightWire Range Test Access
+# BLACKBOX v0.4.0 Alpha 4.8.2 QA — Range & Terminal Mobile Polish
 
-Built directly from the verified A4.8 NightWire Node + The Range checkpoint. This is a **QA convenience build**, not a progression redesign.
+Built directly from the verified A4.8.1 QA NightWire Range test-access checkpoint. This is a **physical-device polish hotfix**: exploit rules, Range solutions, campaign/story content, and normal progression are unchanged.
+
+## A4.8.2 physical-device polish
+
+- Reading a Range proof now produces a clear **RANGE OBJECTIVE COMPLETE** terminal notice with completion stats; the image stays mounted until the player chooses `finish`.
+- Re-entering NightWire while a completed image is mounted shows a dedicated completion state with `finish` and `resume` / `return` choices.
+- `finish` confirms saved results, final noise, and the next unlocked Range exercise.
+- BLACKBOX custom-keyboard mode now mirrors typed text with a blinking block cursor (`█`) so the input position remains visible while the native iOS keyboard is suppressed.
+- BLACKBOX key legends are larger in portrait; the landscape split keyboard uses a slightly wider dock, 38px keys, and larger legends/brand text.
+- `enum`, `probe`, and `auth` malformed syntax gives concise usage and one example. Unknown `probe` tokens are rejected as profile syntax before any target logic runs.
+- While a Range image is mounted, the terminal header shows `LINK RANGE-<id>` and `TRACE <noise>/<threshold>`.
+- `SAVE_VERSION = 15` and `WORLD_SCHEMA = 10` remain unchanged.
 
 ## QA test identity
 

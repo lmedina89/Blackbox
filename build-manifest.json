@@ -1,6 +1,6 @@
 {
-  "name": "NightWire Range QA Test Access",
-  "version": "0.4.0-alpha.4.8.1-qa",
+  "name": "Range & Terminal Mobile Polish QA",
+  "version": "0.4.0-alpha.4.8.2-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -31,6 +31,14 @@
     "nightwireRangeLabs": 3
   },
   "features": [
+    "Range proof retrieval now emits an explicit objective-complete terminal notice with completion noise, failed-auth and hint summary while leaving the image mounted for optional exploration",
+    "NightWire Range control clearly distinguishes an objective-complete mounted image and offers finish or resume/return without silently forcing detachment",
+    "Range finish output confirms the saved training result, final noise, and the next unlocked exercise",
+    "BLACKBOX custom-keyboard mode renders a simulated blinking block caret immediately after the mirrored command text instead of hiding all cursor feedback",
+    "BLACKBOX touch-key legends are larger in portrait and the short-landscape right-side keyboard dock uses slightly more width, taller keys, and larger legends/branding",
+    "enum, probe and auth malformed syntax returns concise usage plus one phone-friendly example; unknown probe tokens are identified before target/profile execution",
+    "BLACKBOX header shows RANGE-<id> and aggregate Range noise/threshold while a practice image is mounted",
+    "A4.8.2 remains SAVE_VERSION 15 / WORLD_SCHEMA 10 and does not change exploit rules, missions, story, Range solutions, or normal NightWire progression",
     "QA-only boot entry creates a separate NightWire Range test identity without changing normal New Identity progression",
     "QA identity archives any current active identity before switching so normal player progress remains recoverable from Archived Identities",
     "QA identity marks all nine legacy Act-I missions complete and derives the canonical 3,080 credits / 50 reputation directly from mission definitions",
@@ -237,7 +245,7 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.8.1 QA Test Access: separate boot-time NightWire Range identity for immediate physical-device testing without replaying Act I",
+  "foundationMilestone": "A4.8.2 Range & Terminal Mobile Polish: physical-device completion feedback, custom caret, keyboard readability, syntax guidance, and active Range status",
   "immediateBaseline": {
     "version": "0.4.0-A4.8",
     "sha256": "5fe9ef2a56b4a17d04365fd983806644765f358f58a4ce0a9c8b157208a2745a"

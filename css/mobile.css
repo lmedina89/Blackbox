@@ -134,6 +134,9 @@
   .terminal-input-controls button,.nexus-input-controls button{min-height:34px;font-size:10px}
   .terminal-custom-keyboard,.nexus-custom-keyboard{padding-left:max(6px,env(safe-area-inset-left));padding-right:max(6px,env(safe-area-inset-right))}
   .terminal-key,.nexus-key{min-height:40px}
+  .terminal-key{font-size:14px}
+  .terminal-keyboard-brand{font-size:10px}
+  .terminal-input-controls button{font-size:11px}
   .terminal-form-custom .terminal-input,.notepad-custom-input{user-select:none;-webkit-user-select:none}
 }
 
@@ -160,7 +163,7 @@
 @media (orientation:landscape) and (max-height:520px) and (pointer:coarse){
   .terminal-shell.terminal-shell-custom.terminal-shell-keys-open{
     display:grid;
-    grid-template-columns:minmax(0,1fr) clamp(320px,42vw,520px);
+    grid-template-columns:minmax(0,1fr) clamp(340px,44vw,560px);
     grid-template-rows:auto minmax(0,1fr) auto;
     align-items:stretch;
   }
@@ -176,15 +179,15 @@
     grid-column:2;grid-row:1;display:flex;padding:4px max(6px,env(safe-area-inset-right)) 3px 6px;border-top:0;border-bottom:1px solid #214c2b;
   }
   .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-input-controls button{
-    min-height:30px;height:30px;padding:3px 7px;font-size:8px;
+    min-height:31px;height:31px;padding:3px 8px;font-size:10px;
   }
   .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-custom-keyboard{
     grid-column:2;grid-row:2 / 4;display:block;min-width:0;min-height:0;padding:5px max(6px,env(safe-area-inset-right)) calc(5px + env(safe-area-inset-bottom)) 6px;border-top:0;overflow:auto;
   }
   .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-keyboard-case{padding:5px 6px 7px;border-radius:11px 11px 7px 7px}
-  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-keyboard-brand{display:flex;margin-bottom:3px;font-size:7px}
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-keyboard-brand{display:flex;margin-bottom:4px;font-size:9px}
   .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-key-row{gap:3px;margin-top:3px}
-  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-key{min-height:34px;height:34px;padding:1px;font-size:9px;border-radius:3px}
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-key{min-height:38px;height:38px;padding:1px;font-size:12px;border-radius:3px}
   .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-key-wide{flex-grow:2.25}
   .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-latest{min-height:28px;padding:2px 6px;font-size:8px}
 }
@@ -195,4 +198,11 @@
 }
 @media (orientation:landscape) and (max-height:520px) and (pointer:coarse){
   .app-window-servicedesk{left:max(4px,env(safe-area-inset-left))!important;right:max(4px,env(safe-area-inset-right));top:3px!important;bottom:3px;width:auto;height:auto}.sd-header{padding:4px 7px}.sd-layout{grid-template-columns:235px minmax(0,1fr)}.sd-queue{max-height:none;border-right:2px groove #fff;border-bottom:0;padding:4px}.sd-ticket-pane{padding:6px}.sd-ticket-meta{grid-template-columns:repeat(4,minmax(0,1fr));margin:5px 0}.sd-ticket-pane .classic-group{margin-top:5px}.sd-notes{min-height:48px}.remote-assist-title{padding:3px 5px}.remote-identity{grid-template-columns:repeat(4,minmax(0,1fr))}.remote-workspace{grid-template-columns:minmax(285px,42%) minmax(0,1fr);grid-template-rows:1fr;padding:3px;gap:3px}.remote-screen{min-height:0}.remote-tool-content{padding:5px}.remote-desktop-icons{grid-template-columns:repeat(2,68px);grid-auto-rows:51px;right:auto}.remote-watermark{font-size:19px}.remote-command{min-height:0;height:100%}.remote-command-output{min-height:90px}.remote-session-actions button{min-height:25px}
+}
+
+/* A4.8.2: keep the simulated BLACKBOX caret visually attached to the prompt on phones. */
+@media (max-width:700px) and (pointer:coarse){
+  .terminal-form.terminal-form-custom{flex-direction:row;align-items:center;gap:6px}
+  .terminal-form.terminal-form-custom .terminal-prompt{max-width:70%;white-space:normal;overflow-wrap:anywhere;word-break:break-word;padding-top:0}
+  .terminal-form.terminal-form-custom .terminal-custom-input-display{min-width:34px;font-size:16px;line-height:1.35}
 }
