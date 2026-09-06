@@ -10,6 +10,7 @@ const BLACKBOX_KEYBOARD_ROWS=["qwertyuiop","asdfghjkl","zxcvbnm"];
 
 export function initTerminalUI({onExit,onSuspend,onPurge}){
   const output=document.querySelector("#terminal-output");
+  const shell=document.querySelector(".terminal-shell");
   const form=document.querySelector("#terminal-form");
   const input=document.querySelector("#terminal-input");
   const prompt=document.querySelector("#terminal-prompt");
@@ -36,6 +37,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
 
   function isVisible(){return !document.querySelector("#blackbox").classList.contains("hidden");}
   function coarsePointer(){return !!globalThis.matchMedia?.("(pointer: coarse)")?.matches;}
+  function landscapeTouch(){return !!globalThis.matchMedia?.("(orientation: landscape) and (max-height: 520px) and (pointer: coarse)")?.matches;}
   function preferredInputMode(){
     if(!coarsePointer())return "system";
     const pref=getState().ui?.terminalInputMode||"auto";
@@ -43,11 +45,18 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
   }
 
   function updateLatestOffset(){
-    if(!coarsePointer()){latestButton.style.removeProperty("bottom");return;}
+    if(!coarsePointer()){latestButton.style.removeProperty("bottom");latestButton.style.removeProperty("right");return;}
     requestAnimationFrame(()=>{
+      const openCustom=currentInputMode==="blackbox"&&!keysCollapsed&&customKeyboard?.classList.contains("is-active");
+      if(landscapeTouch()&&openCustom){
+        latestButton.style.bottom=`${Math.max(40,(form.offsetHeight||0)+8)}px`;
+        latestButton.style.right=`${Math.max(12,(customKeyboard.offsetWidth||0)+12)}px`;
+        return;
+      }
       const controls=inputControls?.offsetHeight||0;
-      const keys=customKeyboard?.classList.contains("is-active")?(customKeyboard.offsetHeight||0):0;
+      const keys=openCustom?(customKeyboard.offsetHeight||0):0;
       latestButton.style.bottom=`${Math.max(54,(form.offsetHeight||0)+controls+keys+8)}px`;
+      latestButton.style.removeProperty("right");
     });
   }
 
@@ -140,6 +149,8 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     form.classList.toggle("terminal-form-custom",custom);
     customKeyboard?.classList.toggle("is-active",custom&&!keysCollapsed);
     inputControls?.classList.toggle("is-custom",custom);
+    shell?.classList.toggle("terminal-shell-custom",custom);
+    shell?.classList.toggle("terminal-shell-keys-open",custom&&!keysCollapsed);
     if(inputModeButton)inputModeButton.textContent=custom?"SYSTEM KEYBOARD":"BLACKBOX KEYS";
     if(keysCollapseButton){
       keysCollapseButton.classList.toggle("hidden",!custom);
@@ -341,6 +352,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     if(currentInputMode!=="blackbox")return;
     keysCollapsed=!keysCollapsed;
     customKeyboard?.classList.toggle("is-active",!keysCollapsed);
+    shell?.classList.toggle("terminal-shell-keys-open",!keysCollapsed);
     keysCollapseButton.textContent=keysCollapsed?"SHOW KEYS":"HIDE KEYS";
     keysCollapseButton.setAttribute("aria-expanded",String(!keysCollapsed));
     updateLatestOffset();
@@ -449,7 +461,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
         output.innerHTML="";
         print("┌──────────────────────────────────────────┐","banner");
         print("│       B L A C K B O X   S E C U R E      │","banner");
-        print("│          INTERACTIVE SHELL 0.4.0-A4.5           │","banner");
+        print("│      INTERACTIVE SHELL 0.4.0-A4.5.1      │","banner");
         print("└──────────────────────────────────────────┘","banner");
         print("");
         print(`SESSION ${String(s.terminal.sessionCount).padStart(4,"0")} // LOCAL ENVIRONMENT`);

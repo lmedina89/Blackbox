@@ -11,9 +11,9 @@ export const THREADS = [
         {id:"mirror_send",text:"Send me what he found.",setFlags:["mirror_lead_accepted"],relationship:{maya:1}},
         {id:"mirror_why",text:"What exactly did he find?",setFlags:["mirror_lead_accepted","asked_about_mirror"],relationship:{maya:1}}
       ]}},
-      {id:"m6",from:"player",time:"19:04",text:"Send me what he found.",visibleWhen:["choice_mirror_send"]},
-      {id:"m7",from:"player",time:"19:04",text:"What exactly did he find?",visibleWhen:["choice_mirror_why"]},
-      {id:"m8",from:"maya",time:"19:05",text:"Check Sam's FriendSpace. He posted the hostname and address before he went offline.",visibleWhen:["mirror_lead_accepted"]},
+      {id:"m6",from:"player",time:"19:04",timeFromChoice:"mirror_send",text:"Send me what he found.",visibleWhen:["choice_mirror_send"]},
+      {id:"m7",from:"player",time:"19:04",timeFromChoice:"mirror_why",text:"What exactly did he find?",visibleWhen:["choice_mirror_why"]},
+      {id:"m8",from:"maya",time:"19:05",timeFromChoice:["mirror_send","mirror_why"],timeOffsetMinutes:3,text:"Check Sam's FriendSpace. He posted the hostname and address before he went offline.",visibleWhen:["mirror_lead_accepted"]},
       {id:"m9",from:"maya",time:"19:18",text:"Sam says the mirror looks normal again. Whatever you found, that helped.",visibleWhen:["mission_mirror_complete"]},
       {id:"m10",from:"maya",time:"21:22",timeFromEvent:"threatdesk_online",text:"That ThreatDesk icon just appeared on your desktop too, right? Looks like it explains the weird network stuff as you find it.",visibleWhen:["threatdesk_online"]},
       {id:"m11",from:"maya",time:"22:14",timeFromEvent:"lumen_public_response",text:"Lumen made a public statement. Sounds like your DNS trail was right.",visibleWhen:["lumen_world_updated"]},

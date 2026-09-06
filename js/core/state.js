@@ -1,6 +1,6 @@
 import { emit } from "./events.js";
 
-export const SAVE_VERSION=11;
+export const SAVE_VERSION=12;
 export const WORLD_SCHEMA=10;
 
 function id(prefix="id"){
@@ -51,7 +51,7 @@ export const baseState=()=>({
     timeline:{scheduled:{},delivered:[],deliveryTimes:{},cancelled:[],expired:[],cooldowns:{},occurrenceCounters:{}}
   },
   missions:{active:[],progress:{}},
-  communications:{choicesMade:[],threads:{}},
+  communications:{choicesMade:[],choiceTimes:{},threads:{}},
   learning:{questionAttempts:{},topicStats:{},reviewQueue:[]},
   helpDesk:{availableTickets:[],activeTickets:[],completedTickets:[],ticketProgress:{}},
   behavior:{autonomy:0,empathy:0,intervention:0,transparency:0,trust:0,decisions:[]},

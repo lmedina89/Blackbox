@@ -1,8 +1,16 @@
-# BLACKBOX v0.4.0 Alpha 4.5 — Retro Web & NEXUS/OS Troubleshooting Foundation
+# BLACKBOX v0.4.0 Alpha 4.5.1 — Device Polish & Conversation Timing
 
-Built directly from **v0.4.0 Alpha 4.4** SHA-256 `b9dae94a4a1ffa48d46cbf959a89e393282dd6ba177500708d1dadef356f28f9`.
+Built directly from the verified **v0.4.0 Alpha 4.5** archive SHA-256 `346925fe82bd9b5db8e159276ff9d8079ef40bd0506cbe4c876b1dc379a07bed`.
 
-Alpha 4.5 defines the visual identity of the normal NEXUS computer and turns My Computer into a persistent troubleshooting sandbox. The BLACKBOX desktop shortcut, icon, terminal palette, terminal command behavior, host topology, missions, rewards, evidence, scheduler content, DNS data, and story content are not redesigned by this milestone.
+Alpha 4.5.1 is a narrow repair/polish pass over the A4.5 retro-web and NEXUS troubleshooting foundation. It preserves the BLACKBOX desktop/terminal identity and A4.5 gameplay/content while repairing late-choice Messenger chronology and replacing the vertically compressed landscape keyboard with a right-side dock.
+
+## Alpha 4.5.1 — Device Polish & Conversation Timing
+
+- Persists the exact in-game timestamp of each dialogue choice.
+- Player reply lines now display at the actual choice time; Maya's Old Mirror follow-up is anchored three in-game minutes after that choice.
+- A4.5 saves migrate the already-persisted per-thread latest choice timestamp into the new per-choice timing map.
+- Short coarse-pointer landscape BLACKBOX uses a right-side keyboard dock instead of vertically flattening the 90s keycaps beneath the terminal.
+- Portrait BLACKBOX input, NEXUS/OS system tools, retro web presentation, missions, rewards, host topology, evidence, DNS, and world schema remain unchanged.
 
 ## Alpha 4.5 changes
 
@@ -55,9 +63,10 @@ The BLACKBOX visual identity is unchanged. On short coarse-pointer landscape scr
 
 ## Save compatibility
 
-- SAVE_VERSION: **11**
+- SAVE_VERSION: **12**
 - WORLD_SCHEMA: **10**
-- v10 identities migrate automatically to the new NEXUS workstation state.
+- v11/A4.5 identities migrate automatically to per-choice conversation timing while preserving their existing latest choice timestamp.
+- Earlier supported identities still pass through the existing migration chain, including the A4.5 NEXUS workstation state.
 - Existing mission/campaign progress is preserved.
 
 ## Device acceptance focus
@@ -65,7 +74,7 @@ The BLACKBOX visual identity is unchanged. On short coarse-pointer landscape scr
 Physical iPhone testing should verify:
 
 1. The BLACKBOX icon/terminal still look like A4.4.
-2. Landscape BLACKBOX provides noticeably more terminal history above the compact keyboard.
+2. Landscape BLACKBOX docks the custom keyboard on the right and preserves substantially more terminal history height on the left.
 3. Each NEXUS website remains readable in portrait and landscape.
 4. My Computer → Control Panel → Device Manager / Network / Firewall / Services / Event Viewer remains usable on touch screens.
 5. Disable Local Area Connection → NEXUS Explorer shows Offline → Repair restores browsing.

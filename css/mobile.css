@@ -156,16 +156,35 @@
   .mw-columns{grid-template-columns:1fr}.mw-columns aside{border-left:0;border-top:1px solid #999;padding:7px 0 0}.bbn-listing{grid-template-columns:50px minmax(0,1fr)}.bbn-listing>strong,.bbn-listing>.old-web-button{grid-column:2;justify-self:start}.dd-index article{grid-template-columns:1fr}.dd-index article small{grid-column:1}.explorer-layout{grid-template-columns:1fr}.explorer-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px}.explorer-side-title{grid-column:1/-1}.device-row{grid-template-columns:1fr}.device-row .classic-button{justify-self:start}.network-details{grid-template-columns:105px 1fr}.service-head,.service-row{grid-template-columns:minmax(0,1fr) 70px}.service-head>*:last-child,.service-row>.classic-button{grid-column:1/-1;justify-self:start}.event-head,.event-row{grid-template-columns:72px 85px 45px minmax(120px,1fr);min-width:420px}.event-table{overflow-x:auto}.system-toolbar label{display:none}.system-content{padding:6px}.cp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
-/* A4.5 dedicated compact BLACKBOX landscape input layout: visual theme unchanged, vertical footprint reduced. */
+/* A4.5.1: landscape becomes a split workstation instead of vertically crushing the keyboard. */
 @media (orientation:landscape) and (max-height:520px) and (pointer:coarse){
-  .terminal-input-controls{padding-top:1px;padding-bottom:1px}
-  .terminal-input-controls button{min-height:24px;height:24px;padding:1px 6px;font-size:8px}
-  .terminal-custom-keyboard{padding-top:1px;padding-bottom:calc(2px + env(safe-area-inset-bottom))}
-  .terminal-keyboard-case{padding:2px 4px 3px;border-radius:6px}
-  .terminal-keyboard-brand{display:none}
-  .terminal-key-row{gap:2px;margin-top:1px}
-  .terminal-key{min-height:22px;height:22px;padding:0 1px;font-size:8px;border-radius:2px}
-  .terminal-form{padding-top:3px;padding-bottom:3px;min-height:31px}
-  .terminal-output{padding-top:5px;padding-bottom:5px}
-  .terminal-latest{bottom:120px;min-height:26px;padding:2px 6px;font-size:8px}
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) clamp(320px,42vw,520px);
+    grid-template-rows:auto minmax(0,1fr) auto;
+    align-items:stretch;
+  }
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-output{
+    grid-column:1;grid-row:1 / 3;min-width:0;min-height:0;padding:6px max(8px,env(safe-area-inset-right)) 6px max(10px,env(safe-area-inset-left));
+    border-right:1px solid #285d32;
+  }
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-form{
+    grid-column:1;grid-row:3;min-width:0;min-height:38px;padding:5px max(8px,env(safe-area-inset-right)) 5px max(10px,env(safe-area-inset-left));
+    border-right:1px solid #285d32;
+  }
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-input-controls{
+    grid-column:2;grid-row:1;display:flex;padding:4px max(6px,env(safe-area-inset-right)) 3px 6px;border-top:0;border-bottom:1px solid #214c2b;
+  }
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-input-controls button{
+    min-height:30px;height:30px;padding:3px 7px;font-size:8px;
+  }
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-custom-keyboard{
+    grid-column:2;grid-row:2 / 4;display:block;min-width:0;min-height:0;padding:5px max(6px,env(safe-area-inset-right)) calc(5px + env(safe-area-inset-bottom)) 6px;border-top:0;overflow:auto;
+  }
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-keyboard-case{padding:5px 6px 7px;border-radius:11px 11px 7px 7px}
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-keyboard-brand{display:flex;margin-bottom:3px;font-size:7px}
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-key-row{gap:3px;margin-top:3px}
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-key{min-height:34px;height:34px;padding:1px;font-size:9px;border-radius:3px}
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-key-wide{flex-grow:2.25}
+  .terminal-shell.terminal-shell-custom.terminal-shell-keys-open .terminal-latest{min-height:28px;padding:2px 6px;font-size:8px}
 }

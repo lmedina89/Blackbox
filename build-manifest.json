@@ -1,7 +1,7 @@
 {
   "name": "Human Layer / Act II Foundation",
-  "version": "0.4.0-alpha.4.5",
-  "saveVersion": 11,
+  "version": "0.4.0-alpha.4.5.1",
+  "saveVersion": 12,
   "worldSchema": 10,
   "baseline": {
     "version": "0.2.3.4",
@@ -25,6 +25,9 @@
     "scheduledContent": 5
   },
   "features": [
+    "persistent per-choice conversation timestamps anchor player replies and delayed follow-ups to the actual in-game choice time instead of stale authored clock labels",
+    "Maya Old Mirror reply/follow-up chronology uses the actual player choice time with a three-minute world-time follow-up offset while preserving intentional same-time NPC message bursts",
+    "coarse-pointer short-landscape BLACKBOX input uses a right-side keyboard dock so terminal history retains nearly full viewport height and 90s keycaps keep usable proportions",
     "retro late-90s NEXUS Explorer presentation for MetroWire, FriendSpace, NightWire, Packet Underground, DeadDrop, and ByteBarn while preserving existing content IDs and gameplay actions",
     "working NEXUS/OS My Computer shell with File Explorer-style folders, Control Panel, System Properties, Device Manager, Network Connections, host firewall, Services, Event Viewer, and Add or Remove Programs",
     "persistent NEXUS workstation troubleshooting state for adapter status, DHCP/DNS services, firewall exceptions, device state, and local system events",
@@ -107,6 +110,9 @@
     "IPv6"
   ],
   "verification": [
+    "A4.5.1 late-choice chronology regression reproduces the 19:27 physical-device sequence and verifies player reply/follow-up order at 19:27 and 19:30",
+    "A4.5.1 migration regression preserves an A4.5 thread lastChoiceAt timestamp by normalizing it into communications.choiceTimes",
+    "A4.5.1 landscape static guard verifies the right-side split-workstation grid and ensures portrait keyboard rules remain intact",
     "A4.5 NEXUS system-tools suite verifies save-v11 migration, adapter/DNS repair behavior, firewall/service/device state, event logging, and required troubleshooting UI surfaces",
     "A4.5 retro-web suite verifies all six existing NEXUS web destinations retain their data/event hooks inside the new late-90s presentation and browser Back/Home/Refresh/address controls are wired",
     "A4.5 protected BLACKBOX visual review keeps css/terminal.css and js/data/apps.js byte-identical to A4.4; terminalUI changes are version-label-only while compact landscape behavior is isolated to mobile CSS",
@@ -171,5 +177,5 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.5 retro web and NEXUS/OS troubleshooting foundation: 90s internet presentation, functional Windows-style system tools, compact landscape terminal input; BLACKBOX visual identity preserved"
+  "foundationMilestone": "A4.5.1 device polish and conversation timing: choice-relative message chronology plus right-side landscape BLACKBOX keyboard dock; A4.5 NEXUS systems preserved"
 }

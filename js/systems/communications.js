@@ -79,9 +79,12 @@ export function makeChoice(choiceId){
     }
   }
 
+  const choiceAt=absoluteNow();
+  s.communications.choiceTimes??={};
+  s.communications.choiceTimes[choiceId]=choiceAt;
   const threadState=ensureThreadState(match.thread.id);
   threadState.lastChoiceId=choiceId;
-  threadState.lastChoiceAt=absoluteNow();
+  threadState.lastChoiceAt=choiceAt;
   threadState.waitingForReply=null;
 
   learn(`dialogue:${choiceId}`,"social");

@@ -70,9 +70,31 @@ function fixedClockAbsolute(clockMinute,anchorAbsolute=null){
   return Math.max(anchorAbsolute,planned);
 }
 
+function choiceRelativeAbsolute(item,state){
+  const raw=item?.timeFromChoice;
+  if(!raw)return null;
+  const ids=Array.isArray(raw)?raw:[raw];
+  const times=ids.map(id=>Number(state.communications?.choiceTimes?.[id])).filter(Number.isFinite);
+  if(!times.length){
+    // Compatibility fallback for A4.5 saves whose latest per-thread choice timestamp
+    // exists but has not yet been normalized into the choiceTimes map.
+    for(const thread of Object.values(state.communications?.threads||{})){
+      if(!thread||!ids.includes(thread.lastChoiceId))continue;
+      const at=Number(thread.lastChoiceAt);
+      if(Number.isFinite(at))times.push(at);
+    }
+  }
+  if(!times.length)return null;
+  const offset=Math.max(0,Math.trunc(Number(item.timeOffsetMinutes)||0));
+  return Math.max(...times)+offset;
+}
+
 export function contentAbsoluteTime(item,state=getState()){
   const delivery=contentDelivery(item);
   if(delivery&&Number.isFinite(Number(delivery.absolute)))return Number(delivery.absolute);
+
+  const choiceTime=choiceRelativeAbsolute(item,state);
+  if(choiceTime!==null)return choiceTime;
 
   if(item?.timeFromEvent){
     const value=historyAbsolute(historyById(state,`event:${item.timeFromEvent}`));
@@ -114,7 +136,7 @@ export function sortChronologically(items,state=getState(),{direction="asc"}={})
 
 export function chronologyAvailable(item,{kind="generic",state=getState()}={}){
   if(item?.scheduleId)return true; // scheduler delivery itself already gates availability
-  if(!item?.time)return true;
+  if(!item?.time&&!item?.timeFromEvent&&!item?.timeFromChoice)return true;
   const absolute=contentAbsoluteTime(item,state);
   if(!Number.isFinite(absolute))return true;
   return worldAbsoluteMinute(state)>=absolute;

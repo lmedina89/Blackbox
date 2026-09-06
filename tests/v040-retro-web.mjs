@@ -23,9 +23,10 @@ assert.match(desktop,/siteUrl=/);
 assert.match(desktop,/Local Area Connection is disabled/);
 assert.match(desktop,/DNS Client service is not running/);
 
-// Landscape compaction keeps the BLACKBOX palette/component but removes decorative height.
-assert.match(mobile,/dedicated compact BLACKBOX landscape input layout/);
-assert.match(mobile,/\.terminal-keyboard-brand\{display:none\}/);
-assert.match(mobile,/\.terminal-key\{min-height:22px;height:22px/);
+// A4.5.1 keeps the BLACKBOX palette/component but moves the keyboard into a right-side landscape dock.
+assert.match(mobile,/landscape becomes a split workstation/);
+assert.match(mobile,/grid-template-columns:minmax\(0,1fr\) clamp\(320px,42vw,520px\)/);
+assert.match(mobile,/terminal-keyboard-brand\{display:flex/);
+assert.match(mobile,/terminal-key[^}]*min-height:34px;height:34px/);
 
-console.log("BLACKBOX v0.4.0 Alpha 4.5 retro web and landscape guards passed");
+console.log("BLACKBOX v0.4.0 Alpha 4.5.1 retro web and landscape guards passed");

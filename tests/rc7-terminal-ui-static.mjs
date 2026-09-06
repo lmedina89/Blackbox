@@ -15,7 +15,7 @@ const manifest=JSON.parse(read('build-manifest.json'));
 
 assert.equal(manifest.sourceBaseline?.version,'0.3.0-RC7');
 assert.equal(manifest.sourceBaseline?.sha256,'cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e');
-assert.equal(manifest.saveVersion,11);
+assert.equal(manifest.saveVersion,12);
 assert.equal(manifest.worldSchema,10);
 
 // Fixed shell: BLACKBOX itself owns viewport height, middle history scrolls, form stays outside it.

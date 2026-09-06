@@ -21,6 +21,7 @@ import { getThreadState, makeChoice, recordPresentedThread, setThreadCooldown, s
   assert.equal(thread.waitingForReply,null);
   assert.equal(thread.lastChoiceId,"mirror_send");
   assert.equal(thread.lastChoiceAt,19*60+3);
+  assert.equal(s.communications.choiceTimes.mirror_send,19*60+3,"choice timestamp must persist by choice id");
   assert(s.world.flags.includes("mirror_lead_accepted"),"existing Old Mirror choice semantics changed");
 }
 

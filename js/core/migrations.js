@@ -97,6 +97,19 @@ const migrations={
   11(save){
     save.nexusSystem ??= baseState().nexusSystem;
     return save;
+  },
+  12(save){
+    save.communications ??= {choicesMade:[],threads:{}};
+    save.communications.choiceTimes ??= {};
+    // A4.5 already persisted each thread's most recent choice and timestamp.
+    // Use that to preserve canonical reply timing when migrating an in-progress save.
+    for(const raw of Object.values(save.communications.threads||{})){
+      if(!raw||typeof raw!=="object"||Array.isArray(raw))continue;
+      const id=typeof raw.lastChoiceId==="string"?raw.lastChoiceId:"";
+      const at=Number(raw.lastChoiceAt);
+      if(id&&Number.isFinite(at)&&at>=0&&save.communications.choiceTimes[id]===undefined)save.communications.choiceTimes[id]=Math.trunc(at);
+    }
+    return save;
   }
 };
 
@@ -235,6 +248,13 @@ function normalize(save){
   save.missions.active=uniqueStrings(save.missions.active,[]);
   save.missions.progress=safePlainObject(save.missions.progress,{});
   save.communications.choicesMade=uniqueStrings(save.communications.choicesMade,[]);
+  const choiceTimes={};
+  for(const [choiceId,raw] of Object.entries(safePlainObject(save.communications.choiceTimes,{}))){
+    if(typeof choiceId!=="string"||!choiceId)continue;
+    const absolute=asNumber(raw,NaN,{integer:true,min:0});
+    if(Number.isFinite(absolute))choiceTimes[choiceId]=absolute;
+  }
+  save.communications.choiceTimes=choiceTimes;
   const rawThreads=safePlainObject(save.communications.threads,{}),threads={};
   for(const [threadId,raw] of Object.entries(rawThreads)){
     if(typeof threadId!=="string"||!threadId||!isObject(raw))continue;
