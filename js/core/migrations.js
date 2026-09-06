@@ -183,10 +183,44 @@ function normalize(save){
   save.world.caseHistory=asArray(save.world.caseHistory,[]).filter(isObject);
   save.world.lastActionKey=save.world.lastActionKey==null?undefined:asString(save.world.lastActionKey,"");
   const timeline=safePlainObject(save.world.timeline,{});
+  const validTimelineModes=new Set(["afterActions","afterMinutes","timeWindow","afterEvent","absolute"]);
+  const scheduled={};
+  for(const [contentId,raw] of Object.entries(safePlainObject(timeline.scheduled,{}))){
+    if(typeof contentId!=="string"||!contentId||!isObject(raw))continue;
+    const mode=validTimelineModes.has(raw.mode)?raw.mode:"afterMinutes";
+    const entry={
+      mode,
+      eligibleAt:asNumber(raw.eligibleAt,0,{integer:true,min:0})
+    };
+    if(mode==="afterActions"){
+      entry.eligibleActionTick=asNumber(raw.eligibleActionTick,0,{integer:true,min:0});
+      entry.dueActionTick=asNumber(raw.dueActionTick,entry.eligibleActionTick,{integer:true,min:0});
+    }else{
+      entry.at=asNumber(raw.at,entry.eligibleAt,{integer:true,min:0});
+    }
+    if(raw.anchorId!==undefined)entry.anchorId=asString(raw.anchorId,"").slice(0,128);
+    if(raw.expiresAt!==undefined)entry.expiresAt=asNumber(raw.expiresAt,entry.eligibleAt,{integer:true,min:0});
+    scheduled[contentId]=entry;
+  }
+  const deliveryTimes={};
+  for(const [contentId,raw] of Object.entries(safePlainObject(timeline.deliveryTimes,{}))){
+    if(typeof contentId!=="string"||!contentId)continue;
+    if(isObject(raw)){
+      const absolute=asNumber(raw.absolute,0,{integer:true,min:0});
+      deliveryTimes[contentId]={
+        day:asNumber(raw.day,Math.floor(absolute/1440)+1,{integer:true,min:1}),
+        minute:asNumber(raw.minute,absolute%1440,{integer:true,min:0,max:1439}),
+        absolute
+      };
+    }else{
+      const absolute=asNumber(raw,NaN,{integer:true,min:0});
+      if(Number.isFinite(absolute))deliveryTimes[contentId]={day:Math.floor(absolute/1440)+1,minute:absolute%1440,absolute};
+    }
+  }
   save.world.timeline={
-    scheduled:safePlainObject(timeline.scheduled,{}),
+    scheduled,
     delivered:uniqueStrings(timeline.delivered,[]),
-    deliveryTimes:safePlainObject(timeline.deliveryTimes,{}),
+    deliveryTimes,
     cancelled:uniqueStrings(timeline.cancelled,[]),
     expired:uniqueStrings(timeline.expired,[]),
     cooldowns:safePlainObject(timeline.cooldowns,{}),

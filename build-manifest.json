@@ -1,6 +1,6 @@
 {
   "name": "Human Layer / Act II Foundation",
-  "version": "0.4.0-alpha.1",
+  "version": "0.4.0-alpha.2",
   "saveVersion": 10,
   "worldSchema": 10,
   "baseline": {
@@ -24,6 +24,12 @@
     "worldEvents": 11
   },
   "features": [
+    "persistent living-world scheduler engine integrated behind the existing timeline API with no live content migrated yet",
+    "scheduler timing modes: afterMinutes, timeWindow including overnight windows, afterEvent, afterActions, and absolute game time",
+    "persisted deterministic delivery targets with original scheduled timestamps preserved during catch-up",
+    "declarative scheduler prerequisites for flags, missions, clues, delivered/read content, dialogue choices, and day bounds",
+    "scheduler cancellation, expiration, replacement, and immediate autosave boundaries",
+    "malformed scheduler-record normalization for save resilience",
     "v0.4.0 save/world schema scaffolding with v9 migration",
     "compatibility-aware scheduled-content visibility with legacy flag fallback",
     "persistent timeline, conversation, learning, Help Desk, and behavioral state foundations",
@@ -69,6 +75,10 @@
     "IPv6"
   ],
   "verification": [
+    "continuous nine-case campaign and all prior RC7/A1 regression suites pass after timeline integration",
+    "all eleven legacy v0.3 world events remain defined in the unchanged worldEvents data and continue through the proven actionTick compatibility path",
+    "Alpha 2 leaves scheduledContent catalog empty so no current Messenger/Mail/News/Social/ThreatDesk/mission-critical content has moved to the new scheduler",
+    "v040-timeline scheduler suite passes persistent scheduling, no-reroll reload, windows, event anchoring, cancellation/replacement, expiry, chronological catch-up, read prerequisites, and malformed-state normalization",
     "protected current content and gameplay files are byte-identical to exact RC7: missions, messages, emails, news, social, forums, threats, world events, hosts, DNS, clues, mission system, timeline system, communications system, network system, and terminal command system",
     "v040-foundation migration/metadata/content-availability suite passes",
     "existing continuous nine-case campaign + reload suite passes unchanged in gameplay behavior",
@@ -112,5 +122,5 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A1 compatibility scaffolding"
+  "foundationMilestone": "A2 living-world scheduler engine; live scheduler catalog intentionally empty"
 }

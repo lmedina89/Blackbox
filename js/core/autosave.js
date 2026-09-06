@@ -9,7 +9,7 @@ export const AUTOSAVE_EVENTS=[
   "dns:lookup","threat:read","lab:completed","email:read",
   "forum:read","social:read","news:read","message:read","thread:read",
   "host:connected","command:committed","notes:changed","browser:navigated",
-  "timeline:scheduled","content:delivered","content:expired","content:replaced",
+  "timeline:scheduled","content:delivered","content:cancelled","content:expired","content:replaced",
   "conversation:advanced","helpdesk:changed","training:attempted","behavior:decision"
 ];
 

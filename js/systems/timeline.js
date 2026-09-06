@@ -1,6 +1,8 @@
 import { WORLD_EVENTS } from "../data/worldEvents.js";
+import { SCHEDULED_CONTENT } from "../data/scheduledContent.js";
 import { getState, hasFlag, setFlag } from "../core/state.js";
 import { emit, on } from "../core/events.js";
+import { processScheduledContent } from "./scheduler.js";
 
 function eligible(def){
   const s=getState(),when=def.when||{};
@@ -18,7 +20,7 @@ export function addCaseHistory(entry){
   return true;
 }
 
-export function processTimeline(){
+function processLegacyWorldEvents(){
   const s=getState();
   s.world.deliveredEvents??=[];s.world.eventEligibleAt??={};
   for(const def of WORLD_EVENTS){
@@ -32,6 +34,13 @@ export function processTimeline(){
     addCaseHistory({id:`event:${def.id}`,kind:"world",title:def.notice||def.id});
     emit("timeline:event",{event:def});
   }
+}
+
+export function processTimeline(){
+  // Compatibility first: all eleven v0.3 world events retain their exact
+  // actionTick semantics. New scheduled content is processed independently.
+  processLegacyWorldEvents();
+  processScheduledContent(SCHEDULED_CONTENT);
 }
 
 export function advanceWorld(actionKey,{minutes=3,once=false}={}){
