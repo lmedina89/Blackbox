@@ -1,69 +1,58 @@
-# BLACKBOX v0.4.0 A4.10.1 QA — Intermediate Service Desk Ticket Pack
+# BLACKBOX v0.4.0 A4.10.1.1 QA — NEXUS Desktop & Remote Tool Consistency
 
-Built directly from the physically accepted A4.10.0.1 Mobile Input & Legacy Ticket Migration checkpoint. A4.10.1 deliberately treats the generalized Service Desk engine as frozen infrastructure: the update adds three deeper troubleshooting cases and only the bounded remote-support controls required by those cases.
+Built directly from the physically accepted A4.10.1 Intermediate Service Desk Ticket Pack checkpoint. This is a deliberately small consistency/polish checkpoint: it does not add or change ticket solutions, learning rules, Range behavior, story state, or BLACKBOX intrusion mechanics.
 
-## A4.10.1 scope
+## A4.10.1.1 scope
 
-- Keeps all seven Service Desk incidents on the same structured **root cause → evidence → change → verification** engine.
-- Adds `INC-0005 — Inventory client cannot sync`, an application/service-dependency case where network reachability remains healthy while the local Northstar Inventory Agent is stopped.
-- Adds `INC-0006 — Reports fail to save`, a disk-exhaustion case with a visible system-volume breakdown and bounded cleanup targets. Small unrelated cleanups do not satisfy the authored free-space requirement; the temporary report-export cache is the intended fix.
-- Adds `INC-0007 — Project share access denied`, an authorization/group-membership case. Broad `DOMAIN-ADMINS` or read/write access can create effective access, but ticket verification requires the scoped read-only `ENG-PROJECT-R` membership and rejects excessive privilege.
-- Extends Remote Assistance rather than creating a second troubleshooting UI:
-  - My Computer can display disk use and approved cleanup categories when a machine has authored storage state.
-  - Users & Groups appears only on machines with delegated group controls.
-  - Command Prompt adds `dir <path>` for system-volume/free-space inspection and share-access reproduction.
-  - Services automatically exposes authored application services such as Northstar Inventory Agent and Report Writer.
-- Existing Activity telemetry remains the single troubleshooting history. Disk cleanups and group changes are recorded as normal structured Activity events.
-- Case Review now includes a **Process** line showing relevant evidence observed, configuration changes, unnecessary changes, and whether explicit verification was recorded. This is preparation for future challenge/leaderboard telemetry, not a new progression system.
-- Adds two stable learning concepts: `systems.storage` and `security.group_membership`. The three new tickets feed the existing A4.9 learning engine; Service Desk still contains no separate mastery/scoring model.
-- Existing tickets, Range, NightWire, mission/story, intrusion, ThreatDesk question rules, and BLACKBOX terminal mechanics are unchanged.
-- **SAVE_VERSION 15 / WORLD_SCHEMA 10** remain unchanged. Existing A4.10.0.1 identities upgrade in place with no save wipe.
-- A4.10.0.1 remains the immediate rollback baseline.
+- Keeps the seven A4.10.1 Service Desk tickets unchanged on the same structured **root cause → evidence → change → verification** engine.
+- Removes **Users & Groups** as a ticket-specific remote-desktop icon. It is now a normal secondary administration utility under **Remote Start → System Tools** on every managed workstation.
+- Normalizes a read-only identity/access view on every Service Desk workstation so the presence of Users & Groups no longer telegraphs the permissions ticket.
+  - ordinary machines expose standard domain/department memberships;
+  - machines without delegated rights show that no membership changes are available;
+  - `ENG-WS-27` retains the authored delegated Engineering groups/share ACLs required by `INC-0007`.
+- Adds a functional Remote Assistance **Start** menu with a consistent System Tools list: My Computer, Command Prompt, Device Manager, Network Connections, Services, Event Viewer, Users & Groups, and NEXUS Firewall.
+- Keeps the familiar high-use remote desktop icons for fast troubleshooting while moving secondary identity administration into Start/System Tools.
+- Adds a real **local NEXUS/OS Command Prompt** to the main desktop Start menu under **System Tools** without adding another desktop shortcut.
+- Local NEXUS CMD provides ordinary workstation diagnostics only: `help`, `hostname`, `whoami`, `ver`, `ipconfig`, `ipconfig /all`, `ipconfig /renew`, `ping`, `nslookup`, `dir`, and `cls`.
+- BLACKBOX-only commands such as `scan`, `enum`, `probe`, and `auth` remain unavailable in ordinary NEXUS CMD, preserving the thematic/technical distinction between NEXUS/OS and the BLACKBOX secure environment.
+- Local CMD uses the same 16px mobile input protection as Remote Command, avoiding iPhone Safari focus zoom.
+- **SAVE_VERSION 15 / WORLD_SCHEMA 10** remain unchanged. Existing A4.10.1 identities upgrade in place; generic identity-tool state is normalized from the existing remote workstation templates/saves.
+- A4.10.1 remains the immediate rollback baseline.
 
-## A4.10.1 physical-device acceptance
+## Physical-device acceptance
 
-1. Confirm the A4.10.0.1 iPhone focus-zoom fix still holds in Remote Command, work notes, and the manual gateway field.
-2. Complete or open the first four existing Service Desk tickets and verify they behave exactly as before.
-3. `INC-0005`:
-   - connect to `LOG-WS-05`;
-   - confirm `ping 10.20.0.30` succeeds even while the inventory problem remains;
-   - inspect Services/Event Viewer;
-   - start **Northstar Inventory Agent**;
-   - VERIFY and resolve;
-   - confirm Case Review records the service root cause and Process telemetry.
-4. `INC-0006`:
-   - connect to `FIN-WS-19`;
-   - inspect My Computer and Event Viewer;
-   - confirm the system volume is nearly full and `dir C:\` reports very little free space;
-   - clean **Temporary report exports**;
-   - VERIFY and resolve;
-   - confirm cleanup controls remain readable and easy to tap in portrait.
-5. `INC-0007`:
-   - connect to `ENG-WS-27`;
-   - open **Users & Groups** and reproduce the share failure with `dir \\FILES-02\ENG-PROJECTS`;
-   - confirm the correct scoped fix is `ENG-PROJECT-R`;
-   - optionally verify that `DOMAIN-ADMINS` does not pass ticket verification even though it can make the share readable;
-   - restore the scoped group, VERIFY, and resolve.
-6. Confirm Activity remains readable with the new cleanup/group actions and Case Review Process line.
-7. Reload and confirm ticket status, machine storage/group state, Activity, Case Reviews, and ThreatDesk applied-learning credit persist.
-8. Briefly recheck ThreatDesk, BLACKBOX terminal, Range, and NightWire for regression.
+1. Confirm the main NEXUS Start menu now has clear **Programs** and **System Tools** groupings.
+2. Open **Start → System Tools → Command Prompt** on the local NEXUS desktop.
+   - confirm it opens as a normal NEXUS/OS window and does not create a new desktop icon;
+   - test `hostname`, `whoami`, `ipconfig /all`, and `help`;
+   - confirm entering `scan` or another BLACKBOX-only command is rejected as a NEXUS command;
+   - confirm tapping the CMD input on iPhone does not zoom the page.
+3. Open any Service Desk Remote Assistance session and tap the remote **Start** button.
+   - confirm the menu is readable/tappable in portrait;
+   - confirm **Users & Groups** is present under System Tools even on a non-permissions ticket;
+   - open it on an ordinary ticket and confirm memberships are visible but no delegated group-change controls appear.
+4. Reopen `INC-0007` / `ENG-WS-27` and confirm Users & Groups still exposes `ENG-PROJECT-R`, `ENG-PROJECT-RW`, and `DOMAIN-ADMINS` controls plus the Engineering Projects effective-access view.
+5. Confirm Users & Groups is no longer sitting on the remote desktop as an obvious one-off clue for the permissions ticket.
+6. Verify existing remote desktop icons, Command Prompt, Network, Services, Event Viewer, Firewall, storage cleanup, gateway editing, Activity, Case Review, and ticket completion still behave exactly as A4.10.1.
+7. Reload and confirm all existing Service Desk progress and machine state persist.
+8. Briefly recheck ThreatDesk, BLACKBOX terminal, NightWire, and Range for regression.
 
 ## Deferred intentionally
 
-- Deterministic ticket variants remain deferred until the fixed authored cases have passed physical QA; A4.10.1 does not introduce procedural/random ticket generation.
-- `INC-0008` / A4.10.2 is reserved for the suspicious-authentication investigation bridge into Free Investigation.
-- The short atmospheric NEXUS/BLACKBOX intro is planned before A4.11 Free Investigation, after the current Service Desk content milestone is stable. It must not reveal that the player is AI.
+- No new Service Desk incidents are added here. `A4.10.2` remains reserved for the suspicious-authentication investigation bridge.
+- Deterministic ticket variants remain deferred until the authored ticket set is fully accepted on physical devices.
+- The short atmospheric NEXUS/BLACKBOX intro remains planned before A4.11 Free Investigation and must not reveal the player's AI nature.
 
 ## Automated verification
 
-- **33/33 automated suites pass** in the working tree, including the new A4.10.1 service/disk/permissions regression plus all prior Service Desk, learning, Range, campaign, save, terminal, and mobile/UI coverage.
-- **88/88 JavaScript/test modules pass `node --check`.**
-- Final ZIP is re-extracted and the full test suite is rerun from the packaged bytes before delivery.
+- **34/34 automated suites pass** in the working tree, including the new A4.10.1.1 local-CMD / remote-tool-consistency regression and all prior Service Desk, learning, Range, campaign, save, terminal, and UI suites.
+- **90/90 JavaScript/test modules pass `node --check`.**
+- Final ZIP is re-extracted and the full suite is rerun from packaged bytes before delivery.
 
 ## Rollback baseline
 
-A4.10.0.1 remains the immediate rollback baseline:
+A4.10.1 remains the immediate rollback baseline:
 
-`BLACKBOX-v0.4.0-A4.10.0.1-Mobile-Input-Legacy-Ticket-Migration-QA-GitHub.zip`
+`BLACKBOX-v0.4.0-A4.10.1-Intermediate-Service-Desk-Ticket-Pack-QA-GitHub.zip`
 
-SHA-256: `3559cee6670857cfca8a22ee1d5528b479570859dd91f00c7a87c01175a11eb7`
+SHA-256: `be2f6b6c3f9e225828d952e275f7e2af270fe1314afc0aa7ed43f631670a374a`

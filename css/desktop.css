@@ -34,3 +34,6 @@
 }
 
 .save-warning{border-color:#a12828;background:#fff1f1;color:#4d1010}.save-warning b{color:#8d1717}
+
+/* A4.10.1.1 Start-menu grouping keeps ordinary NEXUS utilities separate from primary apps. */
+.start-group-label{padding:7px 9px 4px;color:#526579;font:bold 10px Tahoma,Arial,sans-serif;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #c6d0da;margin-top:2px}.start-group-label:first-child{margin-top:0}

@@ -1,12 +1,13 @@
 export const DESKTOP_APPS = [
-  {id:"browser",name:"Nexus Explorer",shortName:"Internet",glyph:"🌐"},
-  {id:"mail",name:"NEXUS Mail",shortName:"Email",glyph:"✉️"},
-  {id:"chat",name:"NEXUS Messenger",shortName:"Messenger",glyph:"💬"},
-  {id:"files",name:"My Computer",shortName:"My Computer",glyph:"🖥️"},
-  {id:"missions",name:"Jobs",shortName:"Jobs",glyph:"📋"},
-  {id:"servicedesk",name:"NEXUS Service Desk",shortName:"Service Desk",glyph:"🎧"},
-  {id:"notes",name:"Notepad",shortName:"Notepad",glyph:"📝"},
-  {id:"threatdesk",name:"NEXUS ThreatDesk",shortName:"ThreatDesk",glyph:"🛡️"}
+  {id:"browser",name:"Nexus Explorer",shortName:"Internet",glyph:"🌐",startGroup:"Programs"},
+  {id:"mail",name:"NEXUS Mail",shortName:"Email",glyph:"✉️",startGroup:"Programs"},
+  {id:"chat",name:"NEXUS Messenger",shortName:"Messenger",glyph:"💬",startGroup:"Programs"},
+  {id:"missions",name:"Jobs",shortName:"Jobs",glyph:"📋",startGroup:"Programs"},
+  {id:"servicedesk",name:"NEXUS Service Desk",shortName:"Service Desk",glyph:"🎧",startGroup:"Programs"},
+  {id:"notes",name:"Notepad",shortName:"Notepad",glyph:"📝",startGroup:"Programs"},
+  {id:"threatdesk",name:"NEXUS ThreatDesk",shortName:"ThreatDesk",glyph:"🛡️",startGroup:"Programs"},
+  {id:"files",name:"My Computer",shortName:"My Computer",glyph:"🖥️",startGroup:"System Tools"},
+  {id:"cmd",name:"Command Prompt",shortName:"Command Prompt",glyph:"⌨️",startGroup:"System Tools",desktop:false}
 ];
 
 export const BLACKBOX_SHORTCUT = {

@@ -1,6 +1,6 @@
 {
-  "name": "Intermediate Service Desk Ticket Pack QA",
-  "version": "0.4.0-alpha.4.10.1-qa",
+  "name": "NEXUS Desktop & Remote Tool Consistency QA",
+  "version": "0.4.0-alpha.4.10.1.1-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -35,6 +35,13 @@
     "legacyTrainingLabs": 3
   },
   "features": [
+    "A4.10.1.1 moves Users & Groups out of the ticket-specific remote desktop icon set and into a functional Remote Start \u2192 System Tools menu available across all managed Service Desk workstations",
+    "all remote workstations normalize a standard identity/access view; ordinary tickets expose read-only domain/department memberships while ENG-WS-27 retains its authored delegated group/share controls",
+    "A4.10.1.1 adds a Start-menu-only local NEXUS/OS Command Prompt with ordinary diagnostics (hostname, whoami, ver, ipconfig, ping, nslookup, dir, cls) while rejecting BLACKBOX-only commands",
+    "local NEXUS CMD and Remote CMD remain distinct environments, preserving BLACKBOX as a deeper secure interface rather than the only place the player can type commands",
+    "Remote Assistance Start/System Tools provides a consistent support-tool surface independent of the active ticket, reducing UI-based answer giveaways before Free Investigation",
+    "A4.10.1.1 keeps all seven ticket definitions/solutions, learning rules, Range/NightWire, mission/story and intrusion mechanics unchanged and retains SAVE_VERSION 15 / WORLD_SCHEMA 10",
+    "all 34 automated suites pass and 90 JavaScript/test modules pass syntax checks before packaging",
     "A4.10.1 adds INC-0005 application/service dependency, INC-0006 disk exhaustion, and INC-0007 group-membership/least-privilege cases on the existing structured Service Desk engine without introducing a second troubleshooting workflow",
     "Remote Assistance reuses existing tools and adds only bounded capabilities required by the authored cases: disk cleanup categories in My Computer, an optional Users & Groups tool, and dir <path> command support for free-space/share-access diagnostics",
     "INC-0005 keeps network reachability healthy while Northstar Inventory Agent is stopped, requiring service/event evidence and a bounded service restart rather than network changes",
@@ -303,10 +310,10 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.10.1 Intermediate Service Desk Ticket Pack: service dependencies, storage exhaustion and least-privilege group access are authored on the unified troubleshooting engine",
+  "foundationMilestone": "A4.10.1.1 NEXUS Desktop & Remote Tool Consistency: ordinary local CMD and standardized remote System Tools remove ticket-specific UI tells without changing ticket logic",
   "immediateBaseline": {
-    "version": "0.4.0-A4.10.0.1-QA",
-    "archive": "BLACKBOX-v0.4.0-A4.10.0.1-Mobile-Input-Legacy-Ticket-Migration-QA-GitHub.zip",
-    "sha256": "3559cee6670857cfca8a22ee1d5528b479570859dd91f00c7a87c01175a11eb7"
+    "version": "0.4.0-A4.10.1-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.10.1-Intermediate-Service-Desk-Ticket-Pack-QA-GitHub.zip",
+    "sha256": "be2f6b6c3f9e225828d952e275f7e2af270fe1314afc0aa7ed43f631670a374a"
   }
 }

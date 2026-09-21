@@ -62,12 +62,12 @@ function mergeMachine(saved,template){
       out.storage.cleanup[id].cleanupAllowed=!!item.cleanupAllowed;
     }
   }
-  if(template.access){
-    out.access={...template.access,...(raw.access&&typeof raw.access==="object"?raw.access:{})};
-    out.access.groups=Array.isArray(raw.access?.groups)?[...new Set(raw.access.groups.filter(x=>typeof x==="string"))]:[...(template.access.groups||[])];
-    out.access.editableGroups=[...(template.access.editableGroups||[])];
-    out.access.shares=clone(template.access.shares||{});
-  }
+  const departmentGroup={Finance:"FIN-STAFF",Operations:"OPS-STAFF","Human Resources":"HR-STAFF",Engineering:"ENG-STAFF",Logistics:"LOG-STAFF"}[out.user.department];
+  const accessTemplate=template.access||{groups:["DOMAIN-USERS",...(departmentGroup?[departmentGroup]:[])],editableGroups:[],shares:{}};
+  out.access={...accessTemplate,...(raw.access&&typeof raw.access==="object"?raw.access:{})};
+  out.access.groups=Array.isArray(raw.access?.groups)?[...new Set(raw.access.groups.filter(x=>typeof x==="string"))]:[...(accessTemplate.groups||[])];
+  out.access.editableGroups=[...(accessTemplate.editableGroups||[])];
+  out.access.shares=clone(accessTemplate.shares||{});
   out.eventLog=Array.isArray(raw.eventLog)?raw.eventLog.filter(x=>x&&typeof x==="object").slice(-100):clone(template.eventLog);
   return out;
 }

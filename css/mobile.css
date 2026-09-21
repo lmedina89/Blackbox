@@ -248,3 +248,9 @@
 @media (max-width:700px){
   .access-group-row{grid-template-columns:minmax(0,1fr) auto}.access-group-row .classic-button{grid-column:1/-1;justify-self:start;min-height:36px}.access-share-row{grid-template-columns:1fr}.access-share-row .access-state{justify-self:start}.storage-cleanup-row{grid-template-columns:minmax(0,1fr) auto}.storage-cleanup-row .classic-button{min-height:36px}.remote-desktop-icons{overflow-y:auto;align-content:start}
 }
+
+@media (max-width:700px){
+  .remote-start-menu{width:min(225px,78%);max-height:calc(100% - 38px)}
+  .remote-start-menu>button{min-height:38px}.remote-start-menu>button b{font-size:11px}.remote-start-menu>button span{font-size:18px}
+  .nexus-command-form input{font-size:16px}
+}
