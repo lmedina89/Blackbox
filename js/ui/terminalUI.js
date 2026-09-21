@@ -50,19 +50,8 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
   }
 
   function updateLatestOffset(){
-    if(!coarsePointer()){latestButton.style.removeProperty("bottom");latestButton.style.removeProperty("right");return;}
-    requestAnimationFrame(()=>{
-      const openCustom=currentInputMode==="blackbox"&&!keysCollapsed&&customKeyboard?.classList.contains("is-active");
-      if(landscapeTouch()&&openCustom){
-        latestButton.style.bottom=`${Math.max(40,(form.offsetHeight||0)+8)}px`;
-        latestButton.style.right=`${Math.max(12,(customKeyboard.offsetWidth||0)+12)}px`;
-        return;
-      }
-      const controls=inputControls?.offsetHeight||0;
-      const keys=openCustom?(customKeyboard.offsetHeight||0):0;
-      latestButton.style.bottom=`${Math.max(54,(form.offsetHeight||0)+controls+keys+8)}px`;
-      latestButton.style.removeProperty("right");
-    });
+    latestButton.style.removeProperty("bottom");
+    latestButton.style.removeProperty("right");
   }
 
   function focusCommandInput(){
@@ -81,6 +70,18 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     const active=currentInputMode==="blackbox"&&!running&&!input.disabled;
     customInputDisplay?.classList.toggle("is-active",active);
     customCaret?.classList.toggle("is-active",active);
+  }
+
+  function syncPromptLayout(){
+    if(!form)return;
+    if(currentInputMode!=="blackbox"||!coarsePointer()){form.classList.remove("terminal-form-stacked");return;}
+    requestAnimationFrame(()=>{
+      const available=Math.max(0,form.clientWidth);
+      const promptWidth=Math.ceil(prompt.scrollWidth||prompt.getBoundingClientRect().width||0);
+      const reserve=Math.min(190,Math.max(145,available*.38));
+      const longPrompt=(prompt.textContent||"").length>22;
+      form.classList.toggle("terminal-form-stacked",longPrompt||promptWidth+reserve+12>available);
+    });
   }
 
   function insertInput(text){
@@ -131,9 +132,9 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
       keySpec(keyboardPage==="numeric"?"ABC":"123",{action:"page",aria:keyboardPage==="numeric"?"Letters":"Numbers and symbols"}),
       keySpec("_"),keySpec("~"),keySpec(".."),
       keySpec("SPACE",{value:" ",wide:true,aria:"Space"}),
+      keySpec("⌫",{action:"backspace",aria:"Backspace"}),
       keySpec("↑",{action:"history-up",aria:"Previous command"}),
       keySpec("↓",{action:"history-down",aria:"Next command"}),
-      keySpec("⌫",{action:"backspace",aria:"Backspace"}),
       keySpec("ENTER",{action:"enter",wide:true,aria:"Enter command"})
     ]);
     customKeyboard.replaceChildren();
@@ -145,6 +146,9 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
       specs.forEach(spec=>{
         const button=document.createElement("button");
         button.type="button";button.className=`terminal-key${spec.wide?" terminal-key-wide":""}`;
+        if(spec.value===" ")button.classList.add("terminal-key-space");
+        if(spec.action==="backspace")button.classList.add("terminal-key-backspace");
+        if(spec.action==="history-up"||spec.action==="history-down")button.classList.add("terminal-key-history");
         button.textContent=spec.label;button.setAttribute("aria-label",spec.aria);
         if(spec.action)button.dataset.action=spec.action;else button.dataset.value=spec.value;
         row.appendChild(button);
@@ -174,6 +178,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     }
     if(custom)input.blur();else if(focus)focusCommandInput();
     syncCustomInputDisplay();
+    syncPromptLayout();
     if(persist){
       getState().ui.terminalInputMode=next;
       emit("ui:terminal-input-mode",{mode:next});
@@ -244,6 +249,26 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     el.append(p,c);output.appendChild(el);scrollLatest();
   }
 
+  function renderHelpIndex(index){
+    const root=document.createElement("section");root.className="terminal-help-index";
+    const title=document.createElement("div");title.className="terminal-help-title";title.textContent="BLACKBOX COMMAND INDEX";root.appendChild(title);
+    for(const section of index||[]){
+      const group=document.createElement("section");group.className="terminal-help-section";
+      const heading=document.createElement("h3");heading.textContent=section.title;group.appendChild(heading);
+      const rows=document.createElement("div");rows.className="terminal-help-rows";
+      for(const entry of section.entries||[]){
+        const row=document.createElement("div");row.className="terminal-help-row";
+        const syntax=document.createElement("div");syntax.className="terminal-help-syntax";
+        const command=document.createElement("span");command.className="terminal-help-command";command.textContent=entry.command;syntax.appendChild(command);
+        if(entry.args){const args=document.createElement("span");args.className="terminal-help-args";args.textContent=` ${entry.args}`;syntax.appendChild(args);}
+        const description=document.createElement("div");description.className="terminal-help-description";description.textContent=entry.description;
+        row.append(syntax,description);rows.appendChild(row);
+      }
+      group.appendChild(rows);root.appendChild(group);
+    }
+    output.appendChild(root);scrollLatest();
+  }
+
   function notice(title,body,next="",tone="success"){
     const box=document.createElement("div");
     box.className=`terminal-notice ${tone}`;
@@ -290,6 +315,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
       trace.textContent=range?`${range.noise}/${range.threshold}`:`${s.terminal.trace||0}%`;
     }
     syncCustomInputDisplay();
+    syncPromptLayout();
   }
 
   async function performPurge(){
@@ -328,7 +354,8 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     const result=await executeCommand(raw);
     if((result.lines||[]).some(line=>line.type==="error"))playSound("terminal_error");
     if(result.clear)output.innerHTML="";
-    for(const line of result.lines||[])print(line.text,line.type||"");
+    if(result.helpIndex)renderHelpIndex(result.helpIndex);
+    else for(const line of result.lines||[])print(line.text,line.type||"");
     running=false;
     refreshPrompt();
     syncCustomInputDisplay();
@@ -482,8 +509,8 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
     updateLatestButton();
   },{passive:true});
   latestButton.addEventListener("click",()=>{scrollLatest(true);focusCommandInput();});
-  window.addEventListener("resize",updateLatestOffset,{passive:true});
-  globalThis.visualViewport?.addEventListener?.("resize",updateLatestOffset,{passive:true});
+  window.addEventListener("resize",()=>{updateLatestOffset();syncPromptLayout();},{passive:true});
+  globalThis.visualViewport?.addEventListener?.("resize",()=>{updateLatestOffset();syncPromptLayout();},{passive:true});
 
   return {
     showSession({resume=false}={}){
@@ -504,7 +531,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
         output.innerHTML="";
         print("┌──────────────────────────────────────────┐","banner");
         print("│       B L A C K B O X   S E C U R E      │","banner");
-        print("│      INTERACTIVE SHELL 0.4.0-A4.8.2-QA        │","banner");
+        print("│    INTERACTIVE SHELL 0.4.0-A4.9.1-QA     │","banner");
         print("└──────────────────────────────────────────┘","banner");
         print("");
         print(`SESSION ${String(s.terminal.sessionCount).padStart(4,"0")} // LOCAL ENVIRONMENT`);

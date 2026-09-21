@@ -162,53 +162,76 @@ export async function executeCommand(raw){
   catch(err){return {lines:[{text:err.message||"Command failed",type:"error"}]};}
 }
 
-registerCommand({name:"help",aliases:["?"],execute(){return line([
-"BLACKBOX COMMAND INDEX","",
-"SYSTEM",
-"  help              command index",
-"  clear             clear terminal",
-"  whoami            current user",
-"  hostname          current host",
-"  uname [-a]        system information",
-"  ps                process table",
-"  services [host]   inspect listening services",
-"  netstat           network connections",
-"  history           command history",
-"  skills            learned proficiencies","",
-"FILES",
-"  pwd               print working directory",
-"  ls [path]         list directory",
-"  cd <path>         change directory",
-"  cat <file>        read file",
-"  head <file>       first lines of file",
-"  tail <file>       last lines of file",
-"  grep <text> <file> filter matching lines",
-"  find [path] <name> locate files",
-"  download <file>   record evidence on HOME-PC","",
-"NETWORK",
-"  ip                inspect network interfaces",
-"  ping <host>       test current-host reachability",
-"  nslookup <name> [type] simulated DNS lookup",
-"  scan              discover hosts reachable FROM this machine",
-"  targets           saved target list",
-"  target add <host|#> save scan result/host",
-"  target remove <#>   remove saved target",
-"  target info <#>     inspect known target data",
-"  connect scan <#>   connect to recent scan result",
-"  connect target <#> connect to saved target",
-"  connect <host|ip>  use an established/legacy session",
-"  traceroute <host> show simulated route",
-"  enum <host> <service> inspect an exposed service",
-"  probe <BBX-id> [host] test a fictional vulnerability profile",
-"  auth <host> <service> <credential> attempt known simulated access",
-"  access            known credentials, sessions, artifacts and noise",
-...(nightwireUnlocked()?["  nightwire         connect to the NightWire private node"]:[]),"",
-"GAME",
-"  missions          active objectives",
-"  clues             discovered information",
-"  purge identity    archive & reset",
-"  exit              close remote/local session"
-].join("\n"));}});
+const BASE_HELP_INDEX=[
+  {title:"SYSTEM",entries:[
+    {command:"help",args:"",description:"command index"},
+    {command:"clear",args:"",description:"clear terminal"},
+    {command:"whoami",args:"",description:"current user"},
+    {command:"hostname",args:"",description:"current host"},
+    {command:"uname",args:"[-a]",description:"system information"},
+    {command:"ps",args:"",description:"process table"},
+    {command:"services",args:"[host]",description:"inspect listening services"},
+    {command:"netstat",args:"",description:"network connections"},
+    {command:"history",args:"",description:"command history"},
+    {command:"skills",args:"",description:"learned proficiencies"}
+  ]},
+  {title:"FILES",entries:[
+    {command:"pwd",args:"",description:"print working directory"},
+    {command:"ls",args:"[path]",description:"list directory"},
+    {command:"cd",args:"<path>",description:"change directory"},
+    {command:"cat",args:"<file>",description:"read file"},
+    {command:"head",args:"<file>",description:"first lines of file"},
+    {command:"tail",args:"<file>",description:"last lines of file"},
+    {command:"grep",args:"<text> <file>",description:"filter matching lines"},
+    {command:"find",args:"[path] <name>",description:"locate files"},
+    {command:"download",args:"<file>",description:"record evidence on HOME-PC"}
+  ]},
+  {title:"NETWORK",entries:[
+    {command:"ip",args:"",description:"inspect network interfaces"},
+    {command:"ping",args:"<host>",description:"test current-host reachability"},
+    {command:"nslookup",args:"<name> [type]",description:"simulated DNS lookup"},
+    {command:"scan",args:"",description:"discover hosts reachable FROM this machine"},
+    {command:"targets",args:"",description:"saved target list"},
+    {command:"target add",args:"<host|#>",description:"save scan result/host"},
+    {command:"target remove",args:"<#>",description:"remove saved target"},
+    {command:"target info",args:"<#>",description:"inspect known target data"},
+    {command:"connect scan",args:"<#>",description:"connect to recent scan result"},
+    {command:"connect target",args:"<#>",description:"connect to saved target"},
+    {command:"connect",args:"<host|ip>",description:"use an established/legacy session"},
+    {command:"traceroute",args:"<host>",description:"show simulated route"},
+    {command:"enum",args:"<host> <service>",description:"inspect an exposed service"},
+    {command:"probe",args:"<BBX-id> [host]",description:"test a fictional vulnerability profile"},
+    {command:"auth",args:"<host> <service> <credential>",description:"attempt known simulated access"},
+    {command:"access",args:"",description:"known credentials, sessions, artifacts and noise"}
+  ]},
+  {title:"GAME",entries:[
+    {command:"missions",args:"",description:"active objectives"},
+    {command:"clues",args:"",description:"discovered information"},
+    {command:"purge identity",args:"",description:"archive & reset"},
+    {command:"exit",args:"",description:"close remote/local session"}
+  ]}
+];
+
+export function buildHelpIndex(){
+  const sections=BASE_HELP_INDEX.map(section=>({title:section.title,entries:section.entries.map(entry=>({...entry}))}));
+  if(nightwireUnlocked())sections.find(section=>section.title==="NETWORK")?.entries.push({command:"nightwire",args:"",description:"connect to the NightWire private node"});
+  return sections;
+}
+
+function helpText(index){
+  const lines=["BLACKBOX COMMAND INDEX",""];
+  for(const section of index){
+    lines.push(section.title);
+    for(const entry of section.entries){
+      const syntax=`${entry.command}${entry.args?` ${entry.args}`:""}`;
+      lines.push(`  ${syntax.padEnd(24)} ${entry.description}`);
+    }
+    lines.push("");
+  }
+  return lines.join("\n").trimEnd();
+}
+
+registerCommand({name:"help",aliases:["?"],execute(){const helpIndex=buildHelpIndex();return {lines:[{text:helpText(helpIndex)}],helpIndex};}});
 
 registerCommand({name:"clear",execute(){return {clear:true,lines:[]};}});
 registerCommand({name:"pwd",execute({state}){learn("pwd","systems");return line(state.terminal.cwd);}});

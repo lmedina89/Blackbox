@@ -24,6 +24,7 @@ import { displayName } from "../systems/network.js";
 import { playSound, toggleAudio, isAudioEnabled } from "../systems/audio.js";
 import { lookupDns, formatDnsResult } from "../systems/dns.js";
 import { escapeHtml } from "./safeText.js";
+import { questionInstruction, shuffleOrderOptions, validateQuestionSubmission, optionFeedback } from "./threatDeskQuestion.js";
 import { contentAvailable, contentDelivery } from "../systems/contentAvailability.js";
 import { chronologyAvailable, contentAbsoluteTime, contentTimeLabel, sortChronologically } from "../systems/contentChronology.js";
 import { nexusNetworkOnline, nexusDnsOnline, setNetworkAdapter, renewDhcp, repairNetwork, setFirewallEnabled, setFirewallRule, setService, setDeviceEnabled, systemSnapshot } from "../systems/nexusSystem.js";
@@ -48,7 +49,7 @@ export function initDesktopUI({enterBlackbox}){
   let z=20,offset=0,activeThreadId="maya",selectedMailId=null,renderScheduled=false;
   const systemView={tool:"explorer",path:"C:\\"};
   const browserHistory=[];
-  const threatDeskView={query:"",output:"Enter a fictional hostname.",tab:"training",trackId:null,questionId:null,lastResult:null};
+  const threatDeskView={query:"",output:"Enter a fictional hostname.",tab:"training",trackId:null,questionId:null,lastResult:null,lastSubmission:null,orderPresentation:null};
   const serviceDeskView={ticketId:null,mode:"queue",remoteTool:"desktop",commandOutput:"Type HELP for supported remote diagnostics."};
 
   for(const app of DESKTOP_APPS){
@@ -350,7 +351,7 @@ export function initDesktopUI({enterBlackbox}){
       if(systemView.tool==="downloads")return `<div class="explorer-folder-view"><h2>Downloads</h2>${(s.player.downloads||[]).length?`<div class="file-details-list">${(s.player.downloads||[]).map(x=>`<div><span>📄</span><b>${escapeHtml(x.split(":").slice(1).join(":")||x)}</b><small>BLACKBOX evidence copy • read-only</small></div>`).join("")}</div>`:`<div class="empty-state compact">This folder is empty.</div>`}</div>`;
       if(systemView.tool==="blackboxData")return `<div class="explorer-folder-view"><h2>BLACKBOX Data</h2><div class="system-summary-strip"><span><b>${knownHosts.length}</b> saved targets</span><span><b>${(s.player.downloads||[]).length}</b> evidence files</span><span><b>${caseClues.length}</b> case clues</span><span><b>${worldIntel.length}</b> world intel</span></div><section class="classic-group"><legend>Saved Targets</legend>${knownHosts.length?knownHosts.map((h,i)=>`<div class="classic-row"><b>[${i}] ${displayName(h.id)}</b><span>${h.address}</span></div>`).join(""):`<p>No remote targets saved.</p>`}</section><section class="classic-group"><legend>Case Clues</legend>${caseClues.length?caseClues.map(c=>`<div class="classic-row stacked"><b>${c.title}</b><span>${c.summary}</span></div>`).join(""):`<p>No case clues recorded.</p>`}</section><section class="classic-group"><legend>World Intel</legend>${worldIntel.length?worldIntel.map(c=>`<div class="classic-row stacked"><b>${c.title}</b><span>${c.summary}</span></div>`).join(""):`<p>No optional world intel learned yet.</p>`}</section><button class="classic-button blackbox-system-launch" id="system-blackbox">ENTER BLACKBOX</button></div>`;
       if(systemView.tool==="control")return `<div class="control-panel"><div class="control-panel-head"><span>🛠️</span><div><h2>Control Panel</h2><p>Pick a category to change NEXUS/OS settings.</p></div></div><div class="cp-grid">${controlIcon("system","🖥️","System","Hardware, performance and Device Manager")}${controlIcon("network","🌐","Network Connections","TCP/IP and adapter status")}${controlIcon("firewall","🧱","NEXUS Firewall","Host firewall and exceptions")}${controlIcon("programs","💿","Add or Remove Programs","Installed applications and components")}${controlIcon("services","⚙️","Administrative Tools","Services and startup state")}${controlIcon("events","📋","Event Viewer","System and troubleshooting logs")}<div class="cp-icon static"><span>🕒</span><b>Date and Time</b><small>Day ${s.world.day} • ${formatClock().time}</small></div><div class="cp-icon static"><span>🖼️</span><b>Display</b><small>NEXUS SVGA • 32-bit color</small></div></div></div>`;
-      if(systemView.tool==="system")return `<div class="system-properties"><div class="classic-tabs"><button class="active">General</button><button>Computer Name</button><button>Hardware</button><button>Advanced</button></div><div class="system-logo-row"><div class="computer-glyph">🖥️</div><div><h2>NEXUS/OS Personal Workstation</h2><p>Registered to: ${escapeHtml(s.player.alias)}</p><p>BLACKBOX 0.4.0-A4.9-QA installed</p></div></div><section class="classic-group"><legend>Computer</legend><p>${snap.hardware.cpu}<br>${snap.hardware.memory} RAM<br>${snap.hardware.disk}</p></section><section class="classic-group"><legend>Hardware</legend><button class="classic-button" data-system-tool="devices">DEVICE MANAGER</button><button class="classic-button" data-action="scan-hardware">SCAN FOR HARDWARE CHANGES</button></section><div class="cert-map"><b>Hands-on concepts:</b> A+ operating systems, hardware identification, troubleshooting and change awareness.</div></div>`;
+      if(systemView.tool==="system")return `<div class="system-properties"><div class="classic-tabs"><button class="active">General</button><button>Computer Name</button><button>Hardware</button><button>Advanced</button></div><div class="system-logo-row"><div class="computer-glyph">🖥️</div><div><h2>NEXUS/OS Personal Workstation</h2><p>Registered to: ${escapeHtml(s.player.alias)}</p><p>BLACKBOX 0.4.0-A4.9.1-QA installed</p></div></div><section class="classic-group"><legend>Computer</legend><p>${snap.hardware.cpu}<br>${snap.hardware.memory} RAM<br>${snap.hardware.disk}</p></section><section class="classic-group"><legend>Hardware</legend><button class="classic-button" data-system-tool="devices">DEVICE MANAGER</button><button class="classic-button" data-action="scan-hardware">SCAN FOR HARDWARE CHANGES</button></section><div class="cert-map"><b>Hands-on concepts:</b> A+ operating systems, hardware identification, troubleshooting and change awareness.</div></div>`;
       if(systemView.tool==="devices"){
         const nicEnabled=snap.devices.networkAdapter!=="disabled",soundEnabled=snap.devices.soundAdapter!=="disabled";
         return `<div class="device-manager"><div class="dm-toolbar"><button class="classic-button" data-action="scan-hardware">🔍 Scan for hardware changes</button></div><div class="device-tree"><details open><summary>▾ Computer</summary><div class="device-row ok">🖥️ ACPI NEXUS PC <span>This device is working properly.</span></div></details><details open><summary>▾ Disk drives</summary><div class="device-row ok">💽 ${snap.hardware.disk}<span>This device is working properly.</span></div></details><details open><summary>▾ Display adapters</summary><div class="device-row ok">🖼️ NEXUS SVGA Adapter<span>This device is working properly.</span></div></details><details open><summary>▾ Network adapters</summary><div class="device-row ${nicEnabled?"ok":"disabled"}">🌐 ${snap.hardware.network}<span>${nicEnabled?"This device is working properly.":"This device is disabled. (Code 22)"}</span><button class="classic-button" data-device="networkAdapter" data-enable="${nicEnabled?"0":"1"}">${nicEnabled?"DISABLE":"ENABLE"}</button></div></details><details open><summary>▾ Sound, video and game controllers</summary><div class="device-row ${soundEnabled?"ok":"disabled"}">🔊 SoundBlaster Compatible Audio<span>${soundEnabled?"This device is working properly.":"This device is disabled. (Code 22)"}</span><button class="classic-button" data-device="soundAdapter" data-enable="${soundEnabled?"0":"1"}">${soundEnabled?"DISABLE":"ENABLE"}</button></div></details><details><summary>▸ Ports (COM & LPT)</summary><div class="device-row ok">🔌 Communications Port (COM1)<span>This device is working properly.</span></div></details><details><summary>▸ System devices</summary><div class="device-row ok">🔧 PCI bus<span>This device is working properly.</span></div></details></div><div class="cert-map"><b>Troubleshooting habit:</b> verify device status before replacing hardware. Disabled devices are not the same as failed devices.</div></div>`;
@@ -459,20 +460,58 @@ export function initDesktopUI({enterBlackbox}){
       ${[["training","Training"],["review",`Review${learning.reviewQueue.length?` (${learning.reviewQueue.length})`:""}`],["intel","Field Intel"],["lookup","Lookup"]].map(([id,label])=>`<button type="button" data-td-tab="${id}" class="${threatDeskView.tab===id?"active":""}">${label}</button>`).join("")}
     </div>`;
 
+    const resetQuestionPresentation=()=>{
+      threatDeskView.lastSubmission=null;
+      threatDeskView.orderPresentation=null;
+    };
+
+    const presentedOrderOptions=question=>{
+      if(question?.type!=="order")return question?.options||[];
+      if(threatDeskView.orderPresentation?.questionId!==question.id){
+        threatDeskView.orderPresentation={questionId:question.id,optionIds:shuffleOrderOptions(question).map(option=>option.id)};
+      }
+      const byId=new Map(question.options.map(option=>[option.id,option]));
+      return threatDeskView.orderPresentation.optionIds.map(id=>byId.get(id)).filter(Boolean);
+    };
+
     const renderQuestion=question=>{
       if(!question)return '<div class="empty-state compact">No question is available in this view.</div>';
       const attempt=questionAttempt(question.id),last=threatDeskView.lastResult?.question?.id===question.id?threatDeskView.lastResult:null;
+      const submission=threatDeskView.lastSubmission?.questionId===question.id?threatDeskView.lastSubmission.answer:null;
+      const locked=!!last;
       let controls="";
-      if(question.type==="single")controls=question.options.map(option=>`<label class="td-choice"><input type="radio" name="td-answer" value="${escapeHtml(option.id)}"><span>${escapeHtml(option.label)}</span></label>`).join("");
-      else if(question.type==="multi")controls=question.options.map(option=>`<label class="td-choice"><input type="checkbox" name="td-answer" value="${escapeHtml(option.id)}"><span>${escapeHtml(option.label)}</span></label>`).join("");
-      else if(question.type==="order")controls=question.options.map(option=>`<label class="td-order-row"><select data-td-order="${escapeHtml(option.id)}"><option value="">#</option>${question.options.map((_,index)=>`<option value="${index+1}">${index+1}</option>`).join("")}</select><span>${escapeHtml(option.label)}</span></label>`).join("");
+      if(question.type==="single")controls=question.options.map(option=>{
+        const feedback=optionFeedback(question,submission,option.id),classes=["td-choice"];
+        if(locked&&feedback.selected)classes.push("is-selected");
+        if(locked&&feedback.correct)classes.push("is-correct");
+        if(locked&&feedback.incorrect)classes.push("is-incorrect");
+        return `<label class="${classes.join(" ")}"><input type="radio" name="td-answer" value="${escapeHtml(option.id)}" ${submission===option.id?"checked":""} ${locked?"disabled":""}><span>${escapeHtml(option.label)}</span></label>`;
+      }).join("");
+      else if(question.type==="multi")controls=question.options.map(option=>{
+        const feedback=optionFeedback(question,submission,option.id),classes=["td-choice"];
+        if(locked&&feedback.selected)classes.push("is-selected");
+        if(locked&&feedback.correct)classes.push("is-correct");
+        if(locked&&feedback.incorrect)classes.push("is-incorrect");
+        return `<label class="${classes.join(" ")}"><input type="checkbox" name="td-answer" value="${escapeHtml(option.id)}" ${Array.isArray(submission)&&submission.includes(option.id)?"checked":""} ${locked?"disabled":""}><span>${escapeHtml(option.label)}</span></label>`;
+      }).join("");
+      else if(question.type==="order")controls=presentedOrderOptions(question).map(option=>{
+        const submittedRank=Array.isArray(submission)?submission.indexOf(option.id)+1:0;
+        const correctRank=Array.isArray(question.answer)?question.answer.indexOf(option.id)+1:0;
+        const classes=["td-order-row"];
+        if(locked&&submittedRank===correctRank)classes.push("is-correct");
+        else if(locked)classes.push("is-incorrect");
+        const opts=question.options.map((_,index)=>`<option value="${index+1}" ${submittedRank===index+1?"selected":""}>${index+1}</option>`).join("");
+        return `<label class="${classes.join(" ")}"><select data-td-order="${escapeHtml(option.id)}" ${locked?"disabled":""}><option value="">#</option>${opts}</select><span>${escapeHtml(option.label)}</span>${locked&&!last.correct&&submittedRank!==correctRank?`<small class="td-order-correct">Correct: ${correctRank}</small>`:""}</label>`;
+      }).join("");
       const conceptChips=question.concepts.map(id=>{const concept=LEARNING_CONCEPTS.find(item=>item.id===id);return `<span class="td-concept-chip ${statusClass(conceptStatus(id))}" title="${escapeHtml(concept?.summary||"")}">${escapeHtml(concept?.title||id)}</span>`;}).join("");
       return `<form class="td-question" data-td-question="${question.id}">
         <div class="td-question-meta"><span>${escapeHtml(question.difficulty)}</span><span>${escapeHtml(question.type.toUpperCase())}</span>${attempt?.attempts?`<span>ATTEMPTS ${attempt.attempts}</span>`:""}</div>
+        <div class="td-question-instruction">${escapeHtml(questionInstruction(question))}</div>
         <h3>${escapeHtml(question.prompt)}</h3>
         <div class="td-concept-chips">${conceptChips}</div>
         <div class="td-question-controls">${controls}</div>
-        <div class="td-question-actions"><button type="submit">CHECK ANSWER</button>${last?'<button type="button" data-td-next> NEXT QUESTION </button>':""}</div>
+        <div class="td-question-validation" data-td-validation role="status" aria-live="polite" hidden></div>
+        <div class="td-question-actions"><button type="submit" ${locked?"disabled":""}>CHECK ANSWER</button>${last?'<button type="button" data-td-next> NEXT QUESTION </button>':""}</div>
         ${last?`<div class="td-answer-result ${last.correct?"correct":"wrong"}"><b>${last.correct?"CORRECT":"REVIEW"}</b><p>${escapeHtml(last.message)}</p>${last.inReview?'<small>This question remains in Review until you answer it correctly twice after a miss.</small>':""}</div>`:""}
       </form>`;
     };
@@ -483,7 +522,7 @@ export function initDesktopUI({enterBlackbox}){
         const track=trackById(threatDeskView.trackId),trackStats=learning.tracks.find(item=>item.id===threatDeskView.trackId);
         if(!track){threatDeskView.trackId=null;threatDeskView.questionId=null;return renderThreatDesk(el);}
         let question=questionById(threatDeskView.questionId);
-        if(!question||question.trackId!==track.id){question=nextPracticeQuestion(track.id);threatDeskView.questionId=question?.id||null;threatDeskView.lastResult=null;}
+        if(!question||question.trackId!==track.id){question=nextPracticeQuestion(track.id);threatDeskView.questionId=question?.id||null;threatDeskView.lastResult=null;resetQuestionPresentation();}
         const concepts=track.concepts.map(id=>{const concept=learning.concepts.find(item=>item.id===id);return `<div class="td-concept-row"><div><b>${escapeHtml(concept?.title||id)}</b><small>${escapeHtml(concept?.summary||"")}</small></div><span class="td-status ${statusClass(concept?.status)}">${escapeHtml(concept?.status||"UNSEEN")}</span></div>`;}).join("");
         body=`<section class="td-panel td-learning-panel td-span-2">
           <div class="td-section-head"><button type="button" data-td-track-back>← TRACKS</button><div><h2>${escapeHtml(track.title)}</h2><p>${escapeHtml(track.description)}</p></div></div>
@@ -501,7 +540,7 @@ export function initDesktopUI({enterBlackbox}){
       }
     }else if(threatDeskView.tab==="review"){
       let queue=learning.reviewQueue.map(questionById).filter(Boolean),question=questionById(threatDeskView.questionId);
-      if(!question||!learning.reviewQueue.includes(question.id)){question=queue[0]||null;threatDeskView.questionId=question?.id||null;threatDeskView.lastResult=null;}
+      if(!question||!learning.reviewQueue.includes(question.id)){question=queue[0]||null;threatDeskView.questionId=question?.id||null;threatDeskView.lastResult=null;resetQuestionPresentation();}
       body=`<section class="td-panel td-learning-panel td-span-2"><h2>Review Queue</h2><p>${queue.length?`${queue.length} question${queue.length===1?"":"s"} need another pass. A missed item clears after two correct review answers.`:"Nothing is waiting for review."}</p>${queue.length?`<div class="td-review-list">${queue.map(q=>`<button type="button" data-td-review-question="${q.id}" class="${q.id===question?.id?"active":""}">${escapeHtml(trackById(q.trackId)?.shortTitle||"TD")} · ${escapeHtml(q.prompt)}</button>`).join("")}</div>${renderQuestion(question)}`:'<div class="empty-state compact">Missed questions will appear here automatically.</div>'}</section>`;
     }else if(threatDeskView.tab==="intel"){
       body=`<section class="td-panel"><h2>Threat Feed</h2><div class="td-feed">${reports.map(r=>`<button data-threat="${r.id}" class="td-report ${(s.world.readThreats||[]).includes(r.id)?"read":"unread"}"><span>${r.severity}${r.timeFromEvent?` · ${contentTimeLabel(r,s,{includeDay:false})}`:""}</span><b>${escapeHtml(r.title)}</b><small>${escapeHtml(r.body)}</small></button>`).join("")}</div></section>
@@ -512,10 +551,10 @@ export function initDesktopUI({enterBlackbox}){
 
     el.innerHTML=`<div class="threatdesk-head"><div><b>NEXUS ThreatDesk</b><span>INTELLIGENCE // LEARNING // SIMULATION</span></div><strong>FEED ONLINE</strong></div>${nav}<div class="threatdesk-body">${body}</div>`;
 
-    el.querySelectorAll("[data-td-tab]").forEach(btn=>btn.addEventListener("click",()=>{threatDeskView.tab=btn.dataset.tdTab;threatDeskView.questionId=null;threatDeskView.lastResult=null;renderThreatDesk(el);}));
-    el.querySelectorAll("[data-td-track]").forEach(btn=>btn.addEventListener("click",()=>{threatDeskView.trackId=btn.dataset.tdTrack;threatDeskView.questionId=null;threatDeskView.lastResult=null;renderThreatDesk(el);}));
-    el.querySelector("[data-td-track-back]")?.addEventListener("click",()=>{threatDeskView.trackId=null;threatDeskView.questionId=null;threatDeskView.lastResult=null;renderThreatDesk(el);});
-    el.querySelectorAll("[data-td-review-question]").forEach(btn=>btn.addEventListener("click",()=>{threatDeskView.questionId=btn.dataset.tdReviewQuestion;threatDeskView.lastResult=null;renderThreatDesk(el);}));
+    el.querySelectorAll("[data-td-tab]").forEach(btn=>btn.addEventListener("click",()=>{threatDeskView.tab=btn.dataset.tdTab;threatDeskView.questionId=null;threatDeskView.lastResult=null;resetQuestionPresentation();renderThreatDesk(el);}));
+    el.querySelectorAll("[data-td-track]").forEach(btn=>btn.addEventListener("click",()=>{threatDeskView.trackId=btn.dataset.tdTrack;threatDeskView.questionId=null;threatDeskView.lastResult=null;resetQuestionPresentation();renderThreatDesk(el);}));
+    el.querySelector("[data-td-track-back]")?.addEventListener("click",()=>{threatDeskView.trackId=null;threatDeskView.questionId=null;threatDeskView.lastResult=null;resetQuestionPresentation();renderThreatDesk(el);});
+    el.querySelectorAll("[data-td-review-question]").forEach(btn=>btn.addEventListener("click",()=>{threatDeskView.questionId=btn.dataset.tdReviewQuestion;threatDeskView.lastResult=null;resetQuestionPresentation();renderThreatDesk(el);}));
     el.querySelector(".td-question")?.addEventListener("submit",event=>{
       event.preventDefault();const form=event.currentTarget,question=questionById(form.dataset.tdQuestion);if(!question)return;
       let answer;
@@ -523,10 +562,20 @@ export function initDesktopUI({enterBlackbox}){
       else if(question.type==="multi")answer=[...form.querySelectorAll('input[name="td-answer"]:checked')].map(input=>input.value);
       else{
         const rows=[...form.querySelectorAll("[data-td-order]")],ranked=rows.map(select=>({id:select.dataset.tdOrder,rank:Number(select.value)}));
-        if(ranked.some(item=>!item.rank)||new Set(ranked.map(item=>item.rank)).size!==ranked.length){toast("Assign each step a unique position before checking the answer.",{titleText:"THREATDESK"});return;}
+        if(ranked.some(item=>!item.rank)){
+          const message=form.querySelector("[data-td-validation]");const text="Assign every step a position before checking.";if(message){message.textContent=text;message.hidden=false;}toast(text,{titleText:"THREATDESK"});return;
+        }
+        if(new Set(ranked.map(item=>item.rank)).size!==ranked.length){
+          const message=form.querySelector("[data-td-validation]");const text="Assign each step a unique position before checking.";if(message){message.textContent=text;message.hidden=false;}toast(text,{titleText:"THREATDESK"});return;
+        }
         answer=ranked.sort((a,b)=>a.rank-b.rank).map(item=>item.id);
       }
-      if((question.type==="single"&&!answer)||(question.type==="multi"&&!answer.length)){toast("Choose an answer before checking it.",{titleText:"THREATDESK"});return;}
+      const validation=validateQuestionSubmission(question,answer);
+      if(!validation.ok){
+        const message=form.querySelector("[data-td-validation]");if(message){message.textContent=validation.message;message.hidden=false;}
+        toast(validation.message,{titleText:"THREATDESK"});return;
+      }
+      threatDeskView.lastSubmission={questionId:question.id,answer:Array.isArray(answer)?[...answer]:answer};
       const result=answerQuestion(question.id,answer,{mode:threatDeskView.tab==="review"?"review":"practice"});threatDeskView.lastResult=result;
       toast(result.correct?"Correct. Learning record updated.":"Added to Review. Read the explanation and try it again later.",{duration:4600,titleText:"THREATDESK"});renderThreatDesk(el);
     });
@@ -534,7 +583,7 @@ export function initDesktopUI({enterBlackbox}){
       const current=questionById(threatDeskView.questionId),reviewOnly=threatDeskView.tab==="review";
       let pool=(reviewOnly?learningSnapshot().reviewQueue.map(questionById).filter(Boolean):questionsForTrack(current?.trackId||threatDeskView.trackId));
       if(pool.length>1){const index=Math.max(0,pool.findIndex(q=>q.id===current?.id));threatDeskView.questionId=pool[(index+1)%pool.length].id;}else if(reviewOnly)threatDeskView.questionId=pool[0]?.id||null;else threatDeskView.questionId=nextPracticeQuestion(current?.trackId||threatDeskView.trackId)?.id||null;
-      threatDeskView.lastResult=null;renderThreatDesk(el);
+      threatDeskView.lastResult=null;resetQuestionPresentation();renderThreatDesk(el);
     });
 
     el.querySelectorAll("[data-threat]").forEach(btn=>btn.addEventListener("click",()=>{const id=btn.dataset.threat;if(!s.world.readThreats.includes(id))s.world.readThreats.push(id);emit("threat:read",{threatId:id});btn.classList.remove("unread");btn.classList.add("read");toast("ThreatDesk report recorded.");refreshBadges();}));

@@ -75,11 +75,11 @@ const due=(s)=>sortChronologically(maya.messages.filter(m=>contentAvailable(m)&&
   assert.match(css,/\.terminal-shell\.terminal-shell-custom\.terminal-shell-keys-open\{\s*display:grid;/);
   assert.match(css,/grid-template-columns:minmax\(0,1fr\) clamp\(340px,44vw,560px\)/);
   assert.match(css,/\.terminal-shell\.terminal-shell-custom\.terminal-shell-keys-open \.terminal-output\{[^}]*grid-column:1;grid-row:1 \/ 3/);
-  assert.match(css,/\.terminal-shell\.terminal-shell-custom\.terminal-shell-keys-open \.terminal-custom-keyboard\{[^}]*grid-column:2;grid-row:2 \/ 4/);
+  assert.match(css,/\.terminal-shell\.terminal-shell-custom\.terminal-shell-keys-open \.terminal-custom-keyboard\{[^}]*grid-column:2;grid-row:2 \/ 5/);
   assert.match(css,/\.terminal-shell\.terminal-shell-custom\.terminal-shell-keys-open \.terminal-key\{[^}]*min-height:38px[^}]*height:38px/);
   assert.match(ui,/terminal-shell-keys-open/);
-  assert.match(ui,/customKeyboard\.offsetWidth/);
-  assert.match(ui,/landscapeTouch\(\)/);
+  assert.match(css,/\.terminal-shell\.terminal-shell-custom\.terminal-shell-keys-open \.terminal-latest\{[^}]*grid-column:1;grid-row:3/);
+  assert.match(ui,/syncPromptLayout/);
 }
 
 console.log("BLACKBOX v0.4.0 Alpha 4.5.1 device/conversation polish tests passed");

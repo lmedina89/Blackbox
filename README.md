@@ -1,4 +1,39 @@
-# BLACKBOX v0.4.0 Alpha 4.9 QA — Learning Architecture & ThreatDesk v2 Foundation
+# BLACKBOX v0.4.0 A4.9.1 QA — ThreatDesk & Mobile Terminal UX Hotfix
+
+Built directly from the verified A4.9 Learning Architecture & ThreatDesk v2 QA checkpoint. A4.9.1 is intentionally a narrow physical-device hotfix: no Range solutions, Service Desk fault logic, campaign/story progression, learning progression rules, save schema, or world schema are changed.
+
+## A4.9.1 hotfix
+
+- ThreatDesk now labels interaction requirements explicitly: **SELECT ONE ANSWER**, **SELECT N ANSWERS**, or **ORDER ALL STEPS**.
+- Multi-select questions require the exact authored number of choices before grading. Too few or too many selections produce validation feedback and do **not** record a false incorrect learning attempt.
+- Submitted choices remain visible after grading, with correct choices and incorrect player selections visually distinguished.
+- Ordering questions shuffle once per attempt, remain stable through rerenders, and are prevented from initially appearing in the solved sequence.
+- Long BLACKBOX prompts can switch to a stacked prompt/command layout on narrow touch screens so the current command keeps usable width.
+- Current commands and prior command lines wrap instead of clipping horizontally.
+- The BBX-90 keyboard moves **Backspace** between **SPACE** and the history arrows, keeps **↑ / ↓** together, and gives SPACE more separation from accidental history recall.
+- `help` now returns structured command metadata to a responsive renderer rather than depending on padded monospace text. Mobile help stacks command syntax above descriptions while desktop keeps a compact two-column layout.
+- Help sections, commands, arguments, and descriptions use restrained color hierarchy for faster scanning.
+- The **↓ LATEST** control participates in terminal layout rather than floating over command output.
+- Version identity is consistent across boot, NEXUS system properties, BLACKBOX transition text, and terminal banner.
+- `SAVE_VERSION = 15` and `WORLD_SCHEMA = 10` remain unchanged.
+- Automated QA: **30/30 suites passing**, including the new A4.9.1 UX guards plus all prior A4.9 learning, Range, Service Desk, campaign, chronology, save, audio, and mobile/static regressions.
+
+## A4.9.1 physical-device acceptance
+
+1. Confirm single-choice, multi-select, and ordering questions show the correct instruction label.
+2. On a two-answer multi-select item, submit one choice and then three choices; both should show validation without adding a learning miss.
+3. Submit the correct pair and confirm normal grading/review behavior.
+4. Confirm ordering steps start shuffled, remain stable while editing, and never initially appear solved.
+5. Use a long remote prompt such as `guest@archives-01:/archive$` and type a long command; prompt/input and history output must remain fully visible in portrait.
+6. Repeatedly tap SPACE on the BBX-90 and confirm the history arrows are no longer in the easy-mistap position. Verify ↑ / ↓ still recall history correctly.
+7. Run `help` in portrait and verify section titles, syntax, arguments, and descriptions stay paired and readable without horizontal clipping.
+8. Scroll away from the newest terminal output and confirm **↓ LATEST** appears without covering text, returns to the bottom, and disappears again.
+9. Recheck Range 01–03, Service Desk, ThreatDesk Review persistence, and save/reload for regressions.
+
+---
+
+## A4.9 foundation retained below
+
 
 Built directly from the A4.8.2 Range & Terminal Mobile Polish QA checkpoint. This milestone adds the first shared learning backbone without changing the campaign missions, Range solutions, intrusion rules, or Service Desk fault logic.
 

@@ -1,6 +1,6 @@
 {
-  "name": "Learning Architecture & ThreatDesk v2 Foundation QA",
-  "version": "0.4.0-alpha.4.9-qa",
+  "name": "ThreatDesk & Mobile Terminal UX Hotfix QA",
+  "version": "0.4.0-alpha.4.9.1-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -35,6 +35,16 @@
     "legacyTrainingLabs": 3
   },
   "features": [
+    "ThreatDesk explicitly labels SELECT ONE ANSWER, SELECT N ANSWERS, and ORDER ALL STEPS so interaction requirements are clear on phone-sized windows",
+    "multi-select validation requires the exact authored answer count before grading; malformed submissions do not create a false incorrect learning attempt",
+    "ThreatDesk preserves submitted answers after grading and visually distinguishes correct choices from incorrect player selections",
+    "ordering questions shuffle once per attempt, remain stable through rerenders, and cannot initially appear in the solved sequence",
+    "BLACKBOX touch input switches long prompts to a stacked prompt/command layout and wraps long current and historical commands without horizontal clipping",
+    "BBX-90 moves Backspace between SPACE and history navigation, keeps up/down history keys together, and widens SPACE to reduce accidental command recall",
+    "BLACKBOX help now exposes structured command metadata to a responsive renderer with distinct section, command, argument, and description styling",
+    "the LATEST control participates in terminal layout rather than overlaying command output",
+    "A4.9.1 keeps SAVE_VERSION 15 and WORLD_SCHEMA 10 and changes no Range, Service Desk, mission, story, or learning-progression rules",
+    "all 30 automated suites pass, including A4.9.1 validation, ordering-shuffle, structured-help, terminal-layout, and prior regression coverage",
     "ThreatDesk v2 replaces the three hard-coded quiz cards with a data-driven 27-question bank across five learning tracks while preserving legacy lab completion IDs",
     "shared learning taxonomy defines 22 stable concepts spanning systems, networking, security, analysis, and architecture for reuse by ThreatDesk, Service Desk, Range, and future missions",
     "knowledge checks support single-answer, multiple-select, and ordered-sequence question formats with explanations and persistent attempt history",
@@ -46,7 +56,6 @@
     "generic learning experience API and learning:experience event provide a common future hook for missions and free exploration without coupling those systems to ThreatDesk storage",
     "ThreatDesk UI now has Training, Review, Field Intel, and Lookup tabs with mobile-aware track cards, concept records, and practice controls",
     "learning changes autosave automatically; SAVE_VERSION remains 15 and WORLD_SCHEMA remains 10 because A4.9 uses the already-reserved learning state fields",
-    "all 29 automated suites pass, including new A4.9 learning architecture coverage and all prior campaign, Range, Service Desk, audio, chronology, UI, and save regressions",
     "Range proof retrieval now emits an explicit objective-complete terminal notice with completion noise, failed-auth and hint summary while leaving the image mounted for optional exploration",
     "NightWire Range control clearly distinguishes an objective-complete mounted image and offers finish or resume/return without silently forcing detachment",
     "Range finish output confirms the saved training result, final noise, and the next unlocked exercise",
@@ -260,10 +269,10 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.9 Learning Architecture & ThreatDesk v2 Foundation: shared concept model, persistent practice/review, and applied-evidence integration",
+  "foundationMilestone": "A4.9.1 ThreatDesk & Mobile Terminal UX Hotfix: physical-device clarity, responsive terminal/help rendering, and no gameplay/schema changes",
   "immediateBaseline": {
-    "version": "0.4.0-A4.8.2-QA",
-    "archive": "BLACKBOX-v0.4.0-A4.8.2-Range-Terminal-Mobile-Polish-QA-GitHub(2).zip",
-    "sha256": "234dcd1b5e9affb3be937d8597fa40b15a7a703af8bc3c593099facb3c7312ec"
+    "version": "0.4.0-A4.9-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.9-Learning-Architecture-ThreatDesk-v2-Foundation-QA-GitHub.zip",
+    "sha256": "a36a101faaeab447505afbfe98bed6cc19502e6dd469436e7673f252a36089b1"
   }
 }
