@@ -1,4 +1,45 @@
-# BLACKBOX v0.4.0 Alpha 4.8.2 QA — Range & Terminal Mobile Polish
+# BLACKBOX v0.4.0 Alpha 4.9 QA — Learning Architecture & ThreatDesk v2 Foundation
+
+Built directly from the A4.8.2 Range & Terminal Mobile Polish QA checkpoint. This milestone adds the first shared learning backbone without changing the campaign missions, Range solutions, intrusion rules, or Service Desk fault logic.
+
+## A4.9 foundation
+
+- ThreatDesk training is now data-driven: **27 questions** across **5 tracks** instead of three hard-coded quiz cards.
+- Shared taxonomy defines **22 stable concepts** across systems, networking, security, analysis, and architecture.
+- Question formats now include single-answer, multiple-select, and ordered-sequence exercises.
+- Missed questions enter a persistent **Review Queue**. They clear after two later correct review passes instead of disappearing after one lucky retry.
+- Concept records deliberately avoid fake mastery percentages. Statuses are **INTRODUCED**, **PRACTICED**, **DEMONSTRATED**, or **NEEDS REVIEW**.
+- ThreatDesk knowledge and hands-on evidence remain separate. A concept becomes DEMONSTRATED only when the player has both correct knowledge evidence and applied evidence.
+- NightWire Range completions now feed applied learning evidence for enumeration, exposed information, credentials, authentication, authorization, privilege boundaries, and failure-state interpretation.
+- Service Desk resolutions feed applied evidence for device state, services, DNS, DHCP/APIPA, addressing, gateways, verification, and controlled change. Escalation does not falsely count as a practical success.
+- Range and Service Desk learning evidence is idempotent. Repeating the same lab/ticket cannot farm concept progression.
+- Existing saves with the original `lab_dns`, `lab_route`, and `lab_access` completions are reconciled into the new model automatically.
+- A generic `learning:experience` path now exists so future missions and free exploration can report concept evidence without knowing how ThreatDesk stores it.
+- ThreatDesk has four mobile-aware sections: **Training**, **Review**, **Field Intel**, and **Lookup**.
+- `SAVE_VERSION = 15` and `WORLD_SCHEMA = 10` remain unchanged because the learning fields were already reserved in the save schema.
+- Automated QA: **29/29 suites passing** after the update, including the new A4.9 learning tests and all prior Range, Service Desk, campaign, chronology, save, audio, and mobile/static regressions.
+
+## Physical-device acceptance to do
+
+A4.9 still needs direct iPhone Safari acceptance. On-device checks should cover:
+
+1. Open ThreatDesk after it unlocks and confirm the four tabs fit and scroll cleanly.
+2. Open each Learning Track and answer at least one single-answer, multi-select, and ordering question.
+3. Miss a question deliberately and verify it appears in Review.
+4. Answer that review item correctly twice and confirm it leaves Review.
+5. Complete a Service Desk ticket and verify its concepts move from unseen/knowledge-only to practical evidence as appropriate.
+6. Complete or revisit a NightWire Range lab and verify applied evidence is recorded without altering the Range flow.
+7. Save/reload and confirm attempts, Review items, and concept records survive.
+8. Confirm Field Intel and fictional DNS Lookup still behave exactly as before.
+
+## Intended next milestone
+
+After A4.9 physical acceptance: **A4.10 — Service Desk Expansion**. Add the next substantial ticket set using the shared concept model rather than expanding the learning engine again. Free Investigation remains the milestone after that.
+
+---
+
+## A4.8.2 baseline retained below
+
 
 Built directly from the verified A4.8.1 QA NightWire Range test-access checkpoint. This is a **physical-device polish hotfix**: exploit rules, Range solutions, campaign/story content, and normal progression are unchanged.
 
@@ -74,5 +115,5 @@ Range hosts exist in the BLACKBOX host registry only as simulation definitions. 
 - `WORLD_SCHEMA = 10`
 - Save 14 migrates with empty NightWire state and a null private-service session.
 
-## Intended next milestone
+## Historical A4.8 intended next milestone
 A5 / Act II can now introduce the first story investigation that expects the player to apply Range concepts against a non-legacy target. Before that, A4.8 should receive physical iPhone acceptance and, ideally, a resumed interactive Work audit of the remaining Act-I paths.

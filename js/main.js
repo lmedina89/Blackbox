@@ -11,6 +11,7 @@ import { initTimeline } from "./systems/timeline.js";
 import { initCommunications } from "./systems/communications.js";
 import { initServiceDesk } from "./systems/serviceDesk.js";
 import { initNightwire } from "./systems/nightwire.js";
+import { initLearning } from "./systems/learning.js";
 import { initAutosave } from "./core/autosave.js";
 import { escapeHtml } from "./ui/safeText.js";
 
@@ -92,6 +93,7 @@ function renderArchives(){
 }
 
 function initializeGameUI(){
+  initLearning();
   initServiceDesk();
   initNightwire();
   desktopUI=initDesktopUI({enterBlackbox});

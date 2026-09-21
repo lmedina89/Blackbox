@@ -11,7 +11,7 @@ export const AUTOSAVE_EVENTS=[
   "host:connected","command:committed","notes:changed","browser:navigated",
   "timeline:scheduled","content:delivered","content:cancelled","content:expired","content:replaced",
   "conversation:advanced","helpdesk:changed","training:attempted","behavior:decision","ui:terminal-input-mode","ui:nexus-input-mode","nexus:system-changed",
-  "nightwire:changed","range:started","range:reset","range:aborted","range:completed"
+  "nightwire:changed","range:started","range:reset","range:aborted","range:completed","learning:changed"
 ];
 
 let initialized=false;

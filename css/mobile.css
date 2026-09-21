@@ -206,3 +206,9 @@
   .terminal-form.terminal-form-custom .terminal-prompt{max-width:70%;white-space:normal;overflow-wrap:anywhere;word-break:break-word;padding-top:0}
   .terminal-form.terminal-form-custom .terminal-custom-input-display{min-width:34px;font-size:16px;line-height:1.35}
 }
+
+/* A4.9 ThreatDesk learning mobile layout */
+@media (max-width:700px){
+  .td-nav{padding:0 5px}.td-nav button{padding:9px 10px;font-size:10px}
+  .td-span-2{grid-column:1/-1}.td-track-grid{grid-template-columns:1fr}.td-track-card{padding:9px}.td-section-head{display:grid;gap:7px}.td-section-head>button{justify-self:start}.td-legend{justify-content:flex-start}.td-question{padding:9px}.td-question h3{font-size:15px}.td-choice,.td-order-row{padding:9px 7px}.td-concept-row{align-items:flex-start}.td-concept-row small{font-size:10px}.td-status{font-size:8px}.td-review-list button{min-width:155px}
+}

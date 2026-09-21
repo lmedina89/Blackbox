@@ -1,6 +1,6 @@
 {
-  "name": "Range & Terminal Mobile Polish QA",
-  "version": "0.4.0-alpha.4.8.2-qa",
+  "name": "Learning Architecture & ThreatDesk v2 Foundation QA",
+  "version": "0.4.0-alpha.4.9-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -28,9 +28,25 @@
     "exploitProfiles": 3,
     "nightwireNodePosts": 4,
     "nightwirePrivateMessages": 1,
-    "nightwireRangeLabs": 3
+    "nightwireRangeLabs": 3,
+    "learningTracks": 5,
+    "learningConcepts": 22,
+    "trainingQuestions": 27,
+    "legacyTrainingLabs": 3
   },
   "features": [
+    "ThreatDesk v2 replaces the three hard-coded quiz cards with a data-driven 27-question bank across five learning tracks while preserving legacy lab completion IDs",
+    "shared learning taxonomy defines 22 stable concepts spanning systems, networking, security, analysis, and architecture for reuse by ThreatDesk, Service Desk, Range, and future missions",
+    "knowledge checks support single-answer, multiple-select, and ordered-sequence question formats with explanations and persistent attempt history",
+    "missed questions enter a persistent Review queue and clear after two later correct review passes; review state survives save/reload through the existing learning save shape",
+    "concept records distinguish INTRODUCED, PRACTICED, DEMONSTRATED, and NEEDS REVIEW instead of presenting a fake mastery percentage",
+    "NightWire Range completion records applied concept evidence separately from quiz knowledge and is idempotent so repeated lab runs cannot farm progression",
+    "resolved Service Desk tickets record applied concept evidence; escalated tickets do not falsely count as demonstrated practical success",
+    "legacy ThreatDesk lab completions are reconciled into the new learning model so existing identities retain prior training credit",
+    "generic learning experience API and learning:experience event provide a common future hook for missions and free exploration without coupling those systems to ThreatDesk storage",
+    "ThreatDesk UI now has Training, Review, Field Intel, and Lookup tabs with mobile-aware track cards, concept records, and practice controls",
+    "learning changes autosave automatically; SAVE_VERSION remains 15 and WORLD_SCHEMA remains 10 because A4.9 uses the already-reserved learning state fields",
+    "all 29 automated suites pass, including new A4.9 learning architecture coverage and all prior campaign, Range, Service Desk, audio, chronology, UI, and save regressions",
     "Range proof retrieval now emits an explicit objective-complete terminal notice with completion noise, failed-auth and hint summary while leaving the image mounted for optional exploration",
     "NightWire Range control clearly distinguishes an objective-complete mounted image and offers finish or resume/return without silently forcing detachment",
     "Range finish output confirms the saved training result, final noise, and the next unlocked exercise",
@@ -240,14 +256,14 @@
     "RC7 static UI guards verify semantic terminal classes/tokens, fixed-shell scroll architecture, Latest behavior hooks, compact portrait taskbar icons, and explicit World Intel routing feedback",
     "RC7 retains save version 9 and world schema 9; command semantics and gameplay state are unchanged"
   ],
-  "releaseCandidate": null,
   "sourceBaseline": {
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.8.2 Range & Terminal Mobile Polish: physical-device completion feedback, custom caret, keyboard readability, syntax guidance, and active Range status",
+  "foundationMilestone": "A4.9 Learning Architecture & ThreatDesk v2 Foundation: shared concept model, persistent practice/review, and applied-evidence integration",
   "immediateBaseline": {
-    "version": "0.4.0-A4.8",
-    "sha256": "5fe9ef2a56b4a17d04365fd983806644765f358f58a4ce0a9c8b157208a2745a"
+    "version": "0.4.0-A4.8.2-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.8.2-Range-Terminal-Mobile-Polish-QA-GitHub(2).zip",
+    "sha256": "234dcd1b5e9affb3be937d8597fa40b15a7a703af8bc3c593099facb3c7312ec"
   }
 }

@@ -40,7 +40,7 @@ saveGame();
 const qa=beginQaNightwireIdentity("range_qa",{archiveActive:true});
 assert.equal(qa.player.alias,"range_qa");
 assert.equal(qa.meta.qaMode,"nightwire_range");
-assert.equal(qa.meta.qaSource,"A4.8.2");
+assert.equal(qa.meta.qaSource,"A4.9");
 assert.deepEqual(new Set(qa.world.completedMissions),new Set(MISSIONS.map(m=>m.id)));
 assert.equal(qa.player.credits,3080);
 assert.equal(qa.player.reputation,50);
