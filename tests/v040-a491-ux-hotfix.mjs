@@ -66,7 +66,7 @@ assert.equal(WORLD_SCHEMA,10);
   assert.match(terminalCss,/\.terminal-help-row\{display:grid/);
   assert.match(terminalCss,/\.terminal-latest\{position:static/);
   assert.match(mobileCss,/terminal-form-stacked/);
-  assert.match(index,/A4\.10\.1(?:\.1)? QA/);
+  assert.match(index,/A4\.10\.[0-9.]+ QA/);
 }
 
 console.log("BLACKBOX v0.4.0 A4.9.1 ThreatDesk & Mobile Terminal UX hotfix tests passed");

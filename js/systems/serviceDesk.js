@@ -8,7 +8,7 @@ const validService=value=>value==="running"||value==="stopped";
 const validDevice=value=>value==="enabled"||value==="disabled";
 const absoluteNow=()=>{const s=getState();return (s.world.day-1)*1440+s.world.minute;};
 const stamp=()=>{const s=getState();return {day:s.world.day,minute:s.world.minute,absolute:absoluteNow()};};
-const toolLabels={desktop:"Remote desktop",computer:"My Computer",devices:"Device Manager",network:"Network Connections",services:"Services",events:"Event Viewer",firewall:"Firewall",access:"Users & Groups",command:"Command Prompt"};
+const toolLabels={desktop:"Remote desktop",computer:"My Computer",devices:"Device Manager",network:"Network Connections",services:"Services",tasks:"Scheduled Tasks",events:"Event Viewer",firewall:"Firewall",access:"Users & Groups",command:"Command Prompt"};
 
 function ensureHelpDeskShape(){
   const s=getState();
@@ -48,6 +48,21 @@ function mergeMachine(saved,template){
   out.hardware={...template.hardware,...(raw.hardware&&typeof raw.hardware==="object"?raw.hardware:{})};
   if(template.applications){
     out.applications={...template.applications,...(raw.applications&&typeof raw.applications==="object"?raw.applications:{})};
+  }
+  if(template.authentication){
+    out.authentication={...template.authentication,...(raw.authentication&&typeof raw.authentication==="object"?raw.authentication:{})};
+    out.authentication.badPasswordCount=Math.max(0,Math.trunc(Number(out.authentication.badPasswordCount)||0));
+  }
+  const defaultTask={name:"NEXUS Update Check",command:"nexusupdate.exe /check",runAs:"NEXUS-SVC\\update",enabled:true,credentialState:"managed",obsolete:false,editable:true,lastResult:"0x0 — Completed successfully"};
+  const taskTemplate={nexusUpdateCheck:defaultTask,...(template.scheduledTasks||{})};
+  if(template.scheduledTasks?.nexusUpdateCheck)taskTemplate.nexusUpdateCheck={...defaultTask,...template.scheduledTasks.nexusUpdateCheck};
+  out.scheduledTasks={};
+  for(const [id,item] of Object.entries(taskTemplate)){
+    const savedItem=raw.scheduledTasks?.[id]&&typeof raw.scheduledTasks[id]==="object"?raw.scheduledTasks[id]:{};
+    out.scheduledTasks[id]={...item,...savedItem};
+    out.scheduledTasks[id].enabled=typeof out.scheduledTasks[id].enabled==="boolean"?out.scheduledTasks[id].enabled:!!item.enabled;
+    out.scheduledTasks[id].obsolete=!!item.obsolete;
+    out.scheduledTasks[id].editable=typeof item.editable==="boolean"?item.editable:!!item.obsolete;
   }
   if(template.storage){
     out.storage={...template.storage,...(raw.storage&&typeof raw.storage==="object"?raw.storage:{})};
@@ -150,6 +165,8 @@ function activityLabel(type,details=""){
   if(type.startsWith("storage:cleanup:"))return `Cleaned ${type.slice("storage:cleanup:".length)}`;
   if(type.startsWith("group:add:"))return `Added group ${type.slice("group:add:".length)}`;
   if(type.startsWith("group:remove:"))return `Removed group ${type.slice("group:remove:".length)}`;
+  if(type.startsWith("task:disable:"))return `Disabled scheduled task ${type.slice("task:disable:".length)}`;
+  if(type.startsWith("task:enable:"))return `Enabled scheduled task ${type.slice("task:enable:".length)}`;
   if(type==="dhcp:renew")return "DHCP lease renewed";
   if(type==="network:repair")return "Network Repair completed";
   if(type==="network:repair-failed")return "Network Repair could not complete";
@@ -314,6 +331,18 @@ export function setRemoteGroupMembership(ticketId,group,enabled){
   return {ok:true,message:`${enabled?"Added":"Removed"} NEXUS\\${machine.user.username} ${enabled?"to":"from"} ${group}.`};
 }
 
+export function setRemoteScheduledTask(ticketId,taskId,enabled){
+  const machine=machineForTicket(ticketId);if(!machine||!currentSessionFor(ticketId))return {ok:false,message:"No matching Remote Assistance session."};
+  const task=machine.scheduledTasks?.[taskId];if(!task)return {ok:false,message:"Unknown scheduled task."};
+  if(!task.editable)return {ok:false,message:"This scheduled task is managed by system policy and cannot be changed in this support session."};
+  const desired=!!enabled;if(task.enabled===desired)return {ok:true,message:`${task.name} is already ${desired?"enabled":"disabled"}.`};
+  task.enabled=desired;
+  task.lastResult=desired?task.lastResult:"Disabled by NEXUS Remote Assistance";
+  event(machine,{source:"Task Scheduler",eventId:desired?106:107,message:`Scheduled task ${task.name} was ${desired?"enabled":"disabled"} by Remote Assistance.`});
+  noteAction(ticketId,`task:${desired?"enable":"disable"}:${taskId}`,{kind:"change",minutes:2,details:`${task.name} · Run as ${task.runAs}`,label:`${desired?"Enabled":"Disabled"} ${task.name}`});
+  return {ok:true,message:`${task.name} ${desired?"enabled":"disabled"}.`};
+}
+
 export function renewRemoteDhcp(ticketId){
   const machine=machineForTicket(ticketId);if(!machine||!currentSessionFor(ticketId))return {ok:false,message:"No matching Remote Assistance session."};
   if(!machine.network.dhcp)return {ok:false,message:"DHCP renewal is unavailable: this workstation uses a manual TCP/IP configuration."};
@@ -385,7 +414,7 @@ export function runRemoteCommand(ticketId,raw){
   const text=String(raw||"").trim();if(!text)return {ok:false,output:""};
   const [command,...args]=text.split(/\s+/),name=command.toLowerCase();
   if(name==="cls"){commandRecorded(ticketId,text,1,{outcome:"clear"});return {ok:true,output:"",clear:true};}
-  if(name==="help"){commandRecorded(ticketId,text,1,{outcome:"ok"});return {ok:true,output:"Commands: hostname, whoami, ipconfig, ipconfig /all, ipconfig /renew, ping <host|IP>, nslookup <name>, dir <path>, cls"};}
+  if(name==="help"){commandRecorded(ticketId,text,1,{outcome:"ok"});return {ok:true,output:"Commands: hostname, whoami, ipconfig, ipconfig /all, ipconfig /renew, ping <host|IP>, nslookup <name>, schtasks /query, dir <path>, cls"};}
   if(name==="hostname"){commandRecorded(ticketId,text,1,{outcome:"ok"});return {ok:true,output:machine.hostname};}
   if(name==="whoami"){commandRecorded(ticketId,text,1,{outcome:"ok"});return {ok:true,output:`nexus\\${machine.user.username}`};}
   if(name==="ipconfig"){
@@ -395,6 +424,12 @@ export function runRemoteCommand(ticketId,raw){
   if(name==="ping"){
     if(!args[0])return {ok:false,output:"Usage: ping <hostname|IP>"};
     const output=pingOutput(machine,args[0]);const ok=/0% loss/.test(output);commandRecorded(ticketId,text,1,{outcome:ok?"reachable":"failed",details:args[0]});return {ok:true,output};
+  }
+  if(name==="schtasks"){
+    const option=args[0]?.toLowerCase();if(option&&option!=="/query")return {ok:false,output:"Usage: schtasks /query"};
+    const tasks=Object.values(machine.scheduledTasks||{});
+    const output=tasks.length?["TaskName                         Status    Run As","-------------------------------- --------- ----------------------",...tasks.map(task=>`${String(task.name).padEnd(32)} ${String(task.enabled?"Ready":"Disabled").padEnd(9)} ${task.runAs}\n  Last Result: ${task.lastResult}`)].join("\n"):"INFO: No scheduled tasks are registered.";
+    commandRecorded(ticketId,text,1,{outcome:"observed"});return {ok:true,output};
   }
   if(name==="dir"){
     const target=args.join(" ")||"c:\\",output=dirOutput(machine,target),denied=/access is denied/i.test(output),missing=/cannot find/i.test(output);
@@ -429,6 +464,11 @@ function evaluateCondition(machine,condition){
   if(condition.op==="group-present")return (machine.access?.groups||[]).includes(condition.value);
   if(condition.op==="group-absent")return !(machine.access?.groups||[]).includes(condition.value);
   if(condition.op==="share-access")return shareAccessible(machine,condition.shareId);
+  if(condition.op==="task-disabled")return machine.scheduledTasks?.[condition.taskId]?.enabled===false;
+  if(condition.op==="no-enabled-stale-user-task"){
+    const user=`nexus\\${String(machine.user?.username||"").toLowerCase()}`;
+    return !Object.values(machine.scheduledTasks||{}).some(task=>task.enabled&&task.credentialState==="stale"&&String(task.runAs||"").toLowerCase()===user);
+  }
   return false;
 }
 function actionMatches(action,match){
@@ -502,6 +542,10 @@ function buildCaseSummary(ticketId,liveVerification){
 
 export function resolveTicket(ticketId){
   const hd=initServiceDesk(),def=ticket(ticketId),p=progress(ticketId);if(!def||!p||!hd.activeTickets.includes(ticketId))return {ok:false,message:"Ticket is not In Progress."};
+  if(def.troubleshooting?.requireEvidence){
+    const evidence=evidenceStatus(ticketId),observed=evidence.filter(item=>item.observed).length,minimum=Math.max(0,Math.trunc(Number(def.troubleshooting.minimumEvidence)||0));
+    if(observed<minimum)return {ok:false,message:`Resolution rejected: correlate at least ${minimum} relevant evidence sources before closing this investigation.`,evidence:evidence.map(item=>({id:item.id,label:item.label,observed:item.observed}))};
+  }
   const check=verification(ticketId);if(!check.ok)return {ok:false,message:"Resolution rejected: verification still detects the reported fault.",checks:check.checks};
   const score=scoreTicket(ticketId);p.status="Resolved";p.score=score;p.resolvedAt=absoluteNow();p.caseSummary=buildCaseSummary(ticketId,check);
   hd.activeTickets=hd.activeTickets.filter(id=>id!==ticketId);if(!hd.completedTickets.includes(ticketId))hd.completedTickets.push(ticketId);hd.job.resolved+=1;hd.job.score+=score;unlockNext(def,hd);

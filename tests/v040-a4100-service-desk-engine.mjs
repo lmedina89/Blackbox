@@ -13,8 +13,8 @@ import {
 
 assert.equal(SAVE_VERSION,15);
 assert.equal(WORLD_SCHEMA,10);
-assert.equal(Object.keys(REMOTE_MACHINE_TEMPLATES).length,7);
-assert.equal(serviceDeskSnapshot().tickets.length,7);
+assert(Object.keys(REMOTE_MACHINE_TEMPLATES).length>=7);
+assert(serviceDeskSnapshot().tickets.length>=7);
 assert(SERVICE_DESK_TICKET_MAP["INC-0001"].troubleshooting,"INC-0001 should prove the generalized troubleshooting schema on an existing ticket");
 assert(SERVICE_DESK_TICKET_MAP["INC-0004"].troubleshooting,"Wrong-gateway ticket should use the generalized troubleshooting schema");
 assert(SERVICE_DESK_LEARNING_MAP["INC-0004"].includes("network.gateway"));

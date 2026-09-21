@@ -1,6 +1,6 @@
 {
-  "name": "NEXUS Desktop & Remote Tool Consistency QA",
-  "version": "0.4.0-alpha.4.10.1.1-qa",
+  "name": "Suspicious Authentication Investigation QA",
+  "version": "0.4.0-alpha.4.10.2-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -23,8 +23,8 @@
     "trainingLabs": 3,
     "worldEvents": 11,
     "scheduledContent": 5,
-    "serviceDeskTickets": 7,
-    "remoteSupportMachines": 7,
+    "serviceDeskTickets": 8,
+    "remoteSupportMachines": 8,
     "exploitProfiles": 3,
     "nightwireNodePosts": 4,
     "nightwirePrivateMessages": 1,
@@ -35,7 +35,7 @@
     "legacyTrainingLabs": 3
   },
   "features": [
-    "A4.10.1.1 moves Users & Groups out of the ticket-specific remote desktop icon set and into a functional Remote Start \u2192 System Tools menu available across all managed Service Desk workstations",
+    "A4.10.1.1 moves Users & Groups out of the ticket-specific remote desktop icon set and into a functional Remote Start → System Tools menu available across all managed Service Desk workstations",
     "all remote workstations normalize a standard identity/access view; ordinary tickets expose read-only domain/department memberships while ENG-WS-27 retains its authored delegated group/share controls",
     "A4.10.1.1 adds a Start-menu-only local NEXUS/OS Command Prompt with ordinary diagnostics (hostname, whoami, ver, ipconfig, ping, nslookup, dir, cls) while rejecting BLACKBOX-only commands",
     "local NEXUS CMD and Remote CMD remain distinct environments, preserving BLACKBOX as a deeper secure interface rather than the only place the player can type commands",
@@ -213,7 +213,14 @@
     "fixed BLACKBOX status header with independently scrollable terminal history and pinned command prompt",
     "manual-scroll preservation with a Latest control instead of forced output snapping",
     "compact icon-based portrait taskbar restore buttons with labeled landscape/desktop task buttons",
-    "explicit World Intel destination feedback pointing to My Computer and the BLACKBOX clues command"
+    "explicit World Intel destination feedback pointing to My Computer and the BLACKBOX clues command",
+    "A4.10.2 adds INC-0008, a higher-uncertainty repeated-account-lockout investigation caused by an obsolete scheduled task using a stale stored credential after a password change",
+    "A4.10.2 adds a generic evidence-gating option for investigation-style Service Desk tickets so a correct guessed change cannot be closed without correlating the authored minimum evidence sources",
+    "A4.10.2 adds Scheduled Tasks to Remote Start → System Tools on every managed workstation, with a normal NEXUS Update Check baseline task so the utility does not telegraph the active ticket",
+    "A4.10.2 adds Remote CMD schtasks /query support and structured scheduled-task enable/disable Activity telemetry without exposing BLACKBOX-only command semantics",
+    "A4.10.2 extends Users & Groups with a standard account-status panel and keeps the new authentication case mundane/non-malicious to teach evidence correlation before attribution",
+    "A4.10.2 maps the new case into shared learning for authentication, credential handling, event logs, evidence correlation/preservation, controlled change and verification",
+    "A4.10.2 preserves SAVE_VERSION 15 / WORLD_SCHEMA 10 and automatically assigns INC-0008 to existing identities that already completed the prior seven-ticket Service Desk chain"
   ],
   "deferred": [
     "packet capture and sniffing simulation",
@@ -304,16 +311,23 @@
     "RC6 device UI guards verify visible portrait taskbar apps, dedicated phone-landscape geometry, full-width Notepad, and the BLACKBOX A2 SVG launcher",
     "RC6 retains save version 9 and world schema 9; no gameplay-state migration is required",
     "RC7 static UI guards verify semantic terminal classes/tokens, fixed-shell scroll architecture, Latest behavior hooks, compact portrait taskbar icons, and explicit World Intel routing feedback",
-    "RC7 retains save version 9 and world schema 9; command semantics and gameplay state are unchanged"
+    "RC7 retains save version 9 and world schema 9; command semantics and gameplay state are unchanged",
+    "A4.10.2 authentication-investigation regression verifies existing seven-ticket identities receive INC-0008 without a save/schema bump",
+    "A4.10.2 regression verifies Event Viewer, schtasks /query and account context expose independent evidence for batch-logon source correlation",
+    "A4.10.2 regression verifies blindly disabling the correct task cannot close the investigation until the authored minimum evidence threshold is met",
+    "A4.10.2 regression verifies disabling an unrelated healthy scheduled task does not fix the lockout source and is retained as an unnecessary change in Case Review telemetry",
+    "A4.10.2 static guards verify Scheduled Tasks lives in Remote Start/System Tools rather than the ticket-specific desktop icon set",
+    "35/35 automated suites pass in the A4.10.2 working tree before packaging",
+    "91/91 JavaScript/test modules pass node --check in the A4.10.2 working tree before packaging"
   ],
   "sourceBaseline": {
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.10.1.1 NEXUS Desktop & Remote Tool Consistency: ordinary local CMD and standardized remote System Tools remove ticket-specific UI tells without changing ticket logic",
+  "foundationMilestone": "A4.10.2 Suspicious Authentication Investigation: the Service Desk now supports an evidence-gated authentication case that bridges deterministic support work into later free investigation without introducing a malicious actor or story reveal",
   "immediateBaseline": {
-    "version": "0.4.0-A4.10.1-QA",
-    "archive": "BLACKBOX-v0.4.0-A4.10.1-Intermediate-Service-Desk-Ticket-Pack-QA-GitHub.zip",
-    "sha256": "be2f6b6c3f9e225828d952e275f7e2af270fe1314afc0aa7ed43f631670a374a"
+    "version": "0.4.0-A4.10.1.1-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.10.1.1-NEXUS-Desktop-Remote-Tool-Consistency-QA-GitHub.zip",
+    "sha256": "868bc047f513832decd2ce99be09b8ad1528f3596d29b5d13078a307813b909f"
   }
 }

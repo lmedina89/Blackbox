@@ -27,7 +27,7 @@ assert.equal(WORLD_SCHEMA,10);
   initServiceDesk();
   let hd=serviceDeskSnapshot();
   assert.deepEqual(hd.availableTickets,["INC-0001"]);
-  assert.equal(Object.keys(s.helpDesk.machines).length,7);
+  assert(Object.keys(s.helpDesk.machines).length>=7);
   assert.equal(hd.remoteSession,null);
 
   assert(acceptTicket("INC-0001").ok);

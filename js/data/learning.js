@@ -229,5 +229,6 @@ export const SERVICE_DESK_LEARNING_MAP={
   "INC-0004":["network.ip_addressing","network.gateway","network.routing_visibility","analysis.evidence_correlation","architecture.change_control","systems.verification"],
   "INC-0005":["systems.services","systems.event_logs","analysis.evidence_correlation","architecture.change_control","systems.verification"],
   "INC-0006":["systems.storage","systems.event_logs","analysis.evidence_correlation","architecture.change_control","systems.verification"],
-  "INC-0007":["security.authentication","security.authorization","security.group_membership","security.least_privilege","analysis.evidence_correlation","architecture.change_control","systems.verification"]
+  "INC-0007":["security.authentication","security.authorization","security.group_membership","security.least_privilege","analysis.evidence_correlation","architecture.change_control","systems.verification"],
+  "INC-0008":["security.authentication","security.credentials","systems.event_logs","analysis.evidence_correlation","analysis.evidence_preservation","architecture.change_control","systems.verification"]
 };
