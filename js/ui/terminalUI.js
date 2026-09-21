@@ -531,7 +531,7 @@ export function initTerminalUI({onExit,onSuspend,onPurge}){
         output.innerHTML="";
         print("┌──────────────────────────────────────────┐","banner");
         print("│       B L A C K B O X   S E C U R E      │","banner");
-        print("│    INTERACTIVE SHELL 0.4.0-A4.9.1-QA     │","banner");
+        print("│    INTERACTIVE SHELL 0.4.0-A4.10.0-QA     │","banner");
         print("└──────────────────────────────────────────┘","banner");
         print("");
         print(`SESSION ${String(s.terminal.sessionCount).padStart(4,"0")} // LOCAL ENVIRONMENT`);

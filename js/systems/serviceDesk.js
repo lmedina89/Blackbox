@@ -8,6 +8,7 @@ const validService=value=>value==="running"||value==="stopped";
 const validDevice=value=>value==="enabled"||value==="disabled";
 const absoluteNow=()=>{const s=getState();return (s.world.day-1)*1440+s.world.minute;};
 const stamp=()=>{const s=getState();return {day:s.world.day,minute:s.world.minute,absolute:absoluteNow()};};
+const toolLabels={desktop:"Remote desktop",computer:"My Computer",devices:"Device Manager",network:"Network Connections",services:"Services",events:"Event Viewer",firewall:"Firewall",command:"Command Prompt"};
 
 function ensureHelpDeskShape(){
   const s=getState();
@@ -34,8 +35,9 @@ function mergeMachine(saved,template){
   out.network={...out.network,...(raw.network&&typeof raw.network==="object"?raw.network:{})};
   out.network.adapterEnabled=typeof out.network.adapterEnabled==="boolean"?out.network.adapterEnabled:template.network.adapterEnabled;
   out.network.dhcp=typeof out.network.dhcp==="boolean"?out.network.dhcp:template.network.dhcp;
+  out.network.gatewayEditable=typeof out.network.gatewayEditable==="boolean"?out.network.gatewayEditable:!!template.network.gatewayEditable;
   out.network.dns=Array.isArray(out.network.dns)?out.network.dns.filter(x=>typeof x==="string").slice(0,4):[...template.network.dns];
-  for(const key of ["ip","subnet","gateway","leaseIp"])if(typeof out.network[key]!=="string")out.network[key]=template.network[key];
+  for(const key of ["ip","subnet","gateway","correctGateway","leaseIp"])if(typeof out.network[key]!=="string")out.network[key]=template.network[key]||"";
   out.network.leaseRenewals=Math.max(0,Math.trunc(Number(out.network.leaseRenewals)||0));
   out.firewall={...out.firewall,...(raw.firewall&&typeof raw.firewall==="object"?raw.firewall:{})};
   out.firewall.rules={...template.firewall.rules,...(raw.firewall?.rules&&typeof raw.firewall.rules==="object"?raw.firewall.rules:{})};
@@ -46,6 +48,17 @@ function mergeMachine(saved,template){
   out.hardware={...template.hardware,...(raw.hardware&&typeof raw.hardware==="object"?raw.hardware:{})};
   out.eventLog=Array.isArray(raw.eventLog)?raw.eventLog.filter(x=>x&&typeof x==="object").slice(-100):clone(template.eventLog);
   return out;
+}
+
+function normalizeAction(action){
+  if(!action||typeof action!=="object"||Array.isArray(action))return null;
+  action.type=typeof action.type==="string"?action.type:"activity";
+  action.kind=typeof action.kind==="string"?action.kind:"action";
+  action.details=typeof action.details==="string"?action.details:"";
+  action.label=typeof action.label==="string"?action.label:"";
+  action.outcome=typeof action.outcome==="string"?action.outcome:"";
+  action.meta=action.meta&&typeof action.meta==="object"&&!Array.isArray(action.meta)?action.meta:null;
+  return action;
 }
 
 export function initServiceDesk(){
@@ -64,11 +77,16 @@ export function initServiceDesk(){
   for(const ticket of SERVICE_DESK_TICKETS){
     const p=hd.ticketProgress[ticket.id];
     if(p&&typeof p==="object"&&!Array.isArray(p)){
-      p.actions=Array.isArray(p.actions)?p.actions.filter(x=>x&&typeof x==="object").slice(-200):[];
+      p.actions=Array.isArray(p.actions)?p.actions.map(normalizeAction).filter(Boolean).slice(-200):[];
       p.observedTools=Array.isArray(p.observedTools)?[...new Set(p.observedTools.filter(x=>typeof x==="string"))]:[];
       p.commands=Array.isArray(p.commands)?[...new Set(p.commands.filter(x=>typeof x==="string"))]:[];
       p.notes=typeof p.notes==="string"?p.notes.slice(0,4000):"";
       p.status=typeof p.status==="string"?p.status:"Assigned";
+      p.verification=p.verification&&typeof p.verification==="object"&&!Array.isArray(p.verification)?p.verification:{passed:false,at:null,checks:[]};
+      p.verification.passed=!!p.verification.passed;
+      p.verification.at=Number.isFinite(Number(p.verification.at))?Math.max(0,Math.trunc(Number(p.verification.at))):null;
+      p.verification.checks=Array.isArray(p.verification.checks)?p.verification.checks.filter(x=>typeof x==="string").slice(0,20):[];
+      p.caseSummary=p.caseSummary&&typeof p.caseSummary==="object"&&!Array.isArray(p.caseSummary)?p.caseSummary:null;
     }
   }
   return hd;
@@ -82,13 +100,49 @@ function event(machine,{level="Information",source="Remote Support",eventId=1000
   machine.eventLog.push({id:`remote-${Date.now()}-${machine.eventLog.length}`,level,source,eventId,message:String(message||"")});
   if(machine.eventLog.length>100)machine.eventLog.splice(0,machine.eventLog.length-100);
 }
-function noteAction(ticketId,type,{kind="action",minutes=0,details=""}={}){
+
+function activityLabel(type,details=""){
+  if(type==="ticket:accepted")return "Ticket accepted";
+  if(type==="remote:connect")return `Remote Support connected${details?` · ${details}`:""}`;
+  if(type==="remote:disconnect")return "Remote Support disconnected";
+  if(type.startsWith("observe:"))return `Inspected ${toolLabels[type.slice(8)]||type.slice(8)}`;
+  if(type.startsWith("command:"))return `Ran ${type.slice(8)}`;
+  if(type.startsWith("device:")){const [,device,state]=type.split(":");return `${device==="networkAdapter"?"Network adapter":device} ${state}`;}
+  if(type.startsWith("service:")){const [,service,state]=type.split(":");return `${service} service ${state}`;}
+  if(type.startsWith("network:gateway:"))return `Default gateway changed to ${type.slice("network:gateway:".length)}`;
+  if(type==="dhcp:renew")return "DHCP lease renewed";
+  if(type==="network:repair")return "Network Repair completed";
+  if(type==="network:repair-failed")return "Network Repair could not complete";
+  if(type==="ticket:verify")return "Ticket verification run";
+  if(type==="notes")return "Work note saved";
+  return type.replaceAll(":"," · ");
+}
+
+function noteAction(ticketId,type,{kind="action",minutes=0,details="",label="",outcome="",meta=null}={}){
   const p=progress(ticketId);if(!p)return false;
-  const action={...stamp(),type,kind,details:String(details||"")};p.actions.push(action);if(p.actions.length>200)p.actions.shift();
+  const action={...stamp(),type,kind,details:String(details||""),label:String(label||activityLabel(type,details)),outcome:String(outcome||""),meta:meta&&typeof meta==="object"&&!Array.isArray(meta)?clone(meta):null};
+  p.actions.push(action);if(p.actions.length>200)p.actions.shift();
+  if(kind==="change")p.verification={passed:false,at:null,checks:[]};
   if(minutes>0)advanceElapsedTime(minutes,{reason:`helpdesk:${ticketId}:${type}`});
   emit("helpdesk:changed",{ticketId,type,kind});return true;
 }
-function validIp(ip){return typeof ip==="string"&&/^10\.20\./.test(ip);}
+
+function isIpv4(ip){
+  if(typeof ip!=="string"||!/^(?:\d{1,3}\.){3}\d{1,3}$/.test(ip))return false;
+  return ip.split(".").every(part=>Number(part)>=0&&Number(part)<=255);
+}
+function ipInt(ip){if(!isIpv4(ip))return null;return ip.split(".").reduce((n,part)=>((n<<8)|(Number(part)&255))>>>0,0)>>>0;}
+function sameSubnet(a,b,mask){const ai=ipInt(a),bi=ipInt(b),mi=ipInt(mask);return ai!=null&&bi!=null&&mi!=null&&((ai&mi)>>>0)===((bi&mi)>>>0);}
+function validIp(ip){return isIpv4(ip)&&/^10\.20\./.test(ip);}
+function gatewayUsable(machine){return !!machine.network.gateway&&machine.network.gateway===machine.network.correctGateway&&sameSubnet(machine.network.ip,machine.network.gateway,machine.network.subnet);}
+function canReach(machine,target){
+  if(!machine.network.adapterEnabled||!isIpv4(machine.network.ip))return false;
+  if(target==="127.0.0.1")return true;
+  if(!isIpv4(target))return false;
+  if(machine.network.ip.startsWith("169.254."))return sameSubnet(machine.network.ip,target,machine.network.subnet);
+  if(sameSubnet(machine.network.ip,target,machine.network.subnet))return true;
+  return gatewayUsable(machine);
+}
 
 export function serviceDeskSnapshot(){
   const hd=initServiceDesk();
@@ -105,7 +159,7 @@ export function acceptTicket(ticketId){
   if(!hd.availableTickets.includes(ticketId)&&!hd.activeTickets.includes(ticketId))return {ok:false,message:"Ticket is not currently assigned to your queue."};
   if(!hd.activeTickets.includes(ticketId)){
     hd.availableTickets=hd.availableTickets.filter(id=>id!==ticketId);hd.activeTickets.push(ticketId);
-    hd.ticketProgress[ticketId]={status:"In Progress",acceptedAt:absoluteNow(),actions:[],observedTools:[],commands:[],notes:"",score:null,resolvedAt:null};
+    hd.ticketProgress[ticketId]={status:"In Progress",acceptedAt:absoluteNow(),actions:[],observedTools:[],commands:[],notes:"",score:null,resolvedAt:null,verification:{passed:false,at:null,checks:[]},caseSummary:null};
     noteAction(ticketId,"ticket:accepted",{kind:"workflow"});
   }
   return {ok:true,message:`${ticketId} is now In Progress.`,ticket:def};
@@ -149,7 +203,7 @@ export function setRemoteDevice(ticketId,device,enabled){
   if(device==="networkAdapter"){
     machine.network.adapterEnabled=!!enabled;
     if(!enabled)machine.network.ip="0.0.0.0";
-    else if(machine.services.dhcpClient==="running"&&machine.network.dhcp){machine.network.ip=machine.network.leaseIp;machine.network.subnet="255.255.255.0";if(!machine.network.gateway)machine.network.gateway=def.machineId==="HR-LT-03"?"10.20.30.1":machine.network.gateway;if(!machine.network.dns.length)machine.network.dns=["10.20.0.10"];}
+    else if(machine.services.dhcpClient==="running"&&machine.network.dhcp){machine.network.ip=machine.network.leaseIp;machine.network.subnet="255.255.255.0";if(!machine.network.gateway)machine.network.gateway=machine.network.correctGateway;if(!machine.network.dns.length)machine.network.dns=["10.20.0.10"];}
   }
   event(machine,{level:enabled?"Information":"Warning",source:"PlugPlayManager",eventId:enabled?4001:4002,message:`${machine.hardware.network} ${enabled?"enabled":"disabled"} in Device Manager.`});
   noteAction(ticketId,`device:${device}:${enabled?"enabled":"disabled"}`,{kind:"change",minutes:2});
@@ -165,6 +219,17 @@ export function setRemoteService(ticketId,service,status){
   return {ok:true,message:`${service} is now ${status}.`};
 }
 
+export function setRemoteGateway(ticketId,gateway){
+  const machine=machineForTicket(ticketId);if(!machine||!currentSessionFor(ticketId))return {ok:false,message:"No matching Remote Assistance session."};
+  if(!machine.network.gatewayEditable)return {ok:false,message:"This workstation receives gateway settings from managed network configuration."};
+  const value=String(gateway||"").trim();if(!isIpv4(value))return {ok:false,message:"Enter a valid IPv4 default gateway."};
+  if(value===machine.network.gateway)return {ok:true,message:`Default gateway is already ${value}.`};
+  const before=machine.network.gateway;machine.network.gateway=value;
+  event(machine,{source:"Tcpip",eventId:4202,message:`Default gateway changed from ${before||"(none)"} to ${value} through Remote Assistance.`});
+  noteAction(ticketId,`network:gateway:${value}`,{kind:"change",minutes:2,details:`${before||"(none)"} → ${value}`,meta:{before,after:value}});
+  return {ok:true,message:`Default gateway updated to ${value}.`};
+}
+
 export function setRemoteFirewallEnabled(ticketId,enabled){
   const machine=machineForTicket(ticketId);if(!machine||!currentSessionFor(ticketId))return {ok:false,message:"No matching Remote Assistance session."};
   machine.firewall.enabled=!!enabled;event(machine,{level:enabled?"Information":"Warning",source:"Firewall",eventId:enabled?3001:3002,message:`NEXUS Firewall ${enabled?"enabled":"disabled"} by Remote Assistance.`});
@@ -178,37 +243,33 @@ export function setRemoteFirewallRule(ticketId,rule,enabled){
 }
 
 export function renewRemoteDhcp(ticketId){
-  const def=ticket(ticketId),machine=machineForTicket(ticketId);if(!def||!machine||!currentSessionFor(ticketId))return {ok:false,message:"No matching Remote Assistance session."};
+  const machine=machineForTicket(ticketId);if(!machine||!currentSessionFor(ticketId))return {ok:false,message:"No matching Remote Assistance session."};
+  if(!machine.network.dhcp)return {ok:false,message:"DHCP renewal is unavailable: this workstation uses a manual TCP/IP configuration."};
   if(!machine.network.adapterEnabled)return {ok:false,message:"DHCP renewal failed: network adapter is disabled."};
   if(machine.services.dhcpClient!=="running")return {ok:false,message:"DHCP renewal failed: DHCP Client service is stopped."};
-  machine.network.ip=machine.network.leaseIp;machine.network.subnet="255.255.255.0";
-  if(def.machineId==="HR-LT-03")machine.network.gateway="10.20.30.1";
-  if(!machine.network.gateway)machine.network.gateway="10.20.0.1";
+  machine.network.ip=machine.network.leaseIp;machine.network.subnet="255.255.255.0";machine.network.gateway=machine.network.correctGateway||machine.network.gateway||"10.20.0.1";
   machine.network.dns=["10.20.0.10"];machine.network.leaseRenewals+=1;
   event(machine,{source:"Dhcp",eventId:1001,message:`DHCP lease renewed for ${machine.network.ip}.`});noteAction(ticketId,"dhcp:renew",{kind:"change",minutes:2});
   return {ok:true,message:`DHCP lease renewed: ${machine.network.ip}.`};
 }
 
 export function repairRemoteNetwork(ticketId){
-  const def=ticket(ticketId),machine=machineForTicket(ticketId);if(!def||!machine||!currentSessionFor(ticketId))return {ok:false,message:"No matching Remote Assistance session."};
+  const machine=machineForTicket(ticketId);if(!machine||!currentSessionFor(ticketId))return {ok:false,message:"No matching Remote Assistance session."};
   // The Windows-style Repair action is intentionally not a magic ticket solver.
-  // It cannot enable a disabled device or start a stopped DHCP/DNS service.
+  // It cannot enable a disabled device, start a stopped dependency, or rewrite a manual static gateway.
   if(!machine.network.adapterEnabled){noteAction(ticketId,"network:repair-failed",{kind:"diagnostic",minutes:2});return {ok:false,message:"Repair could not start: Local Area Connection is disabled in Device Manager."};}
+  if(!machine.network.dhcp){noteAction(ticketId,"network:repair-failed",{kind:"diagnostic",minutes:2});return {ok:false,message:"Repair found a manual TCP/IP configuration. Review the configured address, subnet and gateway directly."};}
   if(machine.services.dhcpClient!=="running"){noteAction(ticketId,"network:repair-failed",{kind:"diagnostic",minutes:2});return {ok:false,message:"Repair could not renew TCP/IP configuration because DHCP Client is stopped."};}
-  machine.network.ip=machine.network.leaseIp;machine.network.subnet="255.255.255.0";
-  if(def.machineId==="FIN-WS-07")machine.network.gateway="10.20.10.1";
-  if(def.machineId==="OPS-WS-12")machine.network.gateway="10.20.20.1";
-  if(def.machineId==="HR-LT-03")machine.network.gateway="10.20.30.1";
-  machine.network.dns=["10.20.0.10"];machine.network.leaseRenewals+=1;
+  machine.network.ip=machine.network.leaseIp;machine.network.subnet="255.255.255.0";machine.network.gateway=machine.network.correctGateway||machine.network.gateway;machine.network.dns=["10.20.0.10"];machine.network.leaseRenewals+=1;
   event(machine,{source:"Network Diagnostics",eventId:2001,message:"Network Repair renewed TCP/IP configuration and refreshed local network caches."});
   noteAction(ticketId,"network:repair",{kind:"change",minutes:3});
   return {ok:true,message:machine.services.dnsClient==="running"?"Network Repair renewed TCP/IP configuration.":"Network Repair renewed TCP/IP configuration, but local name resolution still needs attention."};
 }
 
 function commandRoot(raw){return String(raw||"").trim().toLowerCase().split(/\s+/)[0]||"";}
-function commandRecorded(ticketId,raw,minutes=1){
+function commandRecorded(ticketId,raw,minutes=1,{outcome="",details=""}={}){
   const p=progress(ticketId),root=commandRoot(raw);if(p&&root&&!p.commands.includes(root))p.commands.push(root);
-  noteAction(ticketId,`command:${String(raw||"").trim()}`,{kind:"diagnostic",minutes});
+  noteAction(ticketId,`command:${String(raw||"").trim().toLowerCase()}`,{kind:"diagnostic",minutes,outcome,details});
 }
 function ipconfig(machine,all=false){
   const media=machine.network.adapterEnabled;
@@ -226,75 +287,130 @@ function pingOutput(machine,target){
     if(machine.services.dnsClient!=="running"||!machine.network.dns.length)return `Ping request could not find host ${target}. Please check the name and try again.`;
     if(clean==="intranet.nexus.local")resolved="10.20.0.20";else return `Ping request could not find host ${target}.`;
   }
-  if(clean==="127.0.0.1"||resolved==="127.0.0.1")return "Reply from 127.0.0.1: bytes=32 time<1ms TTL=128\nReply from 127.0.0.1: bytes=32 time<1ms TTL=128\n\nPackets: Sent = 2, Received = 2, Lost = 0 (0% loss)";
+  if(resolved==="127.0.0.1")return "Reply from 127.0.0.1: bytes=32 time<1ms TTL=128\nReply from 127.0.0.1: bytes=32 time<1ms TTL=128\n\nPackets: Sent = 2, Received = 2, Lost = 0 (0% loss)";
+  if(canReach(machine,resolved))return `Pinging ${resolved} with 32 bytes of data:\nReply from ${resolved}: bytes=32 time=2ms TTL=64\nReply from ${resolved}: bytes=32 time=2ms TTL=64\n\nPackets: Sent = 2, Received = 2, Lost = 0 (0% loss)`;
   if(machine.network.ip.startsWith("169.254."))return `Pinging ${resolved} with 32 bytes of data:\nDestination host unreachable.\nDestination host unreachable.\n\nPackets: Sent = 2, Received = 0, Lost = 2 (100% loss)`;
-  if(resolved===machine.network.gateway||resolved==="10.20.0.20"||resolved==="10.20.0.10")return `Pinging ${resolved} with 32 bytes of data:\nReply from ${resolved}: bytes=32 time=2ms TTL=64\nReply from ${resolved}: bytes=32 time=2ms TTL=64\n\nPackets: Sent = 2, Received = 2, Lost = 0 (0% loss)`;
-  return `Pinging ${resolved} with 32 bytes of data:\nRequest timed out.\nRequest timed out.\n\nPackets: Sent = 2, Received = 0, Lost = 2 (100% loss)`;
+  return `Pinging ${resolved} with 32 bytes of data:\nDestination host unreachable.\nDestination host unreachable.\n\nPackets: Sent = 2, Received = 0, Lost = 2 (100% loss)`;
 }
 
 export function runRemoteCommand(ticketId,raw){
   const machine=machineForTicket(ticketId);if(!machine||!currentSessionFor(ticketId))return {ok:false,output:"No matching Remote Assistance session."};
   const text=String(raw||"").trim();if(!text)return {ok:false,output:""};
   const [command,...args]=text.split(/\s+/),name=command.toLowerCase();
-  if(name==="cls"){commandRecorded(ticketId,text,1);return {ok:true,output:"",clear:true};}
-  if(name==="help"){commandRecorded(ticketId,text,1);return {ok:true,output:"Commands: hostname, whoami, ipconfig, ipconfig /all, ipconfig /renew, ping <host|IP>, nslookup <name>, cls"};}
-  if(name==="hostname"){commandRecorded(ticketId,text,1);return {ok:true,output:machine.hostname};}
-  if(name==="whoami"){commandRecorded(ticketId,text,1);return {ok:true,output:`nexus\\${machine.user.username}`};}
+  if(name==="cls"){commandRecorded(ticketId,text,1,{outcome:"clear"});return {ok:true,output:"",clear:true};}
+  if(name==="help"){commandRecorded(ticketId,text,1,{outcome:"ok"});return {ok:true,output:"Commands: hostname, whoami, ipconfig, ipconfig /all, ipconfig /renew, ping <host|IP>, nslookup <name>, cls"};}
+  if(name==="hostname"){commandRecorded(ticketId,text,1,{outcome:"ok"});return {ok:true,output:machine.hostname};}
+  if(name==="whoami"){commandRecorded(ticketId,text,1,{outcome:"ok"});return {ok:true,output:`nexus\\${machine.user.username}`};}
   if(name==="ipconfig"){
-    if(args[0]?.toLowerCase()==="/renew"){commandRecorded(ticketId,text,0);const result=renewRemoteDhcp(ticketId);return {ok:result.ok,output:result.message};}
-    commandRecorded(ticketId,text,1);return {ok:true,output:ipconfig(machine,args[0]?.toLowerCase()==="/all")};
+    if(args[0]?.toLowerCase()==="/renew"){const result=renewRemoteDhcp(ticketId);return {ok:result.ok,output:result.message};}
+    commandRecorded(ticketId,text,1,{outcome:"observed"});return {ok:true,output:ipconfig(machine,args[0]?.toLowerCase()==="/all")};
   }
   if(name==="ping"){
-    if(!args[0])return {ok:false,output:"Usage: ping <hostname|IP>"};commandRecorded(ticketId,text,1);return {ok:true,output:pingOutput(machine,args[0])};
+    if(!args[0])return {ok:false,output:"Usage: ping <hostname|IP>"};
+    const output=pingOutput(machine,args[0]);const ok=/0% loss/.test(output);commandRecorded(ticketId,text,1,{outcome:ok?"reachable":"failed",details:args[0]});return {ok:true,output};
   }
   if(name==="nslookup"){
-    if(!args[0])return {ok:false,output:"Usage: nslookup <hostname>"};commandRecorded(ticketId,text,1);
-    if(!machine.network.adapterEnabled)return {ok:false,output:"DNS request timed out. Network adapter is disabled."};
-    if(!machine.network.dns.length)return {ok:false,output:"*** No DNS server is configured on this adapter."};
+    if(!args[0])return {ok:false,output:"Usage: nslookup <hostname>"};
+    if(!machine.network.adapterEnabled){commandRecorded(ticketId,text,1,{outcome:"failed"});return {ok:false,output:"DNS request timed out. Network adapter is disabled."};}
+    if(!machine.network.dns.length){commandRecorded(ticketId,text,1,{outcome:"failed"});return {ok:false,output:"*** No DNS server is configured on this adapter."};}
+    if(!canReach(machine,machine.network.dns[0])){commandRecorded(ticketId,text,1,{outcome:"failed"});return {ok:false,output:`DNS request timed out. Server ${machine.network.dns[0]} is unreachable.`};}
+    commandRecorded(ticketId,text,1,{outcome:"queried"});
     // Like real nslookup, this diagnostic queries the configured DNS server directly;
     // it can still prove server-side DNS is healthy when the local DNS Client service is stopped.
     if(args[0].toLowerCase()==="intranet.nexus.local")return {ok:true,output:`Server:  ${machine.network.dns[0]}\nAddress: ${machine.network.dns[0]}\n\nName:    intranet.nexus.local\nAddress: 10.20.0.20`};
     return {ok:false,output:`*** ${machine.network.dns[0]} can't find ${args[0]}: Non-existent domain`};
   }
-  commandRecorded(ticketId,text,1);return {ok:false,output:`'${command}' is not recognized as an internal or external command. Type HELP for supported diagnostics.`};
+  commandRecorded(ticketId,text,1,{outcome:"unknown"});return {ok:false,output:`'${command}' is not recognized as an internal or external command. Type HELP for supported diagnostics.`};
 }
 
+function getPath(object,path){return String(path||"").split(".").filter(Boolean).reduce((value,key)=>value&&typeof value==="object"?value[key]:undefined,object);}
+function evaluateCondition(machine,condition){
+  const value=condition.path?getPath(machine,condition.path):undefined;
+  if(condition.op==="equals")return value===condition.value;
+  if(condition.op==="equals-path")return value===getPath(machine,condition.otherPath);
+  if(condition.op==="corporate-ip")return validIp(value);
+  if(condition.op==="truthy")return !!value;
+  if(condition.op==="nonempty")return Array.isArray(value)?value.length>0:!!String(value||"");
+  if(condition.op==="reachable")return canReach(machine,condition.target);
+  return false;
+}
+function actionMatches(action,match){
+  if(match.type&&action.type===match.type)return true;
+  if(match.typePrefix&&action.type.startsWith(match.typePrefix))return true;
+  if(match.kind&&action.kind===match.kind)return true;
+  return false;
+}
+function evidenceStatus(ticketId){
+  const def=ticket(ticketId),p=progress(ticketId),items=def?.troubleshooting?.evidence||[];
+  if(!p)return [];
+  return items.map(item=>({...item,observed:p.actions.some(action=>(item.matches||[]).some(match=>actionMatches(action,match)))}));
+}
 function verification(ticketId){
-  const machine=machineForTicket(ticketId);if(!machine)return {ok:false,checks:[]};
-  if(ticketId==="INC-0001")return {ok:machine.network.adapterEnabled&&machine.devices.networkAdapter==="enabled"&&validIp(machine.network.ip),checks:[`Adapter: ${machine.devices.networkAdapter}`,`IP: ${machine.network.ip}`]};
+  const def=ticket(ticketId),machine=machineForTicket(ticketId);if(!machine||!def)return {ok:false,checks:[]};
+  const authored=def.troubleshooting?.verification;
+  if(Array.isArray(authored)&&authored.length){
+    const results=authored.map(condition=>({label:condition.label,ok:evaluateCondition(machine,condition)}));
+    return {ok:results.every(result=>result.ok),checks:results.map(result=>`${result.ok?"PASS":"FAIL"}: ${result.label}`),results};
+  }
   if(ticketId==="INC-0002")return {ok:machine.network.adapterEnabled&&validIp(machine.network.ip)&&machine.services.dnsClient==="running"&&machine.network.dns.length>0,checks:[`Link/IP: ${machine.network.ip}`,`DNS Client: ${machine.services.dnsClient}`,`DNS server: ${machine.network.dns[0]||"none"}`]};
   if(ticketId==="INC-0003")return {ok:machine.network.adapterEnabled&&machine.services.dhcpClient==="running"&&validIp(machine.network.ip)&&!!machine.network.gateway&&machine.network.dns.length>0,checks:[`DHCP Client: ${machine.services.dhcpClient}`,`IP: ${machine.network.ip}`,`Gateway: ${machine.network.gateway||"none"}`,`DNS: ${machine.network.dns[0]||"none"}`]};
   return {ok:false,checks:[]};
 }
 
 export function verifyTicket(ticketId){
-  const result=verification(ticketId);noteAction(ticketId,"ticket:verify",{kind:"verification",minutes:1});return {...result,message:result.ok?"Verification passed. The reported fault is no longer present.":"Verification failed. The reported issue still appears unresolved."};
+  const p=progress(ticketId);if(!p)return {ok:false,checks:[],message:"Accept the ticket before running verification."};
+  const result=verification(ticketId);
+  noteAction(ticketId,"ticket:verify",{kind:"verification",minutes:1,outcome:result.ok?"passed":"failed",label:result.ok?"Verification passed":"Verification failed"});
+  p.verification={passed:result.ok,at:absoluteNow(),checks:[...result.checks]};
+  return {...result,message:result.ok?"Verification passed. The reported fault is no longer present.":"Verification failed. The reported issue still appears unresolved."};
 }
 
 function scoreTicket(ticketId){
   const def=ticket(ticketId),p=progress(ticketId);if(!def||!p)return 0;
-  let score=70;
+  if(!def.troubleshooting){
+    let score=70;
+    if(def.relevantTools.some(tool=>p.observedTools.includes(tool)))score+=10;
+    if(def.relevantCommands.some(command=>p.commands.includes(command)))score+=10;
+    const expected=new Set(def.expectedActions),changes=p.actions.filter(a=>a.kind==="change").map(a=>a.type),unrelated=changes.filter(type=>!expected.has(type));
+    if(!unrelated.length)score+=10;else score-=Math.min(20,unrelated.length*5);
+    return Math.max(0,Math.min(100,score));
+  }
+  let score=60;
   if(def.relevantTools.some(tool=>p.observedTools.includes(tool)))score+=10;
   if(def.relevantCommands.some(command=>p.commands.includes(command)))score+=10;
-  const expected=new Set(def.expectedActions);
-  const changes=p.actions.filter(a=>a.kind==="change").map(a=>a.type);
-  const unrelated=changes.filter(type=>!expected.has(type));
-  if(!unrelated.length)score+=10;else score-=Math.min(20,unrelated.length*5);
+  const expected=new Set(def.expectedActions),changes=p.actions.filter(a=>a.kind==="change").map(a=>a.type),unrelated=changes.filter(type=>!expected.has(type));
+  if(!unrelated.length)score+=10;else score-=Math.min(25,unrelated.length*5);
+  const evidence=evidenceStatus(ticketId),observed=evidence.filter(item=>item.observed).length,minimum=Math.max(0,Math.trunc(Number(def.troubleshooting.minimumEvidence)||0));
+  if(observed>=minimum)score+=5;
+  if(p.verification?.passed)score+=5;
   return Math.max(0,Math.min(100,score));
 }
 function unlockNext(def,hd){
   if(!def?.nextTicketId)return;
   const id=def.nextTicketId;if(!hd.availableTickets.includes(id)&&!hd.activeTickets.includes(id)&&!hd.completedTickets.includes(id))hd.availableTickets.push(id);
 }
+function buildCaseSummary(ticketId,liveVerification){
+  const def=ticket(ticketId),p=progress(ticketId);if(!def||!p)return null;
+  const evidence=evidenceStatus(ticketId).filter(item=>item.observed).map(item=>item.label);
+  const changes=p.actions.filter(action=>action.kind==="change").map(action=>action.label||activityLabel(action.type,action.details));
+  return {
+    rootCause:def.troubleshooting?.rootCause?.label||"Resolved reported fault",
+    evidence,
+    changes,
+    verification:[...(liveVerification?.checks||[])],
+    explicitVerification:!!p.verification?.passed,
+    closedAt:absoluteNow()
+  };
+}
 
 export function resolveTicket(ticketId){
   const hd=initServiceDesk(),def=ticket(ticketId),p=progress(ticketId);if(!def||!p||!hd.activeTickets.includes(ticketId))return {ok:false,message:"Ticket is not In Progress."};
   const check=verification(ticketId);if(!check.ok)return {ok:false,message:"Resolution rejected: verification still detects the reported fault.",checks:check.checks};
-  const score=scoreTicket(ticketId);p.status="Resolved";p.score=score;p.resolvedAt=absoluteNow();
+  const score=scoreTicket(ticketId);p.status="Resolved";p.score=score;p.resolvedAt=absoluteNow();p.caseSummary=buildCaseSummary(ticketId,check);
   hd.activeTickets=hd.activeTickets.filter(id=>id!==ticketId);if(!hd.completedTickets.includes(ticketId))hd.completedTickets.push(ticketId);hd.job.resolved+=1;hd.job.score+=score;unlockNext(def,hd);
   if(hd.remoteSession?.ticketId===ticketId)hd.remoteSession=null;
-  emit("helpdesk:changed",{ticketId,type:"resolved",score});
-  return {ok:true,message:`${ticketId} resolved. Ticket review: ${score}/100.`,score,checks:check.checks};
+  emit("helpdesk:changed",{ticketId,type:"resolved",score,caseSummary:clone(p.caseSummary)});
+  return {ok:true,message:`${ticketId} resolved. Ticket review: ${score}/100.`,score,checks:check.checks,caseSummary:clone(p.caseSummary)};
 }
 
 export function escalateTicket(ticketId){

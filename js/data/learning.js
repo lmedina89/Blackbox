@@ -223,5 +223,6 @@ export const RANGE_LEARNING_MAP={
 export const SERVICE_DESK_LEARNING_MAP={
   "INC-0001":["systems.device_state","systems.verification","architecture.change_control"],
   "INC-0002":["systems.services","network.dns","systems.verification","analysis.evidence_correlation"],
-  "INC-0003":["network.dhcp","network.apipa","network.ip_addressing","network.gateway","systems.services","systems.verification"]
+  "INC-0003":["network.dhcp","network.apipa","network.ip_addressing","network.gateway","systems.services","systems.verification"],
+  "INC-0004":["network.ip_addressing","network.gateway","network.routing_visibility","analysis.evidence_correlation","architecture.change_control","systems.verification"]
 };

@@ -2,7 +2,7 @@ export const REMOTE_MACHINE_TEMPLATES={
   "FIN-WS-07":{
     id:"FIN-WS-07",hostname:"FIN-WS-07",os:"NEXUS/OS Professional 4.0",remoteTransport:"NEXUS Support Modem (out-of-band)",
     user:{name:"Maria Santos",username:"msantos",department:"Finance"},
-    network:{adapterEnabled:false,dhcp:true,ip:"0.0.0.0",subnet:"255.255.255.0",gateway:"10.20.10.1",dns:["10.20.0.10"],leaseIp:"10.20.10.57",leaseRenewals:0},
+    network:{adapterEnabled:false,dhcp:true,ip:"0.0.0.0",subnet:"255.255.255.0",gateway:"10.20.10.1",correctGateway:"10.20.10.1",gatewayEditable:false,dns:["10.20.0.10"],leaseIp:"10.20.10.57",leaseRenewals:0},
     firewall:{enabled:true,profile:"Domain",rules:{fileSharing:false,remoteAssistance:true,webBrowser:true,messenger:true}},
     services:{dnsClient:"running",dhcpClient:"running",printSpooler:"running",workstation:"running",nexusUpdate:"running"},
     devices:{networkAdapter:"disabled",soundAdapter:"enabled"},
@@ -15,7 +15,7 @@ export const REMOTE_MACHINE_TEMPLATES={
   "OPS-WS-12":{
     id:"OPS-WS-12",hostname:"OPS-WS-12",os:"NEXUS/OS Professional 4.0",remoteTransport:"NEXUS Remote Assistance over LAN",
     user:{name:"Derrick Cole",username:"dcole",department:"Operations"},
-    network:{adapterEnabled:true,dhcp:true,ip:"10.20.20.84",subnet:"255.255.255.0",gateway:"10.20.20.1",dns:["10.20.0.10"],leaseIp:"10.20.20.84",leaseRenewals:1},
+    network:{adapterEnabled:true,dhcp:true,ip:"10.20.20.84",subnet:"255.255.255.0",gateway:"10.20.20.1",correctGateway:"10.20.20.1",gatewayEditable:false,dns:["10.20.0.10"],leaseIp:"10.20.20.84",leaseRenewals:1},
     firewall:{enabled:true,profile:"Domain",rules:{fileSharing:false,remoteAssistance:true,webBrowser:true,messenger:true}},
     services:{dnsClient:"stopped",dhcpClient:"running",printSpooler:"running",workstation:"running",nexusUpdate:"running"},
     devices:{networkAdapter:"enabled",soundAdapter:"enabled"},
@@ -28,7 +28,7 @@ export const REMOTE_MACHINE_TEMPLATES={
   "HR-LT-03":{
     id:"HR-LT-03",hostname:"HR-LT-03",os:"NEXUS/OS Professional 4.0",remoteTransport:"NEXUS Support Modem (out-of-band)",
     user:{name:"Alicia Green",username:"agreen",department:"Human Resources"},
-    network:{adapterEnabled:true,dhcp:true,ip:"169.254.44.17",subnet:"255.255.0.0",gateway:"",dns:[],leaseIp:"10.20.30.44",leaseRenewals:0},
+    network:{adapterEnabled:true,dhcp:true,ip:"169.254.44.17",subnet:"255.255.0.0",gateway:"",correctGateway:"10.20.30.1",gatewayEditable:false,dns:[],leaseIp:"10.20.30.44",leaseRenewals:0},
     firewall:{enabled:true,profile:"Domain",rules:{fileSharing:false,remoteAssistance:true,webBrowser:true,messenger:true}},
     services:{dnsClient:"running",dhcpClient:"stopped",printSpooler:"running",workstation:"running",nexusUpdate:"running"},
     devices:{networkAdapter:"enabled",soundAdapter:"enabled"},
@@ -37,6 +37,19 @@ export const REMOTE_MACHINE_TEMPLATES={
       {id:"hr-boot",level:"Information",source:"System",eventId:6005,message:"NEXUS/OS system services started."},
       {id:"hr-dhcp-stop",level:"Warning",source:"Service Control Manager",eventId:7035,message:"DHCP Client service entered the stopped state."},
       {id:"hr-apipa",level:"Warning",source:"Tcpip",eventId:4199,message:"No DHCP lease was available. Automatic private address 169.254.44.17 assigned."}
+    ]
+  },
+  "ENG-WS-21":{
+    id:"ENG-WS-21",hostname:"ENG-WS-21",os:"NEXUS/OS Professional 4.0",remoteTransport:"NEXUS Remote Assistance over LAN",
+    user:{name:"Tara Bishop",username:"tbishop",department:"Engineering"},
+    network:{adapterEnabled:true,dhcp:false,ip:"10.20.40.88",subnet:"255.255.255.0",gateway:"10.20.41.1",correctGateway:"10.20.40.1",gatewayEditable:true,dns:["10.20.0.10"],leaseIp:"10.20.40.88",leaseRenewals:0},
+    firewall:{enabled:true,profile:"Domain",rules:{fileSharing:false,remoteAssistance:true,webBrowser:true,messenger:true}},
+    services:{dnsClient:"running",dhcpClient:"running",printSpooler:"running",workstation:"running",nexusUpdate:"running"},
+    devices:{networkAdapter:"enabled",soundAdapter:"enabled"},
+    hardware:{cpu:"Northstar P4 1.4 GHz",memory:"384 MB",disk:"40 GB DeskStar HDD",network:"FastLink 100 PCI Adapter"},
+    eventLog:[
+      {id:"eng-boot",level:"Information",source:"System",eventId:6005,message:"NEXUS/OS system services started."},
+      {id:"eng-route",level:"Warning",source:"Tcpip",eventId:4201,message:"Remote network traffic could not be forwarded through the configured default gateway."}
     ]
   }
 };
@@ -48,7 +61,20 @@ export const SERVICE_DESK_TICKETS=[
     description:"Internet and shared resources do not load. I restarted twice already. It started after I moved the tower so I could clean under the desk.",
     userNote:"I think the network cable might have gone bad.",
     learning:["Device Manager status","Code 22","Adapter state","Post-repair verification"],
-    expectedActions:["device:networkAdapter:enabled"],relevantTools:["devices","network"],relevantCommands:["ipconfig","ping"],nextTicketId:"INC-0002"
+    expectedActions:["device:networkAdapter:enabled"],relevantTools:["devices","network"],relevantCommands:["ipconfig","ping"],nextTicketId:"INC-0002",
+    troubleshooting:{
+      version:1,
+      rootCause:{id:"nic_disabled",label:"Network adapter disabled in Device Manager"},
+      evidence:[
+        {id:"device_state",label:"Device Manager state inspected",matches:[{type:"observe:devices"}]},
+        {id:"media_state",label:"TCP/IP media state inspected",matches:[{typePrefix:"command:ipconfig"}]}
+      ],
+      minimumEvidence:1,
+      verification:[
+        {id:"adapter",label:"Network adapter enabled",path:"devices.networkAdapter",op:"equals",value:"enabled"},
+        {id:"address",label:"Corporate IPv4 address assigned",path:"network.ip",op:"corporate-ip"}
+      ]
+    }
   },
   {
     id:"INC-0002",title:"Names do not resolve",priority:"Normal",category:"Network / DNS",machineId:"OPS-WS-12",
@@ -64,7 +90,31 @@ export const SERVICE_DESK_TICKETS=[
     description:"The laptop says it is connected after I docked it, but nothing on the company network opens. Wi-Fi was working at home last night.",
     userNote:"Maybe the wall jack on this desk is bad. I have a meeting soon.",
     learning:["APIPA 169.254.0.0/16","DHCP Client","ipconfig","Lease renewal","Gateway/DNS verification"],
-    expectedActions:["service:dhcpClient:running","dhcp:renew"],relevantTools:["network","services","events"],relevantCommands:["ipconfig","ping"],nextTicketId:null
+    expectedActions:["service:dhcpClient:running","dhcp:renew"],relevantTools:["network","services","events"],relevantCommands:["ipconfig","ping"],nextTicketId:"INC-0004"
+  },
+  {
+    id:"INC-0004",title:"Local network works, remote resources fail",priority:"Normal",category:"Network / Routing",machineId:"ENG-WS-21",
+    summary:"Engineering workstation reaches local devices but times out when opening remote company resources.",
+    description:"The shared lab system on this floor responds, but the intranet and other department resources do not. The workstation was manually re-addressed yesterday after a desk move.",
+    userNote:"A teammate thinks DNS is down, but the lab controller by IP still works.",
+    learning:["Local vs remote reachability","Default gateway","Subnet reasoning","Bounded configuration change","Post-change verification"],
+    expectedActions:["network:gateway:10.20.40.1"],relevantTools:["network","events"],relevantCommands:["ipconfig","ping"],nextTicketId:null,
+    troubleshooting:{
+      version:1,
+      rootCause:{id:"wrong_gateway",label:"Default gateway is outside the workstation's local subnet"},
+      evidence:[
+        {id:"tcpip",label:"TCP/IP configuration inspected",matches:[{type:"observe:network"},{typePrefix:"command:ipconfig"}]},
+        {id:"local_ok",label:"Local-subnet reachability tested",matches:[{type:"command:ping 10.20.40.20"}]},
+        {id:"remote_fail",label:"Remote-network reachability tested",matches:[{type:"command:ping 10.20.0.20"}]},
+        {id:"route_event",label:"Relevant TCP/IP event reviewed",matches:[{type:"observe:events"}]}
+      ],
+      minimumEvidence:2,
+      verification:[
+        {id:"address",label:"Workstation retains a valid corporate IPv4 address",path:"network.ip",op:"corporate-ip"},
+        {id:"gateway",label:"Default gateway matches the local subnet",path:"network.gateway",op:"equals-path",otherPath:"network.correctGateway"},
+        {id:"remote",label:"Remote company resource is reachable",op:"reachable",target:"10.20.0.20"}
+      ]
+    }
   }
 ];
 

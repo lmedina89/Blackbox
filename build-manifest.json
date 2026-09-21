@@ -1,6 +1,6 @@
 {
-  "name": "ThreatDesk & Mobile Terminal UX Hotfix QA",
-  "version": "0.4.0-alpha.4.9.1-qa",
+  "name": "Service Desk Engine Expansion & Routing Ticket QA",
+  "version": "0.4.0-alpha.4.10.0-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -23,8 +23,8 @@
     "trainingLabs": 3,
     "worldEvents": 11,
     "scheduledContent": 5,
-    "serviceDeskTickets": 3,
-    "remoteSupportMachines": 3,
+    "serviceDeskTickets": 4,
+    "remoteSupportMachines": 4,
     "exploitProfiles": 3,
     "nightwireNodePosts": 4,
     "nightwirePrivateMessages": 1,
@@ -35,6 +35,17 @@
     "legacyTrainingLabs": 3
   },
   "features": [
+    "A4.10.0 preserves the existing NEXUS Service Desk and Remote Assistance workflow while upgrading the existing Activity stream into structured troubleshooting telemetry instead of adding a duplicate journal",
+    "structured Service Desk definitions may declare root cause, evidence signals, minimum evidence and declarative verification conditions; INC-0001 is converted as the regression proof without changing its solution",
+    "INC-0004 introduces a wrong-default-gateway routing case where same-subnet traffic succeeds but remote company resources fail until the bounded gateway correction is made",
+    "ENG-WS-21 exposes manual gateway editing only because it is an authored static-IP workstation; existing DHCP/managed machines do not expose that control",
+    "Network Repair refuses to rewrite static manual TCP/IP settings, preventing the new routing lesson from being bypassed by a magic repair action",
+    "Service Desk actions now persist readable labels, kind, details and outcome while old saved action records normalize safely",
+    "any configuration change invalidates stale explicit verification state; structured ticket scoring can distinguish evidence gathering, bounded changes and post-change verification",
+    "resolved structured tickets persist a Case Review containing root cause, evidence actually observed, changes made and verification results",
+    "INC-0004 feeds applied gateway/routing/evidence/change-control concepts through the existing A4.9 learning integration without creating a second progression system",
+    "A4.10.0 keeps SAVE_VERSION 15 and WORLD_SCHEMA 10 and does not change Range, NightWire, mission/story, intrusion, or ThreatDesk question rules",
+    "all 31 automated suites pass, including the new A4.10.0 Service Desk engine/routing regression plus all prior A4.9.1, learning, Range, campaign, save and mobile/UI coverage",
     "ThreatDesk explicitly labels SELECT ONE ANSWER, SELECT N ANSWERS, and ORDER ALL STEPS so interaction requirements are clear on phone-sized windows",
     "multi-select validation requires the exact authored answer count before grading; malformed submissions do not create a false incorrect learning attempt",
     "ThreatDesk preserves submitted answers after grading and visually distinguishes correct choices from incorrect player selections",
@@ -269,10 +280,10 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.9.1 ThreatDesk & Mobile Terminal UX Hotfix: physical-device clarity, responsive terminal/help rendering, and no gameplay/schema changes",
+  "foundationMilestone": "A4.10.0 Service Desk Engine Expansion: structured troubleshooting telemetry, declarative evidence/verification, and first routing-depth ticket",
   "immediateBaseline": {
-    "version": "0.4.0-A4.9-QA",
-    "archive": "BLACKBOX-v0.4.0-A4.9-Learning-Architecture-ThreatDesk-v2-Foundation-QA-GitHub.zip",
-    "sha256": "a36a101faaeab447505afbfe98bed6cc19502e6dd469436e7673f252a36089b1"
+    "version": "0.4.0-A4.9.1-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.9.1-ThreatDesk-Mobile-Terminal-UX-Hotfix-QA-GitHub.zip",
+    "sha256": "73d2830b22a70fef9d1c72234e2d60db3b5a053259432f03fac855ef171779ad"
   }
 }
