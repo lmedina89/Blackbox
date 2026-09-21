@@ -8,7 +8,7 @@ const validService=value=>value==="running"||value==="stopped";
 const validDevice=value=>value==="enabled"||value==="disabled";
 const absoluteNow=()=>{const s=getState();return (s.world.day-1)*1440+s.world.minute;};
 const stamp=()=>{const s=getState();return {day:s.world.day,minute:s.world.minute,absolute:absoluteNow()};};
-const toolLabels={desktop:"Remote desktop",computer:"My Computer",devices:"Device Manager",network:"Network Connections",services:"Services",events:"Event Viewer",firewall:"Firewall",command:"Command Prompt"};
+const toolLabels={desktop:"Remote desktop",computer:"My Computer",devices:"Device Manager",network:"Network Connections",services:"Services",events:"Event Viewer",firewall:"Firewall",access:"Users & Groups",command:"Command Prompt"};
 
 function ensureHelpDeskShape(){
   const s=getState();
@@ -46,6 +46,28 @@ function mergeMachine(saved,template){
   out.devices={...template.devices,...(raw.devices&&typeof raw.devices==="object"?raw.devices:{})};
   for(const key of Object.keys(template.devices))if(!validDevice(out.devices[key]))out.devices[key]=template.devices[key];
   out.hardware={...template.hardware,...(raw.hardware&&typeof raw.hardware==="object"?raw.hardware:{})};
+  if(template.applications){
+    out.applications={...template.applications,...(raw.applications&&typeof raw.applications==="object"?raw.applications:{})};
+  }
+  if(template.storage){
+    out.storage={...template.storage,...(raw.storage&&typeof raw.storage==="object"?raw.storage:{})};
+    out.storage.capacityMb=Math.max(1,Math.trunc(Number(out.storage.capacityMb)||template.storage.capacityMb||1));
+    out.storage.baseUsedMb=Math.max(0,Math.trunc(Number(out.storage.baseUsedMb)||template.storage.baseUsedMb||0));
+    out.storage.minimumFreeMb=Math.max(0,Math.trunc(Number(out.storage.minimumFreeMb)||template.storage.minimumFreeMb||0));
+    out.storage.cleanup={};
+    for(const [id,item] of Object.entries(template.storage.cleanup||{})){
+      const savedItem=raw.storage?.cleanup?.[id]&&typeof raw.storage.cleanup[id]==="object"?raw.storage.cleanup[id]:{};
+      out.storage.cleanup[id]={...item,...savedItem};
+      out.storage.cleanup[id].remainingMb=Math.max(0,Math.trunc(Number(out.storage.cleanup[id].remainingMb)||0));
+      out.storage.cleanup[id].cleanupAllowed=!!item.cleanupAllowed;
+    }
+  }
+  if(template.access){
+    out.access={...template.access,...(raw.access&&typeof raw.access==="object"?raw.access:{})};
+    out.access.groups=Array.isArray(raw.access?.groups)?[...new Set(raw.access.groups.filter(x=>typeof x==="string"))]:[...(template.access.groups||[])];
+    out.access.editableGroups=[...(template.access.editableGroups||[])];
+    out.access.shares=clone(template.access.shares||{});
+  }
   out.eventLog=Array.isArray(raw.eventLog)?raw.eventLog.filter(x=>x&&typeof x==="object").slice(-100):clone(template.eventLog);
   return out;
 }
@@ -92,11 +114,14 @@ export function initServiceDesk(){
       if(ticket.troubleshooting&&p.status==="Resolved"){
         const observed=(ticket.troubleshooting.evidence||[]).filter(item=>p.actions.some(action=>(item.matches||[]).some(match=>actionMatches(action,match)))).map(item=>item.label);
         const changes=p.actions.filter(action=>action.kind==="change").map(action=>action.label||activityLabel(action.type,action.details));
-        if(!p.caseSummary)p.caseSummary={rootCause:ticket.troubleshooting.rootCause?.label||"Resolved reported fault",evidence:observed,changes,verification:[...(p.verification?.checks||[])],explicitVerification:!!p.verification?.passed,closedAt:p.resolvedAt??null};
+        const changeActions=p.actions.filter(action=>action.kind==="change"),expected=new Set(ticket.expectedActions||[]),unnecessary=changeActions.filter(action=>!expected.has(action.type)).length;
+        const process={evidenceObserved:observed.length,changes:changeActions.length,unnecessaryChanges:unnecessary,verified:!!p.verification?.passed};
+        if(!p.caseSummary)p.caseSummary={rootCause:ticket.troubleshooting.rootCause?.label||"Resolved reported fault",evidence:observed,changes,verification:[...(p.verification?.checks||[])],process,explicitVerification:!!p.verification?.passed,closedAt:p.resolvedAt??null};
         else{
           if(!p.caseSummary.rootCause||p.caseSummary.rootCause==="Resolved reported fault")p.caseSummary.rootCause=ticket.troubleshooting.rootCause?.label||p.caseSummary.rootCause;
           if((!Array.isArray(p.caseSummary.evidence)||!p.caseSummary.evidence.length)&&observed.length)p.caseSummary.evidence=observed;
           if((!Array.isArray(p.caseSummary.changes)||!p.caseSummary.changes.length)&&changes.length)p.caseSummary.changes=changes;
+          if(!p.caseSummary.process||typeof p.caseSummary.process!=="object")p.caseSummary.process=process;
         }
       }
     }
@@ -122,6 +147,9 @@ function activityLabel(type,details=""){
   if(type.startsWith("device:")){const [,device,state]=type.split(":");return `${device==="networkAdapter"?"Network adapter":device} ${state}`;}
   if(type.startsWith("service:")){const [,service,state]=type.split(":");return `${service} service ${state}`;}
   if(type.startsWith("network:gateway:"))return `Default gateway changed to ${type.slice("network:gateway:".length)}`;
+  if(type.startsWith("storage:cleanup:"))return `Cleaned ${type.slice("storage:cleanup:".length)}`;
+  if(type.startsWith("group:add:"))return `Added group ${type.slice("group:add:".length)}`;
+  if(type.startsWith("group:remove:"))return `Removed group ${type.slice("group:remove:".length)}`;
   if(type==="dhcp:renew")return "DHCP lease renewed";
   if(type==="network:repair")return "Network Repair completed";
   if(type==="network:repair-failed")return "Network Repair could not complete";
@@ -146,6 +174,15 @@ function isIpv4(ip){
 function ipInt(ip){if(!isIpv4(ip))return null;return ip.split(".").reduce((n,part)=>((n<<8)|(Number(part)&255))>>>0,0)>>>0;}
 function sameSubnet(a,b,mask){const ai=ipInt(a),bi=ipInt(b),mi=ipInt(mask);return ai!=null&&bi!=null&&mi!=null&&((ai&mi)>>>0)===((bi&mi)>>>0);}
 function validIp(ip){return isIpv4(ip)&&/^10\.20\./.test(ip);}
+function storageFreeMb(machine){
+  if(!machine?.storage)return null;
+  const cleanupUsed=Object.values(machine.storage.cleanup||{}).reduce((sum,item)=>sum+Math.max(0,Number(item?.remainingMb)||0),0);
+  return Math.max(0,Math.trunc((Number(machine.storage.capacityMb)||0)-(Number(machine.storage.baseUsedMb)||0)-cleanupUsed));
+}
+function shareAccessible(machine,shareId){
+  const share=machine?.access?.shares?.[shareId];if(!share)return false;
+  const groups=new Set(machine.access?.groups||[]);return (share.allowedGroups||[]).some(group=>groups.has(group));
+}
 function gatewayUsable(machine){return !!machine.network.gateway&&machine.network.gateway===machine.network.correctGateway&&sameSubnet(machine.network.ip,machine.network.gateway,machine.network.subnet);}
 function canReach(machine,target){
   if(!machine.network.adapterEnabled||!isIpv4(machine.network.ip))return false;
@@ -254,6 +291,29 @@ export function setRemoteFirewallRule(ticketId,rule,enabled){
   noteAction(ticketId,`firewall-rule:${rule}:${enabled?"enabled":"disabled"}`,{kind:"change",minutes:2});return {ok:true,message:`Remote firewall exception ${enabled?"allowed":"blocked"}.`};
 }
 
+export function cleanupRemoteStorage(ticketId,target){
+  const machine=machineForTicket(ticketId);if(!machine||!currentSessionFor(ticketId))return {ok:false,message:"No matching Remote Assistance session."};
+  const item=machine.storage?.cleanup?.[target];if(!item||!item.cleanupAllowed)return {ok:false,message:"That storage category is not an approved cleanup target."};
+  const amount=Math.max(0,Math.trunc(Number(item.remainingMb)||0));
+  if(!amount)return {ok:true,message:`${item.label} is already empty.`};
+  item.remainingMb=0;
+  event(machine,{source:"Disk Cleanup",eventId:2101,message:`Removed ${amount} MB from ${item.label}.`});
+  noteAction(ticketId,`storage:cleanup:${target}`,{kind:"change",minutes:3,details:`${item.label} · ${amount} MB removed`,label:`Cleaned ${item.label}`,meta:{target,removedMb:amount}});
+  return {ok:true,message:`Disk Cleanup removed ${amount} MB from ${item.label}. ${storageFreeMb(machine)} MB free.`};
+}
+
+export function setRemoteGroupMembership(ticketId,group,enabled){
+  const machine=machineForTicket(ticketId);if(!machine||!currentSessionFor(ticketId))return {ok:false,message:"No matching Remote Assistance session."};
+  if(!machine.access||!machine.access.editableGroups?.includes(group))return {ok:false,message:"That group is not available for delegated support changes."};
+  const groups=new Set(machine.access.groups||[]),had=groups.has(group);
+  if(enabled)groups.add(group);else groups.delete(group);
+  machine.access.groups=[...groups];
+  if(had===!!enabled)return {ok:true,message:`NEXUS\\${machine.user.username} is already ${enabled?"a member":"not a member"} of ${group}.`};
+  event(machine,{source:"Security",eventId:enabled?636:637,message:`NEXUS\\${machine.user.username} ${enabled?"added to":"removed from"} ${group}.`});
+  noteAction(ticketId,`group:${enabled?"add":"remove"}:${group}`,{kind:"change",minutes:2,details:`NEXUS\\${machine.user.username}`,label:`${enabled?"Added":"Removed"} ${group}`});
+  return {ok:true,message:`${enabled?"Added":"Removed"} NEXUS\\${machine.user.username} ${enabled?"to":"from"} ${group}.`};
+}
+
 export function renewRemoteDhcp(ticketId){
   const machine=machineForTicket(ticketId);if(!machine||!currentSessionFor(ticketId))return {ok:false,message:"No matching Remote Assistance session."};
   if(!machine.network.dhcp)return {ok:false,message:"DHCP renewal is unavailable: this workstation uses a manual TCP/IP configuration."};
@@ -292,6 +352,21 @@ function ipconfig(machine,all=false){
   if(all)lines.push(`   DNS Servers . . . . . . . . . : ${machine.network.dns.join(", ")||""}`);
   return lines.join("\n");
 }
+function dirOutput(machine,target){
+  const raw=String(target||"").trim(),normalized=raw.replaceAll("/","\\").toLowerCase().replace(/\\+$/g,"");
+  if(!raw||normalized==="c:"||normalized==="c:\\"){
+    const free=storageFreeMb(machine);
+    if(free==null)return ` Volume in drive C is SYSTEM\n Directory of C:\\\n\n   18 File(s)      124,928 bytes\n    9 Dir(s)   8,388,608,000 bytes free`;
+    return ` Volume in drive C is SYSTEM\n Directory of C:\\\n\n   22 File(s)      238,592 bytes\n   11 Dir(s)   ${free.toLocaleString()} MB free`;
+  }
+  const shareEntry=Object.entries(machine.access?.shares||{}).find(([,share])=>String(share.path||"").toLowerCase().replaceAll("/","\\").replace(/\\+$/g,"")===normalized);
+  if(shareEntry){
+    const [shareId,share]=shareEntry;
+    if(!shareAccessible(machine,shareId))return `Access is denied.\n\n${share.path}`;
+    return ` Directory of ${share.path}\n\n09/18/2026  02:14 PM    <DIR>          CURRENT\n09/17/2026  04:32 PM    <DIR>          ARCHIVE\n09/19/2026  09:05 AM           284,672 project-index.pdf\n               1 File(s)        284,672 bytes`;
+  }
+  return `The system cannot find the path specified.\n\n${raw}`;
+}
 function pingOutput(machine,target){
   const clean=target.toLowerCase();if(!machine.network.adapterEnabled)return "PING: transmit failed. General failure.";
   let resolved=target;
@@ -310,7 +385,7 @@ export function runRemoteCommand(ticketId,raw){
   const text=String(raw||"").trim();if(!text)return {ok:false,output:""};
   const [command,...args]=text.split(/\s+/),name=command.toLowerCase();
   if(name==="cls"){commandRecorded(ticketId,text,1,{outcome:"clear"});return {ok:true,output:"",clear:true};}
-  if(name==="help"){commandRecorded(ticketId,text,1,{outcome:"ok"});return {ok:true,output:"Commands: hostname, whoami, ipconfig, ipconfig /all, ipconfig /renew, ping <host|IP>, nslookup <name>, cls"};}
+  if(name==="help"){commandRecorded(ticketId,text,1,{outcome:"ok"});return {ok:true,output:"Commands: hostname, whoami, ipconfig, ipconfig /all, ipconfig /renew, ping <host|IP>, nslookup <name>, dir <path>, cls"};}
   if(name==="hostname"){commandRecorded(ticketId,text,1,{outcome:"ok"});return {ok:true,output:machine.hostname};}
   if(name==="whoami"){commandRecorded(ticketId,text,1,{outcome:"ok"});return {ok:true,output:`nexus\\${machine.user.username}`};}
   if(name==="ipconfig"){
@@ -320,6 +395,10 @@ export function runRemoteCommand(ticketId,raw){
   if(name==="ping"){
     if(!args[0])return {ok:false,output:"Usage: ping <hostname|IP>"};
     const output=pingOutput(machine,args[0]);const ok=/0% loss/.test(output);commandRecorded(ticketId,text,1,{outcome:ok?"reachable":"failed",details:args[0]});return {ok:true,output};
+  }
+  if(name==="dir"){
+    const target=args.join(" ")||"c:\\",output=dirOutput(machine,target),denied=/access is denied/i.test(output),missing=/cannot find/i.test(output);
+    commandRecorded(ticketId,text,1,{outcome:denied?"denied":missing?"missing":"observed",details:target});return {ok:!missing,output};
   }
   if(name==="nslookup"){
     if(!args[0])return {ok:false,output:"Usage: nslookup <hostname>"};
@@ -346,6 +425,10 @@ function evaluateCondition(machine,condition){
   if(condition.op==="greater-than")return Number(value)>Number(condition.value);
   if(condition.op==="reachable")return canReach(machine,condition.target);
   if(condition.op==="dns-server-reachable")return machine.network.dns.length>0&&canReach(machine,machine.network.dns[0]);
+  if(condition.op==="storage-free-at-least")return storageFreeMb(machine)!=null&&storageFreeMb(machine)>=Number(condition.value);
+  if(condition.op==="group-present")return (machine.access?.groups||[]).includes(condition.value);
+  if(condition.op==="group-absent")return !(machine.access?.groups||[]).includes(condition.value);
+  if(condition.op==="share-access")return shareAccessible(machine,condition.shareId);
   return false;
 }
 function actionMatches(action,match){
@@ -404,12 +487,14 @@ function unlockNext(def,hd){
 function buildCaseSummary(ticketId,liveVerification){
   const def=ticket(ticketId),p=progress(ticketId);if(!def||!p)return null;
   const evidence=evidenceStatus(ticketId).filter(item=>item.observed).map(item=>item.label);
-  const changes=p.actions.filter(action=>action.kind==="change").map(action=>action.label||activityLabel(action.type,action.details));
+  const changeActions=p.actions.filter(action=>action.kind==="change"),changes=changeActions.map(action=>action.label||activityLabel(action.type,action.details));
+  const expected=new Set(def.expectedActions||[]),unnecessaryChanges=changeActions.filter(action=>!expected.has(action.type)).length;
   return {
     rootCause:def.troubleshooting?.rootCause?.label||"Resolved reported fault",
     evidence,
     changes,
     verification:[...(liveVerification?.checks||[])],
+    process:{evidenceObserved:evidence.length,changes:changeActions.length,unnecessaryChanges,verified:!!p.verification?.passed},
     explicitVerification:!!p.verification?.passed,
     closedAt:absoluteNow()
   };

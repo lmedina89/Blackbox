@@ -92,7 +92,7 @@ assert.equal(LEARNING_TRACKS.length,5);
   assert.match(desktop,/answerQuestion/);
   assert.doesNotMatch(desktop,/LABS\.map/);
   assert.match(autosave,/learning:changed/);
-  assert.match(index,/A4\.10\.0\.1 QA/);
+  assert.match(index,/A4\.10\.1 QA/);
 }
 
 console.log("BLACKBOX v0.4.0 A4.9 Learning Architecture & ThreatDesk v2 foundation tests passed");

@@ -10,7 +10,7 @@ import {
 
 assert.equal(SAVE_VERSION,15);
 assert.equal(WORLD_SCHEMA,10);
-assert.equal(SERVICE_DESK_TICKETS.length,4);
+assert.equal(SERVICE_DESK_TICKETS.length,7);
 assert(SERVICE_DESK_TICKETS.every(ticket=>ticket.troubleshooting),"every existing Service Desk ticket should use the structured troubleshooting schema");
 
 function resolveNic(){
@@ -83,7 +83,7 @@ function resolveNic(){
   assert.match(css,/\.remote-command-form input,\.remote-gateway-form input,\.sd-notes\{font-size:16px\}/);
   assert.doesNotMatch(system,/ticketId==="INC-0002"/);
   assert.doesNotMatch(system,/ticketId==="INC-0003"/);
-  assert.match(index,/A4\.10\.0\.1 QA/);
+  assert.match(index,/A4\.10\.1 QA/);
 }
 
 console.log("BLACKBOX v0.4.0 A4.10.0.1 legacy-ticket migration + mobile-input tests passed");

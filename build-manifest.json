@@ -1,6 +1,6 @@
 {
-  "name": "Mobile Input & Legacy Service Desk Ticket Migration QA",
-  "version": "0.4.0-alpha.4.10.0.1-qa",
+  "name": "Intermediate Service Desk Ticket Pack QA",
+  "version": "0.4.0-alpha.4.10.1-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -23,18 +23,28 @@
     "trainingLabs": 3,
     "worldEvents": 11,
     "scheduledContent": 5,
-    "serviceDeskTickets": 4,
-    "remoteSupportMachines": 4,
+    "serviceDeskTickets": 7,
+    "remoteSupportMachines": 7,
     "exploitProfiles": 3,
     "nightwireNodePosts": 4,
     "nightwirePrivateMessages": 1,
     "nightwireRangeLabs": 3,
     "learningTracks": 5,
-    "learningConcepts": 22,
+    "learningConcepts": 24,
     "trainingQuestions": 27,
     "legacyTrainingLabs": 3
   },
   "features": [
+    "A4.10.1 adds INC-0005 application/service dependency, INC-0006 disk exhaustion, and INC-0007 group-membership/least-privilege cases on the existing structured Service Desk engine without introducing a second troubleshooting workflow",
+    "Remote Assistance reuses existing tools and adds only bounded capabilities required by the authored cases: disk cleanup categories in My Computer, an optional Users & Groups tool, and dir <path> command support for free-space/share-access diagnostics",
+    "INC-0005 keeps network reachability healthy while Northstar Inventory Agent is stopped, requiring service/event evidence and a bounded service restart rather than network changes",
+    "INC-0006 models a nearly full system volume with temporary exports, archived report logs, and crash dumps; only the large temporary-export cleanup is required to restore the authored minimum free-space condition",
+    "INC-0007 models effective access through group membership and explicitly rejects DOMAIN-ADMINS or broader read/write membership as a valid least-privilege resolution even when those groups make the share readable",
+    "Case Review now adds Process telemetry for evidence observed, total configuration changes, unnecessary changes, and explicit verification while keeping the existing Activity stream as the single troubleshooting history",
+    "The shared learning taxonomy adds systems.storage and security.group_membership, and all three new Service Desk cases report applied learning through the existing A4.9 learning integration",
+    "A4.10.1 intentionally defers deterministic ticket variants until the fixed authored cases pass physical QA; no procedural/random ticket generator is introduced",
+    "A4.10.1 keeps SAVE_VERSION 15 and WORLD_SCHEMA 10 and preserves all existing campaign, Range, NightWire, ThreatDesk, intrusion, Service Desk, Activity, Case Review and machine-state data",
+    "all 33 automated suites pass in the working tree before packaging, including the new service/disk/permissions regression plus prior Service Desk, learning, Range, campaign, save and mobile/UI coverage",
     "A4.10.0.1 prevents iPhone Safari focus-zoom in the Remote Command input, manual gateway editor and Service Desk work-notes field by enforcing a 16px mobile input font while preserving the existing visual layout",
     "INC-0002 and INC-0003 now use the same declarative root-cause/evidence/verification troubleshooting schema as INC-0001 and INC-0004, so all four current Service Desk tickets share one engine architecture",
     "legacy ticket-ID-specific verification branches for INC-0002 and INC-0003 are removed; DNS and DHCP verification now runs entirely through authored conditions",
@@ -207,6 +217,11 @@
     "IPv6"
   ],
   "verification": [
+    "A4.10.1 regression completes the application-service case with healthy network reachability, stopped Northstar Inventory Agent, bounded service repair, and structured Case Review telemetry",
+    "A4.10.1 storage regression proves unrelated small cleanups remain below the authored free-space threshold while removing Temporary report exports restores sufficient capacity",
+    "A4.10.1 least-privilege regression proves DOMAIN-ADMINS can create effective share access but cannot satisfy ticket verification; ENG-PROJECT-R is required and persists through save normalization",
+    "A4.10.1 static/UI guards verify disk-cleanup controls, optional Users & Groups, Process telemetry, storage/group verification operators, and reuse of the existing Remote Assistance and Activity architecture",
+    "A4.10.1 full working-tree verification passes 33/33 automated suites and 88/88 JavaScript/test syntax checks before packaging",
     "A4.8 NightWire regression verifies private-node gating after Glass Harbor, BBS prompt navigation and Range launch/finish flow",
     "A4.8 Range regression completes all three labs through the actual scan/enum/probe/auth/connect/permission/elevation command path",
     "A4.8 isolation regression verifies Range hosts are absent from permanent HOME-PC routes, campaign hosts are unreachable during a mounted lab, and campaign actionTick/networkEpoch do not advance",
@@ -288,10 +303,10 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.10.0.1 Mobile Input & Legacy Ticket Migration: all current Service Desk tickets share the structured troubleshooting engine and iPhone editable fields avoid focus-zoom",
+  "foundationMilestone": "A4.10.1 Intermediate Service Desk Ticket Pack: service dependencies, storage exhaustion and least-privilege group access are authored on the unified troubleshooting engine",
   "immediateBaseline": {
-    "version": "0.4.0-A4.10.0-QA",
-    "archive": "BLACKBOX-v0.4.0-A4.10.0-Service-Desk-Engine-Routing-QA-GitHub.zip",
-    "sha256": "b2ef7619a0cda1423933d3a6b6c8b693d0af784c6aafdccd05bc0a142a06f475"
+    "version": "0.4.0-A4.10.0.1-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.10.0.1-Mobile-Input-Legacy-Ticket-Migration-QA-GitHub.zip",
+    "sha256": "3559cee6670857cfca8a22ee1d5528b479570859dd91f00c7a87c01175a11eb7"
   }
 }

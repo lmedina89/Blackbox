@@ -9,7 +9,7 @@ import { initServiceDesk, serviceDeskSnapshot, acceptTicket, connectRemote, disc
 assert.equal(SAVE_VERSION,15);
 assert.equal(WORLD_SCHEMA,10);
 
-// Foundation seeds only the first structured training incident and four isolated remote machines.
+// Foundation seeds only the first structured training incident while all authored remote machines remain isolated from the campaign world.
 {
   const s=resetState();
   s.player.alias="helpdeskqa";
@@ -27,7 +27,7 @@ assert.equal(WORLD_SCHEMA,10);
   initServiceDesk();
   let hd=serviceDeskSnapshot();
   assert.deepEqual(hd.availableTickets,["INC-0001"]);
-  assert.equal(Object.keys(s.helpDesk.machines).length,4);
+  assert.equal(Object.keys(s.helpDesk.machines).length,7);
   assert.equal(hd.remoteSession,null);
 
   assert(acceptTicket("INC-0001").ok);

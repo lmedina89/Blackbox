@@ -6,6 +6,7 @@ export const LEARNING_CONCEPTS=[
   {id:"systems.device_state",domain:"systems",title:"Device state",summary:"Distinguish disabled, disconnected, failed, and healthy hardware states."},
   {id:"systems.services",domain:"systems",title:"Service state",summary:"Recognize when an operating-system service is required for a feature to work."},
   {id:"systems.event_logs",domain:"systems",title:"Event logs",summary:"Use timestamps and system events as evidence instead of guessing from symptoms."},
+  {id:"systems.storage",domain:"systems",title:"Storage capacity",summary:"Recognize low-space failure modes, identify safe cleanup targets, and preserve required data."},
   {id:"systems.verification",domain:"systems",title:"Post-change verification",summary:"Confirm that the reported fault is actually gone after making a change."},
   {id:"network.ip_addressing",domain:"network",title:"IP addressing",summary:"Interpret local addresses, subnets, and basic host addressing."},
   {id:"network.dhcp",domain:"network",title:"DHCP",summary:"Understand lease assignment, renewal, and common DHCP failure symptoms."},
@@ -17,6 +18,7 @@ export const LEARNING_CONCEPTS=[
   {id:"security.exposed_information",domain:"security",title:"Exposed information",summary:"Recognize backup files, indexes, configuration artifacts, and other unintended disclosures."},
   {id:"security.authentication",domain:"security",title:"Authentication",summary:"Determine whether an identity or credential is accepted by a service."},
   {id:"security.authorization",domain:"security",title:"Authorization",summary:"Determine what an authenticated identity is permitted to access or change."},
+  {id:"security.group_membership",domain:"security",title:"Group-based access",summary:"Use group membership and resource permissions to reason about effective access."},
   {id:"security.credentials",domain:"security",title:"Credential handling",summary:"Treat credentials as scoped access material rather than universal keys."},
   {id:"security.privilege_boundaries",domain:"security",title:"Privilege boundaries",summary:"Recognize restricted sessions, permission failures, and changes in authority."},
   {id:"security.failure_evidence",domain:"security",title:"Failure-state evidence",summary:"Distinguish unreachable, refused, rejected, and permission-denied outcomes."},
@@ -28,9 +30,9 @@ export const LEARNING_CONCEPTS=[
 ];
 
 export const LEARNING_TRACKS=[
-  {id:"it_foundations",title:"IT Foundations",shortTitle:"IT",description:"Workstation state, services, logs, and disciplined troubleshooting.",concepts:["systems.device_state","systems.services","systems.event_logs","systems.verification","architecture.change_control"]},
+  {id:"it_foundations",title:"IT Foundations",shortTitle:"IT",description:"Workstation state, services, storage, logs, and disciplined troubleshooting.",concepts:["systems.device_state","systems.services","systems.event_logs","systems.storage","systems.verification","architecture.change_control"]},
   {id:"networking",title:"Networking",shortTitle:"NET",description:"Addressing, DHCP, DNS, gateways, and network visibility.",concepts:["network.ip_addressing","network.dhcp","network.apipa","network.dns","network.gateway","network.routing_visibility"]},
-  {id:"security_fundamentals",title:"Security Fundamentals",shortTitle:"SEC",description:"Identity, permissions, least privilege, evidence, and exposed information.",concepts:["security.exposed_information","security.authentication","security.authorization","security.credentials","security.privilege_boundaries","security.least_privilege","analysis.evidence_correlation"]},
+  {id:"security_fundamentals",title:"Security Fundamentals",shortTitle:"SEC",description:"Identity, permissions, least privilege, evidence, and exposed information.",concepts:["security.exposed_information","security.authentication","security.authorization","security.group_membership","security.credentials","security.privilege_boundaries","security.least_privilege","analysis.evidence_correlation"]},
   {id:"offensive_foundations",title:"Offensive Security Foundations",shortTitle:"OPS",description:"Safe fictional practice in enumeration, footholds, failure states, and privilege boundaries.",concepts:["security.enumeration","security.exposed_information","security.authentication","security.authorization","security.credentials","security.privilege_boundaries","security.failure_evidence","network.routing_visibility"]},
   {id:"security_architecture",title:"Security Architecture & Governance",shortTitle:"ARCH",description:"Verification, evidence preservation, defense in depth, and controlled change.",concepts:["security.least_privilege","analysis.evidence_correlation","analysis.evidence_preservation","architecture.defense_in_depth","architecture.change_control","systems.verification"]}
 ];
@@ -224,5 +226,8 @@ export const SERVICE_DESK_LEARNING_MAP={
   "INC-0001":["systems.device_state","systems.verification","architecture.change_control"],
   "INC-0002":["systems.services","network.dns","systems.verification","analysis.evidence_correlation"],
   "INC-0003":["network.dhcp","network.apipa","network.ip_addressing","network.gateway","systems.services","systems.verification"],
-  "INC-0004":["network.ip_addressing","network.gateway","network.routing_visibility","analysis.evidence_correlation","architecture.change_control","systems.verification"]
+  "INC-0004":["network.ip_addressing","network.gateway","network.routing_visibility","analysis.evidence_correlation","architecture.change_control","systems.verification"],
+  "INC-0005":["systems.services","systems.event_logs","analysis.evidence_correlation","architecture.change_control","systems.verification"],
+  "INC-0006":["systems.storage","systems.event_logs","analysis.evidence_correlation","architecture.change_control","systems.verification"],
+  "INC-0007":["security.authentication","security.authorization","security.group_membership","security.least_privilege","analysis.evidence_correlation","architecture.change_control","systems.verification"]
 };

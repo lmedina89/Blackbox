@@ -51,6 +51,64 @@ export const REMOTE_MACHINE_TEMPLATES={
       {id:"eng-boot",level:"Information",source:"System",eventId:6005,message:"NEXUS/OS system services started."},
       {id:"eng-route",level:"Warning",source:"Tcpip",eventId:4201,message:"Remote network traffic could not be forwarded through the configured default gateway."}
     ]
+  },
+  "LOG-WS-05":{
+    id:"LOG-WS-05",hostname:"LOG-WS-05",os:"NEXUS/OS Professional 4.0",remoteTransport:"NEXUS Remote Assistance over LAN",
+    user:{name:"Evan Ross",username:"eross",department:"Logistics"},
+    network:{adapterEnabled:true,dhcp:true,ip:"10.20.50.62",subnet:"255.255.255.0",gateway:"10.20.50.1",correctGateway:"10.20.50.1",gatewayEditable:false,dns:["10.20.0.10"],leaseIp:"10.20.50.62",leaseRenewals:1},
+    firewall:{enabled:true,profile:"Domain",rules:{fileSharing:false,remoteAssistance:true,webBrowser:true,messenger:true}},
+    services:{dnsClient:"running",dhcpClient:"running",printSpooler:"running",workstation:"running",nexusUpdate:"running",inventoryAgent:"stopped"},
+    applications:{inventory:{name:"Northstar Inventory Client",service:"inventoryAgent",endpoint:"10.20.0.30"}},
+    devices:{networkAdapter:"enabled",soundAdapter:"enabled"},
+    hardware:{cpu:"Northstar P4 1.5 GHz",memory:"384 MB",disk:"40 GB DeskStar HDD",network:"FastLink 100 PCI Adapter"},
+    eventLog:[
+      {id:"log-boot",level:"Information",source:"System",eventId:6005,message:"NEXUS/OS system services started."},
+      {id:"log-inventory-stop",level:"Error",source:"Service Control Manager",eventId:7031,message:"Northstar Inventory Agent terminated unexpectedly and remained stopped."},
+      {id:"log-inventory-client",level:"Warning",source:"Inventory Client",eventId:1204,message:"Inventory client could not connect to its local synchronization agent."}
+    ]
+  },
+  "FIN-WS-19":{
+    id:"FIN-WS-19",hostname:"FIN-WS-19",os:"NEXUS/OS Professional 4.0",remoteTransport:"NEXUS Remote Assistance over LAN",
+    user:{name:"Megan Price",username:"mprice",department:"Finance"},
+    network:{adapterEnabled:true,dhcp:true,ip:"10.20.10.91",subnet:"255.255.255.0",gateway:"10.20.10.1",correctGateway:"10.20.10.1",gatewayEditable:false,dns:["10.20.0.10"],leaseIp:"10.20.10.91",leaseRenewals:1},
+    firewall:{enabled:true,profile:"Domain",rules:{fileSharing:false,remoteAssistance:true,webBrowser:true,messenger:true}},
+    services:{dnsClient:"running",dhcpClient:"running",printSpooler:"running",workstation:"running",nexusUpdate:"running",reportWriter:"running"},
+    storage:{
+      capacityMb:20480,
+      baseUsedMb:15752,
+      minimumFreeMb:2048,
+      cleanup:{
+        tempExports:{label:"Temporary report exports",remainingMb:3500,cleanupAllowed:true},
+        appLogs:{label:"Archived report logs",remainingMb:650,cleanupAllowed:true},
+        crashDumps:{label:"Old crash dumps",remainingMb:450,cleanupAllowed:true}
+      }
+    },
+    devices:{networkAdapter:"enabled",soundAdapter:"enabled"},
+    hardware:{cpu:"Northstar P4 1.3 GHz",memory:"384 MB",disk:"20 GB DeskStar HDD",network:"FastLink 100 PCI Adapter"},
+    eventLog:[
+      {id:"fin19-boot",level:"Information",source:"System",eventId:6005,message:"NEXUS/OS system services started."},
+      {id:"fin19-disk",level:"Warning",source:"Disk",eventId:2013,message:"The C: volume has less than 1 percent free space remaining."},
+      {id:"fin19-report",level:"Error",source:"Report Writer",eventId:1120,message:"Unable to create output file. Insufficient disk space."}
+    ]
+  },
+  "ENG-WS-27":{
+    id:"ENG-WS-27",hostname:"ENG-WS-27",os:"NEXUS/OS Professional 4.0",remoteTransport:"NEXUS Remote Assistance over LAN",
+    user:{name:"Leah Kim",username:"lkim",department:"Engineering"},
+    network:{adapterEnabled:true,dhcp:true,ip:"10.20.40.104",subnet:"255.255.255.0",gateway:"10.20.40.1",correctGateway:"10.20.40.1",gatewayEditable:false,dns:["10.20.0.10"],leaseIp:"10.20.40.104",leaseRenewals:1},
+    firewall:{enabled:true,profile:"Domain",rules:{fileSharing:true,remoteAssistance:true,webBrowser:true,messenger:true}},
+    services:{dnsClient:"running",dhcpClient:"running",printSpooler:"running",workstation:"running",nexusUpdate:"running"},
+    access:{
+      groups:["DOMAIN-USERS","ENG-STAFF"],
+      editableGroups:["ENG-PROJECT-R","ENG-PROJECT-RW","DOMAIN-ADMINS"],
+      shares:{engineeringProjects:{name:"Engineering Projects",path:"\\\\FILES-02\\ENG-PROJECTS",allowedGroups:["ENG-PROJECT-R","ENG-PROJECT-RW","DOMAIN-ADMINS"],leastPrivilegeGroup:"ENG-PROJECT-R"}}
+    },
+    devices:{networkAdapter:"enabled",soundAdapter:"enabled"},
+    hardware:{cpu:"Northstar P4 1.6 GHz",memory:"512 MB",disk:"40 GB DeskStar HDD",network:"FastLink 100 PCI Adapter"},
+    eventLog:[
+      {id:"eng27-boot",level:"Information",source:"System",eventId:6005,message:"NEXUS/OS system services started."},
+      {id:"eng27-auth",level:"Information",source:"Security",eventId:528,message:"Interactive logon succeeded for NEXUS\\lkim."},
+      {id:"eng27-share",level:"Warning",source:"Workstation",eventId:3019,message:"Access to \\\\FILES-02\\ENG-PROJECTS was denied for NEXUS\\lkim."}
+    ]
   }
 };
 
@@ -136,7 +194,7 @@ export const SERVICE_DESK_TICKETS=[
     description:"The shared lab system on this floor responds, but the intranet and other department resources do not. The workstation was manually re-addressed yesterday after a desk move.",
     userNote:"A teammate thinks DNS is down, but the lab controller by IP still works.",
     learning:["Local vs remote reachability","Default gateway","Subnet reasoning","Bounded configuration change","Post-change verification"],
-    expectedActions:["network:gateway:10.20.40.1"],relevantTools:["network","events"],relevantCommands:["ipconfig","ping"],nextTicketId:null,
+    expectedActions:["network:gateway:10.20.40.1"],relevantTools:["network","events"],relevantCommands:["ipconfig","ping"],nextTicketId:"INC-0005",
     troubleshooting:{
       version:1,
       rootCause:{id:"wrong_gateway",label:"Default gateway is outside the workstation's local subnet"},
@@ -151,6 +209,73 @@ export const SERVICE_DESK_TICKETS=[
         {id:"address",label:"Workstation retains a valid corporate IPv4 address",path:"network.ip",op:"corporate-ip"},
         {id:"gateway",label:"Default gateway matches the local subnet",path:"network.gateway",op:"equals-path",otherPath:"network.correctGateway"},
         {id:"remote",label:"Remote company resource is reachable",op:"reachable",target:"10.20.0.20"}
+      ]
+    }
+  },
+  {
+    id:"INC-0005",title:"Inventory client cannot sync",priority:"Normal",category:"Application / Services",machineId:"LOG-WS-05",
+    summary:"The inventory client opens, but synchronization fails while other network functions still work.",
+    description:"The warehouse inventory screen opens normally, but it stays offline and will not pull current stock. Email and the intranet still work on this computer.",
+    userNote:"Someone said the inventory server might be down for everyone, but the next desk is still updating stock.",
+    learning:["Application dependencies","Service state","Event correlation","Bounded service restart","Post-change verification"],
+    expectedActions:["service:inventoryAgent:running"],relevantTools:["services","events","network"],relevantCommands:["ping"],nextTicketId:"INC-0006",
+    troubleshooting:{
+      version:1,
+      rootCause:{id:"inventory_agent_stopped",label:"Northstar Inventory Agent service is stopped on the workstation"},
+      evidence:[
+        {id:"network_ok",label:"Inventory endpoint reachability tested",matches:[{type:"command:ping 10.20.0.30"}]},
+        {id:"service_state",label:"Application service state inspected",matches:[{type:"observe:services"}]},
+        {id:"service_event",label:"Inventory/Service Control events reviewed",matches:[{type:"observe:events"}]}
+      ],
+      minimumEvidence:2,
+      verification:[
+        {id:"network",label:"Inventory endpoint is reachable",op:"reachable",target:"10.20.0.30"},
+        {id:"service",label:"Northstar Inventory Agent is running",path:"services.inventoryAgent",op:"equals",value:"running"}
+      ]
+    }
+  },
+  {
+    id:"INC-0006",title:"Reports fail to save",priority:"Normal",category:"Storage / Workstation",machineId:"FIN-WS-19",
+    summary:"Finance reports open normally but fail when the user attempts to save or export them.",
+    description:"The reporting tool works until I save a file. Then it says the output cannot be created. Restarting the program did not help.",
+    userNote:"I am worried the reporting application is corrupted because it started during month-end exports.",
+    learning:["Free-space diagnosis","Event logs","Safe cleanup targets","Change restraint","Post-change verification"],
+    expectedActions:["storage:cleanup:tempExports"],relevantTools:["computer","events"],relevantCommands:["dir"],nextTicketId:"INC-0007",
+    troubleshooting:{
+      version:1,
+      rootCause:{id:"disk_exhaustion",label:"Temporary report exports consumed nearly all free space on the system volume"},
+      evidence:[
+        {id:"disk_usage",label:"System-volume free space inspected",matches:[{type:"observe:computer"},{typePrefix:"command:dir c:"}]},
+        {id:"disk_event",label:"Disk/report write errors reviewed",matches:[{type:"observe:events"}]}
+      ],
+      minimumEvidence:2,
+      verification:[
+        {id:"service",label:"Report Writer service remains running",path:"services.reportWriter",op:"equals",value:"running"},
+        {id:"free_space",label:"At least 2 GB of free disk space is available",op:"storage-free-at-least",value:2048}
+      ]
+    }
+  },
+  {
+    id:"INC-0007",title:"Project share access denied",priority:"Normal",category:"Identity / Permissions",machineId:"ENG-WS-27",
+    summary:"A transferred Engineering employee can sign in and use the network but cannot open a required project share.",
+    description:"I moved into Engineering this week. Email and the intranet work, but the Engineering Projects folder says Access Denied. I only need to read the current drawings.",
+    userNote:"Another engineer said IT could just make me an administrator, but I only need the project files.",
+    learning:["Authentication vs authorization","Group membership","Effective access","Least privilege","Access verification"],
+    expectedActions:["group:add:ENG-PROJECT-R"],relevantTools:["access","events"],relevantCommands:["dir"],nextTicketId:null,
+    troubleshooting:{
+      version:1,
+      rootCause:{id:"missing_project_group",label:"Required read-only Engineering project group is missing from the user's memberships"},
+      evidence:[
+        {id:"membership",label:"User group memberships and share ACL inspected",matches:[{type:"observe:access"}]},
+        {id:"access_failure",label:"Project-share access failure reproduced",matches:[{typePrefix:"command:dir \\\\files-02\\eng-projects"}]},
+        {id:"access_event",label:"Relevant access-denied event reviewed",matches:[{type:"observe:events"}]}
+      ],
+      minimumEvidence:2,
+      verification:[
+        {id:"required_group",label:"User has the scoped ENG-PROJECT-R group",op:"group-present",value:"ENG-PROJECT-R"},
+        {id:"no_broad_write",label:"Broader ENG-PROJECT-RW access was not granted",op:"group-absent",value:"ENG-PROJECT-RW"},
+        {id:"no_admin",label:"DOMAIN-ADMINS was not used as a workaround",op:"group-absent",value:"DOMAIN-ADMINS"},
+        {id:"share",label:"Engineering Projects share is readable",op:"share-access",shareId:"engineeringProjects"}
       ]
     }
   }
