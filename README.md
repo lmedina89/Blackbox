@@ -1,5 +1,7 @@
-# BLACKBOX v0.4.0 A4.10.2 QA — Suspicious Authentication Investigation
+# BLACKBOX v0.4.0 A4.10.2.1 QA — Suspicious Authentication Investigation
 
+
+**A4.10.2.1 boot hotfix:** restores application startup by closing the Scheduled Tasks renderer block correctly. No ticket logic, save schema, or investigation behavior changed.
 Built directly from the physically accepted A4.10.1.1 NEXUS Desktop & Remote Tool Consistency checkpoint. A4.10.2 is the investigation bridge for the Service Desk milestone: it adds one higher-uncertainty authentication case while preserving the established Service Desk engine, campaign, missions, BLACKBOX intrusion model, NightWire/Range, and save/world schema.
 
 ## A4.10.2 scope

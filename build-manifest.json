@@ -1,6 +1,6 @@
 {
   "name": "Suspicious Authentication Investigation QA",
-  "version": "0.4.0-alpha.4.10.2-qa",
+  "version": "0.4.0-alpha.4.10.2.1-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -317,8 +317,8 @@
     "A4.10.2 regression verifies blindly disabling the correct task cannot close the investigation until the authored minimum evidence threshold is met",
     "A4.10.2 regression verifies disabling an unrelated healthy scheduled task does not fix the lockout source and is retained as an unnecessary change in Case Review telemetry",
     "A4.10.2 static guards verify Scheduled Tasks lives in Remote Start/System Tools rather than the ticket-specific desktop icon set",
-    "35/35 automated suites pass in the A4.10.2 working tree before packaging",
-    "91/91 JavaScript/test modules pass node --check in the A4.10.2 working tree before packaging"
+    "36/36 automated suites pass in the A4.10.2.1 working tree before packaging",
+    "A4.10.2.1 adds an explicit ES-module graph import guard for js/ui/desktop.js so malformed renderer blocks cannot pass packaging again"
   ],
   "sourceBaseline": {
     "version": "0.3.0-RC7",
