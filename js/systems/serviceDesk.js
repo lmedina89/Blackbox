@@ -87,6 +87,18 @@ export function initServiceDesk(){
       p.verification.at=Number.isFinite(Number(p.verification.at))?Math.max(0,Math.trunc(Number(p.verification.at))):null;
       p.verification.checks=Array.isArray(p.verification.checks)?p.verification.checks.filter(x=>typeof x==="string").slice(0,20):[];
       p.caseSummary=p.caseSummary&&typeof p.caseSummary==="object"&&!Array.isArray(p.caseSummary)?p.caseSummary:null;
+      // A4.10.0.1: completed legacy tickets adopt the authored troubleshooting schema
+      // without inventing evidence the player never gathered. Historical actions remain authoritative.
+      if(ticket.troubleshooting&&p.status==="Resolved"){
+        const observed=(ticket.troubleshooting.evidence||[]).filter(item=>p.actions.some(action=>(item.matches||[]).some(match=>actionMatches(action,match)))).map(item=>item.label);
+        const changes=p.actions.filter(action=>action.kind==="change").map(action=>action.label||activityLabel(action.type,action.details));
+        if(!p.caseSummary)p.caseSummary={rootCause:ticket.troubleshooting.rootCause?.label||"Resolved reported fault",evidence:observed,changes,verification:[...(p.verification?.checks||[])],explicitVerification:!!p.verification?.passed,closedAt:p.resolvedAt??null};
+        else{
+          if(!p.caseSummary.rootCause||p.caseSummary.rootCause==="Resolved reported fault")p.caseSummary.rootCause=ticket.troubleshooting.rootCause?.label||p.caseSummary.rootCause;
+          if((!Array.isArray(p.caseSummary.evidence)||!p.caseSummary.evidence.length)&&observed.length)p.caseSummary.evidence=observed;
+          if((!Array.isArray(p.caseSummary.changes)||!p.caseSummary.changes.length)&&changes.length)p.caseSummary.changes=changes;
+        }
+      }
     }
   }
   return hd;
@@ -331,7 +343,9 @@ function evaluateCondition(machine,condition){
   if(condition.op==="corporate-ip")return validIp(value);
   if(condition.op==="truthy")return !!value;
   if(condition.op==="nonempty")return Array.isArray(value)?value.length>0:!!String(value||"");
+  if(condition.op==="greater-than")return Number(value)>Number(condition.value);
   if(condition.op==="reachable")return canReach(machine,condition.target);
+  if(condition.op==="dns-server-reachable")return machine.network.dns.length>0&&canReach(machine,machine.network.dns[0]);
   return false;
 }
 function actionMatches(action,match){
@@ -352,8 +366,6 @@ function verification(ticketId){
     const results=authored.map(condition=>({label:condition.label,ok:evaluateCondition(machine,condition)}));
     return {ok:results.every(result=>result.ok),checks:results.map(result=>`${result.ok?"PASS":"FAIL"}: ${result.label}`),results};
   }
-  if(ticketId==="INC-0002")return {ok:machine.network.adapterEnabled&&validIp(machine.network.ip)&&machine.services.dnsClient==="running"&&machine.network.dns.length>0,checks:[`Link/IP: ${machine.network.ip}`,`DNS Client: ${machine.services.dnsClient}`,`DNS server: ${machine.network.dns[0]||"none"}`]};
-  if(ticketId==="INC-0003")return {ok:machine.network.adapterEnabled&&machine.services.dhcpClient==="running"&&validIp(machine.network.ip)&&!!machine.network.gateway&&machine.network.dns.length>0,checks:[`DHCP Client: ${machine.services.dhcpClient}`,`IP: ${machine.network.ip}`,`Gateway: ${machine.network.gateway||"none"}`,`DNS: ${machine.network.dns[0]||"none"}`]};
   return {ok:false,checks:[]};
 }
 

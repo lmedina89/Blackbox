@@ -242,4 +242,4 @@
 }
 
 /* A4.10.0 Service Desk routing-ticket controls */
-@media (max-width:700px){.remote-gateway-form>div{align-items:stretch;flex-wrap:wrap}.remote-gateway-form input{flex:1 1 150px;font-size:16px}.remote-gateway-form .classic-button{min-height:38px}.sd-review-grid{grid-template-columns:1fr;gap:2px}.sd-review-grid b{margin-top:5px}.sd-activity-row{grid-template-columns:44px minmax(0,1fr)!important}.sd-activity-row small{grid-column:2}}
+@media (max-width:700px){.remote-gateway-form>div{align-items:stretch;flex-wrap:wrap}.remote-gateway-form input{flex:1 1 150px}.remote-command-form input,.remote-gateway-form input,.sd-notes{font-size:16px}.remote-gateway-form .classic-button{min-height:38px}.sd-review-grid{grid-template-columns:1fr;gap:2px}.sd-review-grid b{margin-top:5px}.sd-activity-row{grid-template-columns:44px minmax(0,1fr)!important}.sd-activity-row small{grid-column:2}}

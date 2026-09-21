@@ -82,7 +82,26 @@ export const SERVICE_DESK_TICKETS=[
     description:"The network icon says connected. I can reach an internal server by the IP someone gave me, but the intranet name does not work.",
     userNote:"This happened right after the update popup, so maybe the browser update broke it.",
     learning:["IP connectivity vs name resolution","Services","DNS troubleshooting","Verification"],
-    expectedActions:["service:dnsClient:running"],relevantTools:["services","network","events"],relevantCommands:["ping","nslookup","ipconfig"],nextTicketId:"INC-0003"
+    expectedActions:["service:dnsClient:running"],relevantTools:["services","network","events"],relevantCommands:["ping","nslookup","ipconfig"],nextTicketId:"INC-0003",
+    troubleshooting:{
+      version:1,
+      rootCause:{id:"dns_client_stopped",label:"DNS Client service is stopped on the workstation"},
+      evidence:[
+        {id:"tcpip",label:"TCP/IP configuration inspected",matches:[{type:"observe:network"},{typePrefix:"command:ipconfig"}]},
+        {id:"ip_reachability",label:"Direct IP reachability tested",matches:[{type:"command:ping 10.20.0.20"}]},
+        {id:"name_failure",label:"Name-based reachability failure reproduced",matches:[{type:"command:ping intranet.nexus.local"}]},
+        {id:"dns_query",label:"Configured DNS server queried directly",matches:[{type:"command:nslookup intranet.nexus.local"}]},
+        {id:"service_state",label:"Service state inspected",matches:[{type:"observe:services"}]},
+        {id:"service_event",label:"Relevant service event reviewed",matches:[{type:"observe:events"}]}
+      ],
+      minimumEvidence:2,
+      verification:[
+        {id:"address",label:"Workstation retains a valid corporate IPv4 address",path:"network.ip",op:"corporate-ip"},
+        {id:"dns_client",label:"DNS Client service is running",path:"services.dnsClient",op:"equals",value:"running"},
+        {id:"dns_config",label:"A DNS server is configured",path:"network.dns",op:"nonempty"},
+        {id:"dns_server",label:"Configured DNS server is reachable",op:"dns-server-reachable"}
+      ]
+    }
   },
   {
     id:"INC-0003",title:"Limited connectivity after docking",priority:"Normal",category:"Network / DHCP",machineId:"HR-LT-03",
@@ -90,7 +109,26 @@ export const SERVICE_DESK_TICKETS=[
     description:"The laptop says it is connected after I docked it, but nothing on the company network opens. Wi-Fi was working at home last night.",
     userNote:"Maybe the wall jack on this desk is bad. I have a meeting soon.",
     learning:["APIPA 169.254.0.0/16","DHCP Client","ipconfig","Lease renewal","Gateway/DNS verification"],
-    expectedActions:["service:dhcpClient:running","dhcp:renew"],relevantTools:["network","services","events"],relevantCommands:["ipconfig","ping"],nextTicketId:"INC-0004"
+    expectedActions:["service:dhcpClient:running","dhcp:renew"],relevantTools:["network","services","events"],relevantCommands:["ipconfig","ping"],nextTicketId:"INC-0004",
+    troubleshooting:{
+      version:1,
+      rootCause:{id:"dhcp_client_stopped",label:"DHCP Client service is stopped, leaving the workstation on an APIPA address"},
+      evidence:[
+        {id:"tcpip",label:"APIPA/TCP-IP configuration inspected",matches:[{type:"observe:network"},{typePrefix:"command:ipconfig"}]},
+        {id:"service_state",label:"DHCP Client service state inspected",matches:[{type:"observe:services"}]},
+        {id:"dhcp_event",label:"DHCP/APIPA events reviewed",matches:[{type:"observe:events"}]}
+      ],
+      minimumEvidence:2,
+      verification:[
+        {id:"adapter",label:"Network adapter is enabled",path:"network.adapterEnabled",op:"equals",value:true},
+        {id:"dhcp_mode",label:"Adapter is configured to use DHCP",path:"network.dhcp",op:"equals",value:true},
+        {id:"dhcp_client",label:"DHCP Client service is running",path:"services.dhcpClient",op:"equals",value:"running"},
+        {id:"lease",label:"A corporate DHCP lease has been obtained",path:"network.ip",op:"corporate-ip"},
+        {id:"gateway",label:"Default gateway matches the assigned local subnet",path:"network.gateway",op:"equals-path",otherPath:"network.correctGateway"},
+        {id:"dns",label:"DNS configuration was restored",path:"network.dns",op:"nonempty"},
+        {id:"renewal",label:"DHCP lease renewal completed",path:"network.leaseRenewals",op:"greater-than",value:0}
+      ]
+    }
   },
   {
     id:"INC-0004",title:"Local network works, remote resources fail",priority:"Normal",category:"Network / Routing",machineId:"ENG-WS-21",

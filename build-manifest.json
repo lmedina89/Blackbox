@@ -1,6 +1,6 @@
 {
-  "name": "Service Desk Engine Expansion & Routing Ticket QA",
-  "version": "0.4.0-alpha.4.10.0-qa",
+  "name": "Mobile Input & Legacy Service Desk Ticket Migration QA",
+  "version": "0.4.0-alpha.4.10.0.1-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -35,6 +35,14 @@
     "legacyTrainingLabs": 3
   },
   "features": [
+    "A4.10.0.1 prevents iPhone Safari focus-zoom in the Remote Command input, manual gateway editor and Service Desk work-notes field by enforcing a 16px mobile input font while preserving the existing visual layout",
+    "INC-0002 and INC-0003 now use the same declarative root-cause/evidence/verification troubleshooting schema as INC-0001 and INC-0004, so all four current Service Desk tickets share one engine architecture",
+    "legacy ticket-ID-specific verification branches for INC-0002 and INC-0003 are removed; DNS and DHCP verification now runs entirely through authored conditions",
+    "INC-0002 structured verification checks corporate addressing, DNS Client state, configured DNS and reachability of the configured DNS server",
+    "INC-0003 structured verification checks adapter/DHCP state, corporate lease acquisition, correct gateway, restored DNS and a completed DHCP lease renewal",
+    "existing A4.10.0 resolved-ticket Case Reviews are enriched in place with newly authored root-cause labels and only backfill evidence supported by historical Activity records",
+    "A4.10.0.1 keeps SAVE_VERSION 15 and WORLD_SCHEMA 10 and preserves Activity history, machine state, learning credit, Range/campaign state and prior completed tickets",
+    "all 32 automated suites pass, including new legacy-ticket migration/mobile-input coverage plus all prior A4.10.0, A4.9.1, learning, Range, campaign, save and UI regressions",
     "A4.10.0 preserves the existing NEXUS Service Desk and Remote Assistance workflow while upgrading the existing Activity stream into structured troubleshooting telemetry instead of adding a duplicate journal",
     "structured Service Desk definitions may declare root cause, evidence signals, minimum evidence and declarative verification conditions; INC-0001 is converted as the regression proof without changing its solution",
     "INC-0004 introduces a wrong-default-gateway routing case where same-subnet traffic succeeds but remote company resources fail until the bounded gateway correction is made",
@@ -280,10 +288,10 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.10.0 Service Desk Engine Expansion: structured troubleshooting telemetry, declarative evidence/verification, and first routing-depth ticket",
+  "foundationMilestone": "A4.10.0.1 Mobile Input & Legacy Ticket Migration: all current Service Desk tickets share the structured troubleshooting engine and iPhone editable fields avoid focus-zoom",
   "immediateBaseline": {
-    "version": "0.4.0-A4.9.1-QA",
-    "archive": "BLACKBOX-v0.4.0-A4.9.1-ThreatDesk-Mobile-Terminal-UX-Hotfix-QA-GitHub.zip",
-    "sha256": "73d2830b22a70fef9d1c72234e2d60db3b5a053259432f03fac855ef171779ad"
+    "version": "0.4.0-A4.10.0-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.10.0-Service-Desk-Engine-Routing-QA-GitHub.zip",
+    "sha256": "b2ef7619a0cda1423933d3a6b6c8b693d0af784c6aafdccd05bc0a142a06f475"
   }
 }

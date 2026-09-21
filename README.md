@@ -1,42 +1,42 @@
-# BLACKBOX v0.4.0 A4.10.0 QA — Service Desk Engine Expansion & Routing Ticket
+# BLACKBOX v0.4.0 A4.10.0.1 QA — Mobile Input & Legacy Ticket Migration
 
-Built directly from the verified A4.9.1 ThreatDesk & Mobile Terminal UX hotfix checkpoint. A4.10.0 is the first Service Desk depth checkpoint: it preserves the existing NEXUS Service Desk / Remote Assistance interface, upgrades the existing Activity stream into structured troubleshooting telemetry, introduces declarative root-cause/evidence/verification definitions, and adds one new routing incident as the proving case.
+Built directly from the physically accepted A4.10.0 Service Desk Engine & Routing checkpoint. A4.10.0.1 is intentionally small: it fixes iPhone Safari focus-zoom in editable Service Desk/Remote Assistance fields and finishes migrating the two remaining legacy Service Desk tickets onto the generalized A4.10 troubleshooting schema.
 
-## A4.10.0 scope
+## A4.10.0.1 scope
 
-- Keeps the current Service Desk workflow intact: **My Queue → ticket → Remote Support → Verify / Resolve / Escalate → Activity**.
-- Reuses the existing Activity panel rather than adding a duplicate troubleshooting journal.
-- Activity records now carry human-readable labels, action kind, optional details/outcome, and remain backward-compatible with old action entries.
-- Changes invalidate stale verification state, so the ticket remembers whether a verification pass occurred after the latest change.
-- Structured ticket definitions may now declare a root cause, evidence signals, minimum useful evidence, and declarative verification conditions.
-- `INC-0001 — No network connection` is converted to the new schema as the regression proof while preserving its original solution and behavior.
-- Adds `INC-0004 — Local network works, remote resources fail` on `ENG-WS-21`.
-- `INC-0004` starts with a valid local address but an invalid default gateway outside the local /24; local-subnet traffic works while remote company resources fail.
-- Remote Assistance exposes a bounded manual default-gateway editor only on the authored static-IP workstation; existing managed/DHCP machines do not expose that control.
-- Automatic **REPAIR** intentionally refuses to rewrite manual TCP/IP configuration, so the new case cannot be solved by a magic repair button.
-- Ping routing now distinguishes same-subnet reachability from routed reachability using the workstation's address, subnet, and expected local gateway.
-- Closed structured tickets persist a compact **Case Review** containing root cause, evidence actually inspected, changes made, and verification results.
-- `INC-0004` reports applied learning evidence for IP addressing, gateways, routing visibility, evidence correlation, bounded change, and verification through the existing A4.9 learning engine.
-- Existing identity/save compatibility is preserved: **SAVE_VERSION 15 / WORLD_SCHEMA 10**. No save wipe or migration bump is required.
-- Range, NightWire, mission/story, intrusion, ThreatDesk question logic, and A4.9.1 mobile terminal behavior are unchanged.
+- Keeps the accepted A4.10.0 Service Desk / Remote Assistance UI and routing-ticket behavior intact.
+- Raises the mobile font size of the internal Remote Command input, manual gateway input, and Service Desk work-notes field to **16px** so iPhone Safari no longer auto-zooms the page when those controls receive focus.
+- `INC-0002 — Names do not resolve` now declares its root cause, evidence signals, minimum evidence target, and verification conditions through the same structured troubleshooting schema used by INC-0001 and INC-0004.
+- `INC-0003 — Limited connectivity after docking` is migrated to the same schema and explicitly verifies DHCP mode, DHCP Client state, a corporate lease, correct gateway, restored DNS configuration, and a completed lease renewal.
+- Removes the old ticket-ID-specific verification branches for INC-0002 and INC-0003. All four current Service Desk tickets now use one authored troubleshooting architecture.
+- Existing A4.10.0 saves are preserved. Resolved old tickets with the generic `Resolved reported fault` Case Review are enriched in place with the newly authored root-cause label.
+- Historical evidence is backfilled only when the player's existing Activity history actually proves it; the update does **not** invent diagnostics the player never performed.
+- Existing Activity history, scores, ticket status, machine state, learning credit, Range progress, campaign state, and ThreatDesk progress remain intact.
+- **SAVE_VERSION 15 / WORLD_SCHEMA 10** remain unchanged; no save wipe or migration bump is required.
+- A4.10.0 remains the immediate rollback baseline.
 
-## A4.10.0 physical-device acceptance
+## A4.10.0.1 physical-device acceptance
 
-1. Confirm A4.9.1 ThreatDesk, terminal wrapping, keyboard spacing, and Help layout still look correct on iPhone.
-2. Resolve `INC-0001` normally and verify its Activity entries are readable rather than raw event tokens.
-3. Complete `INC-0002` and `INC-0003`; confirm `INC-0004` appears next.
-4. Open `INC-0004` Remote Support → Network. Confirm the machine shows `10.20.40.88 / 255.255.255.0` with gateway `10.20.41.1`.
-5. In Command Prompt, run `ipconfig /all`, `ping 10.20.40.20`, and `ping 10.20.0.20`. Local should pass; remote should fail before the gateway fix.
-6. Press **REPAIR** and confirm it does not magically rewrite the manual gateway.
-7. In Network, change the gateway to `10.20.40.1`. Re-run `ping 10.20.0.20`; it should now pass.
-8. Press **VERIFY**, then **RESOLVE**. Confirm the closed ticket shows a Case Review with root cause, evidence, change, and verification.
-9. Reload the page and confirm the resolved case, Activity history, and Case Review persist.
-10. Confirm no unrelated Range, BLACKBOX campaign, or ThreatDesk progression changed.
+1. Open any Service Desk Remote Support session and tap the internal **Command Prompt** input. Confirm iPhone Safari opens the keyboard without zooming the page.
+2. Open the INC-0004 manual gateway editor and confirm focusing the gateway field also does not zoom.
+3. Tap the Service Desk work-notes field and confirm it remains stable at normal page scale.
+4. Re-open resolved INC-0002 and INC-0003 on the existing identity. Confirm their Case Review now identifies the authored DNS/DHCP root cause rather than the generic legacy label.
+5. On a clean identity, resolve INC-0002 normally and confirm Case Review reports the stopped DNS Client root cause plus only the evidence actually inspected.
+6. Resolve INC-0003 normally. Starting DHCP Client alone must not be enough; renew/repair must obtain a corporate lease before verification passes.
+7. Confirm INC-0001 and INC-0004 still resolve exactly as in A4.10.0.
+8. Reload and confirm all Service Desk status, Activity, Case Reviews, ThreatDesk learning credit, and campaign progress persist.
+9. Recheck BLACKBOX terminal, Range, and ThreatDesk briefly for regression.
+
+## Automated verification
+
+- 32/32 automated test suites pass.
+- 87 JavaScript/test modules pass `node --check`.
+- New regression coverage verifies all four current tickets use the structured troubleshooting schema, INC-0002/0003 no longer use ticket-specific verification branches, old A4.10.0 case summaries enrich safely, and mobile editable fields retain the 16px iOS focus-zoom guard.
 
 ## Rollback baseline
 
-A4.9.1 remains the immediate rollback baseline:
+A4.10.0 remains the immediate rollback baseline:
 
-`BLACKBOX-v0.4.0-A4.9.1-ThreatDesk-Mobile-Terminal-UX-Hotfix-QA-GitHub.zip`
+`BLACKBOX-v0.4.0-A4.10.0-Service-Desk-Engine-Routing-QA-GitHub.zip`
 
-SHA-256: `73d2830b22a70fef9d1c72234e2d60db3b5a053259432f03fac855ef171779ad`
+SHA-256: `b2ef7619a0cda1423933d3a6b6c8b693d0af784c6aafdccd05bc0a142a06f475`
