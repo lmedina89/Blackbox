@@ -224,6 +224,26 @@ function normalize(save){
   save.world.scanCounters=safePlainObject(save.world.scanCounters,{});
   save.world.eventEligibleAt=safePlainObject(save.world.eventEligibleAt,{});
   save.world.caseHistory=asArray(save.world.caseHistory,[]).filter(isObject);
+  const consistency=safePlainObject(save.world.consistency,{}),seenEntities={};
+  for(const [entityId,raw] of Object.entries(safePlainObject(consistency.seen,{}))){
+    if(typeof entityId!=="string"||!entityId||!isObject(raw))continue;
+    seenEntities[entityId]={
+      firstSeenAt:asNumber(raw.firstSeenAt,0,{integer:true,min:0}),
+      lastSeenAt:asNumber(raw.lastSeenAt,0,{integer:true,min:0}),
+      sources:uniqueStrings(raw.sources,[]).slice(-8)
+    };
+  }
+  save.world.consistency={
+    registryVersion:asNumber(consistency.registryVersion,d.world.consistency.registryVersion,{integer:true,min:1,max:999}),
+    seen:seenEntities,
+    recent:asArray(consistency.recent,[]).filter(isObject).slice(-64).map(item=>({
+      entityId:asString(item.entityId,"").slice(0,192),
+      source:asString(item.source,"world").slice(0,128),
+      day:asNumber(item.day,1,{integer:true,min:1}),
+      minute:asNumber(item.minute,0,{integer:true,min:0,max:1439}),
+      absolute:asNumber(item.absolute,0,{integer:true,min:0})
+    })).filter(item=>item.entityId)
+  };
   save.world.lastActionKey=save.world.lastActionKey==null?undefined:asString(save.world.lastActionKey,"");
   const timeline=safePlainObject(save.world.timeline,{});
   const validTimelineModes=new Set(["afterActions","afterMinutes","timeWindow","afterEvent","absolute"]);
@@ -380,10 +400,11 @@ function normalize(save){
 
   const nexus=safePlainObject(save.nexusSystem,{}),nd=d.nexusSystem;
   const network=safePlainObject(nexus.network,{});
+  const normalizedNexusIp=(asString(network.ip,nd.network.ip).slice(0,64)||nd.network.ip)==="192.168.1.24"?nd.network.ip:(asString(network.ip,nd.network.ip).slice(0,64)||nd.network.ip);
   save.nexusSystem.network={
     adapterEnabled:asBoolean(network.adapterEnabled,nd.network.adapterEnabled),
     dhcp:asBoolean(network.dhcp,nd.network.dhcp),
-    ip:asString(network.ip,nd.network.ip).slice(0,64)||nd.network.ip,
+    ip:normalizedNexusIp,
     subnet:asString(network.subnet,nd.network.subnet).slice(0,64)||nd.network.subnet,
     gateway:asString(network.gateway,nd.network.gateway).slice(0,64)||nd.network.gateway,
     dns:uniqueStrings(network.dns,nd.network.dns).slice(0,4),

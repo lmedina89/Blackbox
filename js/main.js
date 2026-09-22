@@ -13,6 +13,7 @@ import { initCommunications } from "./systems/communications.js";
 import { initServiceDesk } from "./systems/serviceDesk.js";
 import { initNightwire } from "./systems/nightwire.js";
 import { initLearning } from "./systems/learning.js";
+import { initWorldConsistency } from "./systems/worldConsistency.js";
 import { initAutosave } from "./core/autosave.js";
 import { escapeHtml } from "./ui/safeText.js";
 
@@ -105,6 +106,7 @@ async function initializeGameUI({trustedGesture=false}={}){
 
   initLearning();
   initServiceDesk();
+  initWorldConsistency();
   initNightwire();
   desktopUI=initDesktopUI({enterBlackbox,replayIntro:replayOpeningIntro});
   terminalUI=initTerminalUI({onExit:closeBlackbox,onSuspend:suspendBlackbox,onPurge:purgeIdentity});

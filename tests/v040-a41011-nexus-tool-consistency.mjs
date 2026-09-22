@@ -18,7 +18,7 @@ assert.equal(WORLD_SCHEMA,10);
   assert.equal(cmd.startGroup,"System Tools");
   assert.equal(runNexusCommand("hostname").output,"HOME-PC");
   assert.match(runNexusCommand("whoami").output,/^NEXUS\\/);
-  assert.match(runNexusCommand("ipconfig \/all").output,/192\.168\.1\.24/);
+  assert.match(runNexusCommand("ipconfig \/all").output,/192\.168\.1\.12/);
   assert.match(runNexusCommand("help").output,/BLACKBOX commands.*not NEXUS\/OS commands/i);
   assert.equal(runNexusCommand("scan").ok,false,"BLACKBOX-only commands must remain unavailable in ordinary NEXUS CMD");
   assert.match(runNexusCommand("nslookup archives.northstar.test").output,/10\.14\.8\.22/);

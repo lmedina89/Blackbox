@@ -48,6 +48,7 @@ export const baseState=()=>({
     eventEligibleAt:{},
     countedActions:[],
     caseHistory:[],
+    consistency:{registryVersion:1,seen:{},recent:[]},
     timeline:{scheduled:{},delivered:[],deliveryTimes:{},cancelled:[],expired:[],cooldowns:{},occurrenceCounters:{}}
   },
   missions:{active:[],progress:{}},
@@ -58,7 +59,7 @@ export const baseState=()=>({
   nightwire:{readPosts:[],readMessages:[],range:{activeLabId:null,completed:[],runs:{},results:{}}},
   behavior:{autonomy:0,empathy:0,intervention:0,transparency:0,trust:0,decisions:[]},
   nexusSystem:{
-    network:{adapterEnabled:true,dhcp:true,ip:"192.168.1.24",subnet:"255.255.255.0",gateway:"192.168.1.1",dns:["192.168.1.1"],leaseRenewals:0,lastRepairAt:null},
+    network:{adapterEnabled:true,dhcp:true,ip:"192.168.1.12",subnet:"255.255.255.0",gateway:"192.168.1.1",dns:["192.168.1.1"],leaseRenewals:0,lastRepairAt:null},
     firewall:{enabled:true,profile:"Home",rules:{fileSharing:false,remoteAssistance:false,webBrowser:true,messenger:true}},
     services:{dnsClient:"running",dhcpClient:"running",printSpooler:"running",workstation:"running",nexusUpdate:"running"},
     devices:{networkAdapter:"enabled",soundAdapter:"enabled"},

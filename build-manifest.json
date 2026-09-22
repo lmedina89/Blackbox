@@ -1,6 +1,6 @@
 {
-  "name": "Opening Intro Readability / Contrast Hotfix QA",
-  "version": "0.4.0-alpha.4.10.3.3-qa",
+  "name": "World Consistency Foundation QA",
+  "version": "0.4.0-alpha.4.10.4.0-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -32,9 +32,18 @@
     "learningTracks": 5,
     "learningConcepts": 24,
     "trainingQuestions": 27,
-    "legacyTrainingLabs": 3
+    "legacyTrainingLabs": 3,
+    "worldRegistryEntities": 60
   },
   "features": [
+    "41/41 automated suites pass and 100 JavaScript/test modules pass syntax checks for the A4.10.4.0 package",
+    "A4.10.4.0 adds a canonical read-only world registry spanning 39 campaign hosts, 5 established social contacts, 8 Service Desk employees, and 8 Service Desk machines (60 entities total)",
+    "canonical world references resolve stable entity IDs from existing host IDs, hostnames, addresses, usernames, handles, and support-machine identifiers without changing gameplay ownership of mutable state",
+    "persistent bounded world.consistency memory records cross-app entity encounters from BLACKBOX connections/saved targets, Service Desk activity, and Messenger reads without awarding clues, setting story flags, or unlocking content",
+    "world-consistency recent encounter memory is capped at 64 first-seen records and per-entity source history is capped at 8 labels to prevent indefinite log growth",
+    "world-registry diagnostics report zero orphan Service Desk machine references, machine identity mismatches, or duplicate campaign host addresses",
+    "A4.10.4.0 reconciles HOME-PC networking to the canonical 192.168.1.12 address used by campaign hosts, eliminating the prior collision with FAMILY-PC at 192.168.1.24; legacy HOME-PC .24 state normalizes safely while other stored addresses remain untouched",
+    "A4.10.4.0 keeps SAVE_VERSION 15 and WORLD_SCHEMA 10 unchanged and intentionally defers ambient world noise, registry-driven app rendering, and A4.11 Free Investigation",
     "40/40 automated suites pass and 97 JavaScript/test modules pass syntax checks for the A4.10.3.3 package",
     "A4.10.3.3 routes Service Desk Work Notes through the established NEXUS PERSONAL KEYBOARD on touch devices while preserving the existing Notepad keyboard unchanged",
     "Service Desk Work Notes default to custom NEXUS input on coarse pointers, suppress native mobile keyboard focus with readonly plus inputmode none, and expose SYSTEM KEYBOARD only as an explicit fallback",
@@ -253,6 +262,9 @@
     "IPv6"
   ],
   "verification": [
+    "A4.10.4.0 full working-tree verification passes 41/41 automated suites and 100/100 JavaScript/test syntax checks before packaging",
+    "A4.10.4.0 registry regression verifies canonical resolution, all eight Service Desk employee/machine mappings, zero static integrity issues, HOME-PC address reconciliation, bounded encounter memory, and no story/clue side effects",
+    "physical iPhone Safari acceptance remains required for normal startup, NEXUS ipconfig display, BLACKBOX banner alignment, Service Desk regression, Messenger read behavior, and save/reload continuity",
     "A4.10.3.3 full working-tree verification passes 40/40 automated suites and 97/97 JavaScript/test syntax checks before packaging",
     "A4.10.3.3 static regression guards Service Desk NEXUS keyboard controls, native-keyboard suppression, explicit SYSTEM KEYBOARD fallback, unchanged Work Notes save semantics, and fixed-width terminal banner identity",
     "physical iPhone Safari acceptance remains required for Work Notes custom-keyboard interaction and explicit native-keyboard fallback",
@@ -351,10 +363,10 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.10.3.3 Mobile Input Consistency / Terminal Banner Hotfix: Service Desk Work Notes adopt the NEXUS personal keyboard on touch devices and the BLACKBOX terminal banner hides the QA suffix while restoring rail alignment",
+  "foundationMilestone": "A4.10.4.0 World Consistency Foundation: canonical cross-app entity registry, bounded persistent encounter memory, integrity diagnostics, and HOME-PC address reconciliation",
   "immediateBaseline": {
-    "version": "0.4.0-A4.10.3.2-QA",
-    "archive": "BLACKBOX-v0.4.0-A4.10.3.2-Opening-Intro-Readability-Contrast-Hotfix-QA-GitHub.zip",
-    "sha256": "48180ccd45e70ca4bd7653ccff67c88e36e8c8e4bd34875eff1910b7e6c07c30"
+    "version": "0.4.0-A4.10.3.3-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.10.3.3-Mobile-Input-Consistency-Terminal-Banner-Hotfix-QA-GitHub.zip",
+    "sha256": "1a0e0ba8c94bccd0359bbc10ee36079b3c15ea84515437f14d50ded99d67e86e"
   }
 }

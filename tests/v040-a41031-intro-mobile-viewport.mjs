@@ -14,7 +14,7 @@ assert.match(css,/\.opening-intro-lines\{[^}]*min-height:0;[^}]*overflow-y:auto;
   "boot transcript should own any required vertical scrolling on iPhone");
 assert.match(css,/\.opening-intro-briefing\{[^}]*flex:0 0 auto;[^}]*max-height:46%;[^}]*overflow-y:auto/,
   "session brief and Continue control should stay inside the viewport");
-assert.match(index,/v0\.4\.0 A4\.10\.3\.3 QA/,
+assert.match(index,/v0\.4\.0 A4\.10\.4\.0 QA/,
   "visible build label should identify the mobile viewport hotfix");
 
 console.log("BLACKBOX v0.4.0 A4.10.3.1 intro mobile viewport regression tests passed");

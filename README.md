@@ -1,3 +1,50 @@
+# BLACKBOX v0.4.0 A4.10.4.0 QA — World Consistency Foundation
+
+Built directly from the physically accepted A4.10.3.3 mobile-input/banner hotfix. This checkpoint starts the A4.10.4 world-consistency branch without adding new story beats or changing the player-facing investigation flow.
+
+## A4.10.4.0 scope
+
+- Adds a canonical read-only **world registry** covering all 39 campaign hosts, the 5 established Messenger/NightWire people, all 8 Service Desk employees, and all 8 managed Service Desk machines: **60 canonical entities total**.
+- Canonical references can be resolved by stable entity ID plus existing host IDs, hostnames, addresses, usernames, handles, and support-machine IDs. This gives future apps one identity layer instead of independently inventing names/addresses.
+- Adds persistent, bounded `world.consistency` memory. Cross-app encounters can now record which canonical entities the identity has actually seen, where they were encountered, and when.
+- Wires the foundation to existing events only: BLACKBOX host connections/saved targets, Service Desk activity, and Messenger reads. These observations **do not** award clues, set story flags, change missions, or unlock content.
+- The encounter ledger is deliberately bounded to 64 first-seen records and 8 source labels per entity so it cannot become another indefinitely growing log.
+- Adds registry diagnostics for orphan Service Desk ticket references, machine identity mismatches, and duplicate campaign host addresses. The A4.10.4.0 catalog reports zero integrity issues.
+- Fixes one real pre-existing world contradiction discovered while building the registry: HOME-PC was shown as `192.168.1.24` in NEXUS system tools while BLACKBOX/campaign networking canonically used `192.168.1.12`, and `192.168.1.24` already belongs to FAMILY-PC. HOME-PC now consistently uses `192.168.1.12`. Existing identities carrying the old uneditable `.24` default normalize safely to `.12`; other stored addresses are preserved.
+- Keeps **SAVE_VERSION 15 / WORLD_SCHEMA 10** unchanged. The new consistency state is additive and normalized for old saves.
+- Updates visible/internal build identity to **A4.10.4.0 QA** while keeping the player-facing interactive-shell banner free of the `QA` suffix.
+
+## Intentionally deferred to A4.10.4.1+
+
+- No new ambient messages, fake activity spam, or procedural noise yet.
+- No existing Mail/News/FriendSpace/ThreatDesk content has been rewritten to consume registry state yet.
+- No Free Investigation clue graph, Findings UI, or A4.11 progression is introduced here.
+- No new Service Desk tickets, mission objectives, rewards, BLACKBOX commands, or hidden-player-identity reveals.
+
+## Physical-device acceptance
+
+1. Continue an existing identity and confirm normal startup/desktop behavior is unchanged.
+2. Open **Start → System Tools → Command Prompt**, run `ipconfig /all`, and confirm HOME-PC reports `192.168.1.12`.
+3. Enter BLACKBOX and confirm the banner reads `INTERACTIVE SHELL 0.4.0-A4.10.4.0` with aligned rails and no `QA` suffix.
+4. Connect to an ordinary campaign host and return to NEXUS; confirm no unexpected toast, clue, mission, or story unlock appears.
+5. Open Service Desk, interact with a ticket/Remote Assistance, and confirm ticket behavior/scoring is unchanged.
+6. Read a Messenger thread and confirm normal read state/timing remains unchanged.
+7. Reload and recheck the active identity to confirm existing mission, Service Desk, Range/NightWire, intro, notes, and settings state survives.
+
+## Automated verification
+
+- **41/41 automated suites pass**, including the new world-registry/entity-memory regression and all prior campaign, Service Desk, learning, Range/NightWire, save, terminal, opening, mobile-input, and chronology coverage.
+- **100/100 JavaScript/test modules pass `node --check`**.
+- Registry diagnostics verify **60 canonical entities** with zero orphan-ticket, machine-identity, or duplicate-campaign-address findings.
+- The final ZIP is re-extracted and the complete test/syntax verification set is rerun from packaged bytes before delivery.
+
+## Immediate rollback baseline
+
+`BLACKBOX-v0.4.0-A4.10.3.3-Mobile-Input-Consistency-Terminal-Banner-Hotfix-QA-GitHub.zip`  
+SHA-256: `1a0e0ba8c94bccd0359bbc10ee36079b3c15ea84515437f14d50ded99d67e86e`
+
+---
+
 # BLACKBOX v0.4.0 A4.10.3.3 QA — Mobile Input Consistency / Terminal Banner Hotfix
 
 Built directly from A4.10.3.2 after physical iPhone Safari QA found two remaining presentation/input inconsistencies: Service Desk Work Notes invoked the native iOS keyboard instead of the established NEXUS keyboard, and the BLACKBOX terminal version line exposed the internal QA suffix and pushed its right rail out of alignment.

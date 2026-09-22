@@ -22,7 +22,7 @@ for(const [label,color] of [
 // User-requested invariant: readability polish must not weaken the established CRT scanlines.
 assert.match(terminalCss,/background:linear-gradient\(transparent 50%,#0005 50%\);background-size:100% 4px/,
   "established BLACKBOX CRT scanline strength/spacing must remain unchanged");
-assert.match(index,/v0\.4\.0 A4\.10\.3\.3 QA/,
+assert.match(index,/v0\.4\.0 A4\.10\.4\.0 QA/,
   "visible build label should identify the readability/contrast hotfix");
 
 console.log("BLACKBOX v0.4.0 A4.10.3.2 intro readability/contrast regression tests passed");

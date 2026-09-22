@@ -30,12 +30,12 @@ assert.match(mobile,/\.terminal-form-custom \.terminal-input,\.notepad-custom-in
 const banner=[
   "┌──────────────────────────────────────────┐",
   "│       B L A C K B O X   S E C U R E      │",
-  "│    INTERACTIVE SHELL 0.4.0-A4.10.3.3     │",
+  "│    INTERACTIVE SHELL 0.4.0-A4.10.4.0     │",
   "└──────────────────────────────────────────┘"
 ];
 assert.deepEqual(banner.map(line=>line.length),[44,44,44,44]);
 for(const line of banner)assert.ok(terminal.includes(JSON.stringify(line).slice(1,-1)),`missing terminal banner line: ${line}`);
 assert.doesNotMatch(terminal,/INTERACTIVE SHELL[^\n]*-QA/);
-assert.match(index,/v0\.4\.0 A4\.10\.3\.3 QA/);
+assert.match(index,/v0\.4\.0 A4\.10\.4\.0 QA/);
 
 console.log("BLACKBOX v0.4.0 A4.10.3.3 input consistency / terminal banner regression tests passed");
