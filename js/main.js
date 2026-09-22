@@ -6,7 +6,8 @@ import { initClues } from "./systems/clues.js";
 import { initDesktopUI } from "./ui/desktop.js";
 import { initTerminalUI } from "./ui/terminalUI.js";
 import { enterBlackboxTransition, exitBlackboxTransition } from "./ui/transitions.js";
-import { initAudio, playSound } from "./systems/audio.js";
+import { initAudio, playSound, recoverAudioContext } from "./systems/audio.js";
+import { INTRO_VERSION, shouldPlayOpeningIntro, playOpeningIntro } from "./ui/openingIntro.js";
 import { initTimeline } from "./systems/timeline.js";
 import { initCommunications } from "./systems/communications.js";
 import { initServiceDesk } from "./systems/serviceDesk.js";
@@ -86,17 +87,26 @@ function renderArchives(){
     const date=new Date(entry.archivedAt).toLocaleDateString();
     row.innerHTML=`<div><b>${escapeHtml(entry.alias)}</b><span>Day ${entry.day} · ${entry.credits} cr · Rep ${entry.reputation}</span><small>Archived ${date} · ${escapeHtml(entry.reason.replaceAll("_"," "))}</small></div><button type="button">Restore</button>`;
     row.querySelector("button").addEventListener("click",()=>{
-      if(restoreArchivedIdentity(entry.archiveId))initializeGameUI();
+      if(restoreArchivedIdentity(entry.archiveId))initializeGameUI({trustedGesture:true});
     });
     archivesList.appendChild(row);
   }
 }
 
-function initializeGameUI(){
+async function initializeGameUI({trustedGesture=false}={}){
+  const state=getState();
+  if(shouldPlayOpeningIntro(state)){
+    if(trustedGesture)await recoverAudioContext({trustedGesture:true});
+    boot.classList.add("hidden");
+    await playOpeningIntro({alias:state.player.alias});
+    state.ui.introVersionSeen=INTRO_VERSION;
+    saveGame();
+  }
+
   initLearning();
   initServiceDesk();
   initNightwire();
-  desktopUI=initDesktopUI({enterBlackbox});
+  desktopUI=initDesktopUI({enterBlackbox,replayIntro:replayOpeningIntro});
   terminalUI=initTerminalUI({onExit:closeBlackbox,onSuspend:suspendBlackbox,onPurge:purgeIdentity});
   document.querySelector("#start-alias").textContent=getState().player.alias;
   desktop.classList.remove("hidden");
@@ -108,6 +118,11 @@ function initializeGameUI(){
   });
 
   startClock();
+}
+
+async function replayOpeningIntro(){
+  await recoverAudioContext({trustedGesture:true});
+  await playOpeningIntro({alias:getState().player.alias,replay:true});
 }
 
 async function enterBlackbox(){
@@ -161,26 +176,25 @@ window.addEventListener("pagehide",()=>{
   if(hasActiveIdentity())saveGame();
 });
 
-continueButton.addEventListener("click",()=>initializeGameUI());
+continueButton.addEventListener("click",()=>initializeGameUI({trustedGesture:true}));
 newIdentityButton.addEventListener("click",()=>showPanel("new"));
 
 qaNightwireButton.addEventListener("click",()=>{
   beginQaNightwireIdentity("range_qa",{archiveActive:true});
-  initializeGameUI();
-  setTimeout(()=>desktopUI.toast("QA identity ready. Enter BLACKBOX and type nightwire."),500);
+  initializeGameUI({trustedGesture:true}).then(()=>setTimeout(()=>desktopUI.toast("QA identity ready. Enter BLACKBOX and type nightwire."),500));
 });
 document.querySelector("#new-identity-back").addEventListener("click",()=>showPanel("home"));
 archivesButton.addEventListener("click",()=>{renderArchives();showPanel("archives");});
 document.querySelector("#archives-back").addEventListener("click",()=>showPanel("home"));
 
-document.querySelector("#alias-form").addEventListener("submit",e=>{
+document.querySelector("#alias-form").addEventListener("submit",async e=>{
   e.preventDefault();
   const alias=document.querySelector("#alias-input").value.trim();
   if(!alias)return;
   beginNewIdentity(alias,{archiveActive:true});
   setFlag("alias_created");
   saveGame();
-  initializeGameUI();
+  await initializeGameUI({trustedGesture:true});
   setTimeout(()=>desktopUI.toast("You have new mail. Check NEXUS Mail."),600);
 });
 

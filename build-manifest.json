@@ -1,6 +1,6 @@
 {
-  "name": "Suspicious Authentication Investigation QA",
-  "version": "0.4.0-alpha.4.10.2.1-qa",
+  "name": "Opening Experience & Audio Foundation QA",
+  "version": "0.4.0-alpha.4.10.3.0-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -35,7 +35,14 @@
     "legacyTrainingLabs": 3
   },
   "features": [
-    "A4.10.1.1 moves Users & Groups out of the ticket-specific remote desktop icon set and into a functional Remote Start → System Tools menu available across all managed Service Desk workstations",
+    "A4.10.3.0 adds a first-run NEXUS Recovery Environment opening for normal identities while QA NightWire identities bypass it for fast testing",
+    "intro progress persists as ui.introVersionSeen with SAVE_VERSION 15 / WORLD_SCHEMA 10 unchanged and older saves normalized additively",
+    "the opening uses ambiguous recovery language and a brief NEXUS Operations framing message without revealing the hidden player identity",
+    "opening audio extends the existing Web Audio palette with boot_tick, boot_warn, intro_ambience and nexus_ready and reuses blackbox_boot for BLACKBOX detection",
+    "the intro includes in-sequence sound mute/unmute, Skip Startup, reduced-motion timing, and no separate audio engine",
+    "Start \u2192 System Tools \u2192 Startup Record provides a replay path without mutating story, mission, ticket, Range or BLACKBOX state",
+    "37/37 automated suites pass and 94 JavaScript/test modules pass syntax checks before packaging",
+    "A4.10.1.1 moves Users & Groups out of the ticket-specific remote desktop icon set and into a functional Remote Start \u2192 System Tools menu available across all managed Service Desk workstations",
     "all remote workstations normalize a standard identity/access view; ordinary tickets expose read-only domain/department memberships while ENG-WS-27 retains its authored delegated group/share controls",
     "A4.10.1.1 adds a Start-menu-only local NEXUS/OS Command Prompt with ordinary diagnostics (hostname, whoami, ver, ipconfig, ping, nslookup, dir, cls) while rejecting BLACKBOX-only commands",
     "local NEXUS CMD and Remote CMD remain distinct environments, preserving BLACKBOX as a deeper secure interface rather than the only place the player can type commands",
@@ -216,7 +223,7 @@
     "explicit World Intel destination feedback pointing to My Computer and the BLACKBOX clues command",
     "A4.10.2 adds INC-0008, a higher-uncertainty repeated-account-lockout investigation caused by an obsolete scheduled task using a stale stored credential after a password change",
     "A4.10.2 adds a generic evidence-gating option for investigation-style Service Desk tickets so a correct guessed change cannot be closed without correlating the authored minimum evidence sources",
-    "A4.10.2 adds Scheduled Tasks to Remote Start → System Tools on every managed workstation, with a normal NEXUS Update Check baseline task so the utility does not telegraph the active ticket",
+    "A4.10.2 adds Scheduled Tasks to Remote Start \u2192 System Tools on every managed workstation, with a normal NEXUS Update Check baseline task so the utility does not telegraph the active ticket",
     "A4.10.2 adds Remote CMD schtasks /query support and structured scheduled-task enable/disable Activity telemetry without exposing BLACKBOX-only command semantics",
     "A4.10.2 extends Users & Groups with a standard account-status panel and keeps the new authentication case mundane/non-malicious to teach evidence correlation before attribution",
     "A4.10.2 maps the new case into shared learning for authentication, credential handling, event logs, evidence correlation/preservation, controlled change and verification",
@@ -318,16 +325,18 @@
     "A4.10.2 regression verifies disabling an unrelated healthy scheduled task does not fix the lockout source and is retained as an unnecessary change in Case Review telemetry",
     "A4.10.2 static guards verify Scheduled Tasks lives in Remote Start/System Tools rather than the ticket-specific desktop icon set",
     "36/36 automated suites pass in the A4.10.2.1 working tree before packaging",
-    "A4.10.2.1 adds an explicit ES-module graph import guard for js/ui/desktop.js so malformed renderer blocks cannot pass packaging again"
+    "A4.10.2.1 adds an explicit ES-module graph import guard for js/ui/desktop.js so malformed renderer blocks cannot pass packaging again",
+    "A4.10.3.0 opening regression verifies new/migrated/QA intro-state behavior and required intro controls/copy",
+    "A4.10.3.0 audio regression guards the new cue names and reuse of the existing BLACKBOX boot signature"
   ],
   "sourceBaseline": {
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.10.2 Suspicious Authentication Investigation: the Service Desk now supports an evidence-gated authentication case that bridges deterministic support work into later free investigation without introducing a malicious actor or story reveal",
+  "foundationMilestone": "A4.10.3.0 Opening Experience & Audio Foundation: BLACKBOX now has a restrained first-run NEXUS recovery sequence with coherent existing-system audio, replay/skip behavior, and no hidden-identity reveal",
   "immediateBaseline": {
-    "version": "0.4.0-A4.10.1.1-QA",
-    "archive": "BLACKBOX-v0.4.0-A4.10.1.1-NEXUS-Desktop-Remote-Tool-Consistency-QA-GitHub.zip",
-    "sha256": "868bc047f513832decd2ce99be09b8ad1528f3596d29b5d13078a307813b909f"
+    "version": "0.4.0-A4.10.2.1-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.10.2.1-Boot-Hotfix-QA-GitHub.zip",
+    "sha256": "74ba00dedcde7958d3eaf9c280f7eb6ce5e15b74b849fef45867293fd8165d1f"
   }
 }

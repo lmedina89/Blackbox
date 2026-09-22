@@ -7,7 +7,8 @@ export const DESKTOP_APPS = [
   {id:"notes",name:"Notepad",shortName:"Notepad",glyph:"📝",startGroup:"Programs"},
   {id:"threatdesk",name:"NEXUS ThreatDesk",shortName:"ThreatDesk",glyph:"🛡️",startGroup:"Programs"},
   {id:"files",name:"My Computer",shortName:"My Computer",glyph:"🖥️",startGroup:"System Tools"},
-  {id:"cmd",name:"Command Prompt",shortName:"Command Prompt",glyph:"⌨️",startGroup:"System Tools",desktop:false}
+  {id:"cmd",name:"Command Prompt",shortName:"Command Prompt",glyph:"⌨️",startGroup:"System Tools",desktop:false},
+  {id:"startup",name:"Startup Record",shortName:"Startup Record",glyph:"◫",startGroup:"System Tools",desktop:false}
 ];
 
 export const BLACKBOX_SHORTCUT = {

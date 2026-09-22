@@ -82,7 +82,7 @@ export const baseState=()=>({
     accessSessionId:null,
     serviceSession:null
   },
-  ui:{openApps:[],lastBrowserSite:"news",terminalInputMode:"auto",nexusInputMode:"auto"}
+  ui:{openApps:[],lastBrowserSite:"news",terminalInputMode:"auto",nexusInputMode:"auto",introVersionSeen:0}
 });
 
 let state=baseState();

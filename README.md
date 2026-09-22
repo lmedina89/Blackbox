@@ -1,77 +1,119 @@
-# BLACKBOX v0.4.0 A4.10.2.1 QA — Suspicious Authentication Investigation
+# BLACKBOX v0.4.0 A4.10.3.0 QA — Opening Experience & Audio Foundation
 
+Built directly from the physically accepted A4.10.2.1 boot-hotfix baseline. This checkpoint adds the first-run NEXUS recovery/startup experience as an isolated presentation layer while leaving Service Desk, missions, BLACKBOX intrusion, NightWire/Range, and the learning architecture unchanged.
 
-**A4.10.2.1 boot hotfix:** restores application startup by closing the Scheduled Tasks renderer block correctly. No ticket logic, save schema, or investigation behavior changed.
-Built directly from the physically accepted A4.10.1.1 NEXUS Desktop & Remote Tool Consistency checkpoint. A4.10.2 is the investigation bridge for the Service Desk milestone: it adds one higher-uncertainty authentication case while preserving the established Service Desk engine, campaign, missions, BLACKBOX intrusion model, NightWire/Range, and save/world schema.
+## A4.10.3.0 scope
 
-## A4.10.2 scope
-
-- Adds **INC-0008 — Account keeps locking after password change** on `OPS-WS-24`.
-  - The user can sign in normally after an unlock, but the account begins locking again every 10–15 minutes.
-  - Security events show repeated **batch** authentication failures originating from the same workstation.
-  - The actual cause is deliberately mundane rather than a hidden attacker: an obsolete **Legacy File Sync** scheduled task is still using the user's stale stored credential after a password change.
-- Extends the existing structured Service Desk flow rather than adding a separate investigation system:
-  **root cause → evidence → bounded change → verification → Case Review**.
-- Adds an authored **evidence requirement** for investigation-style tickets. INC-0008 can no longer be closed by blindly guessing the corrective action; at least two relevant evidence sources must be correlated before resolution.
-- Adds **Scheduled Tasks** as a standard **Remote Start → System Tools** utility on every managed workstation, not as a ticket-specific desktop icon.
-  - Every workstation gets a normal NEXUS Update Check task so the tool itself does not telegraph the new ticket.
-  - `OPS-WS-24` additionally contains the failing Legacy File Sync task.
-  - The task view exposes task name, run-as identity, command, state, and last result; it does not label the stale credential as "the answer."
-- Adds read-only `schtasks /query` support to Remote Command Prompt for cross-checking scheduled automation from the CLI.
-- Expands the normal Users & Groups view with a standard account-status panel. On the new incident it exposes recent bad-password count, password-change time, failure source, and logon type while remaining present on ordinary machines too.
-- Adds task enable/disable changes to the existing Service Desk Activity telemetry and Case Review process accounting. Disabling unrelated healthy tasks is treated as an unnecessary change rather than silently rewarded.
-- Verification for INC-0008 requires:
-  - the obsolete Legacy File Sync task to be disabled;
-  - no enabled scheduled task to remain using the affected user with a stale stored credential;
-  - ordinary workstation network connectivity to remain intact.
-- ThreatDesk/shared learning receives applied experience for authentication, credential handling, event logs, evidence correlation/preservation, bounded change, and post-change verification.
-- `INC-0007` now unlocks `INC-0008`. Existing identities that already completed all seven prior tickets automatically receive the new ticket when A4.10.2 initializes.
-- **SAVE_VERSION 15 / WORLD_SCHEMA 10 remain unchanged.** No save wipe or migration bump is required.
-
-## Design intent
-
-This ticket is intentionally less certain than the previous Service Desk cases. The player should initially have several plausible explanations—stale credentials, scheduled automation, forgotten services, or genuinely suspicious access—and use timestamps, source workstation, logon type, and process context to narrow the cause.
-
-The lesson is not "account lockout = attacker." It is **correlate evidence before attributing cause**. That is the behavior we want before A4.11 Free Investigation removes the explicit ticket framing entirely.
+- Adds a restrained first-run **NEXUS Recovery Environment** sequence for normal identities. QA identities intentionally bypass it.
+- Preserves the hidden-player-identity mystery: the sequence uses ambiguous recovery/session language and does **not** reveal that the player is AI.
+- Adds synchronized audio cues to the existing Web Audio system instead of creating a second audio engine:
+  - `boot_tick` for normal initialization steps;
+  - `boot_warn` for degraded/unverified/partial states;
+  - `intro_ambience` for restrained electrical startup texture;
+  - the existing `blackbox_boot` signature when BLACKBOX is first detected;
+  - `nexus_ready` for the handoff into the desktop.
+- Reuses the existing audio preference and iPhone AudioContext recovery path. The startup screen includes a sound toggle and does not bypass the player's global sound preference.
+- Adds **SKIP** and **CONTINUE TO NEXUS** controls. Reduced-motion users receive compressed timing rather than forced animation.
+- Adds persistent `ui.introVersionSeen` state, normalized by the existing migration layer without a SAVE_VERSION or WORLD_SCHEMA bump. Existing normal identities see the new intro once after upgrade; QA identities do not.
+- Adds **Start → System Tools → Startup Record** so the opening can be replayed later without mutating story, ticket, mission, or world state.
+- Keeps startup presentation isolated in `js/ui/openingIntro.js` and `css/intro.css`; gameplay systems do not depend on intro timing.
+- Updates visible build identity to **A4.10.3.0 QA**.
 
 ## Physical-device acceptance
 
-1. Load an identity that previously completed `INC-0001` through `INC-0007` and confirm **INC-0008** appears automatically without losing prior Service Desk progress.
-2. Accept INC-0008 and open Remote Assistance to `OPS-WS-24`.
-3. Confirm the remote desktop still has the same common high-use icons as A4.10.1.1; **Scheduled Tasks should not appear as a one-off desktop clue**.
-4. Open **Remote Start → System Tools → Scheduled Tasks**.
-   - confirm the menu remains usable in iPhone portrait;
-   - confirm NEXUS Update Check and Legacy File Sync both appear;
-   - confirm task text wraps cleanly without horizontal overflow.
-5. Inspect **Event Viewer** and confirm the authentication failures identify:
-   - `NEXUS\jmiles`;
-   - logon type `Batch`;
-   - Task Scheduler as the caller/source context;
-   - the local workstation rather than an unexplained remote host.
-6. Open **Users & Groups** and confirm the standard Account Status section is readable and does not break the existing INC-0007 membership/ACL controls.
-7. In Remote Command Prompt, run `whoami` and `schtasks /query`; confirm both remain readable and the CMD input does not trigger Safari zoom.
-8. Confirm simply disabling Legacy File Sync and pressing Resolve **before gathering enough evidence** is rejected with an evidence-correlation message.
-9. After inspecting at least two relevant evidence sources, disable only Legacy File Sync, run **VERIFY**, and resolve the case.
-10. Confirm Case Review reports the authored root cause, observed evidence, the task change, verification results, and process telemetry.
-11. Reload and confirm all eight completed tickets, machine state, ThreatDesk practical-learning state, missions, NightWire/Range, and BLACKBOX terminal state persist.
-
-## Deferred intentionally
-
-- Deterministic ticket variants remain deferred until the authored Service Desk milestone is fully accepted on physical devices.
-- No malicious actor or Act II plot reveal is attached to INC-0008; the incident remains a grounded support/security case.
-- The short atmospheric NEXUS/BLACKBOX intro remains planned before A4.11 Free Investigation and must not reveal that the player is AI.
-- Multiplayer/leaderboards, procedural cases, real-network access, and free-form external targeting remain out of scope.
+1. Continue a normal existing identity and confirm the opening runs once before the desktop.
+2. Confirm boot lines remain readable in iPhone portrait and the page does not unexpectedly zoom or horizontally scroll.
+3. With sound enabled, confirm restrained boot ticks/warnings, the existing BLACKBOX boot signature, message cue, and final NEXUS-ready cue align with visible events.
+4. Toggle **SOUND OFF** during the intro and confirm later intro sounds stop; toggle it back on and confirm the existing global audio preference remains coherent on the desktop.
+5. Use **SKIP** and confirm the desktop appears cleanly and the intro does not autoplay again on the next reload.
+6. Let the sequence complete, read the short session brief, then choose **CONTINUE TO NEXUS** and confirm the normal desktop/campaign state is unchanged.
+7. Reload and confirm the intro does not autoplay a second time for that identity.
+8. Open **Start → System Tools → Startup Record → REPLAY STARTUP SEQUENCE** and confirm replay works without changing missions, Service Desk, NightWire/Range, credits, time, or BLACKBOX state.
+9. Create/use the NightWire QA identity and confirm it bypasses the narrative startup.
+10. Background/foreground Safari once, then replay the intro from Startup Record and confirm audio recovers on the trusted tap.
 
 ## Automated verification
 
-- **35/35 automated suites pass** in the working tree, including the new A4.10.2 authentication-investigation regression and every prior Service Desk, learning, mission/campaign, NightWire/Range, save, terminal, audio, and UI suite.
-- **91/91 JavaScript/test modules pass `node --check`** before packaging.
+- **37/37 automated suites pass** after recovery.
+- **94/94 JavaScript/test modules pass `node --check`**.
+- Local HTTP smoke confirms `index.html`, `js/ui/openingIntro.js`, and `css/intro.css` are served from the repo-root structure.
+- The container Chromium policy blocks localhost/file navigation, so physical Safari remains the final visual/audio acceptance target.
+
+## Deferred intentionally
+
+- No world-registry/background-noise changes yet; those remain A4.10.4.
+- No Free Investigation/clue graph yet; that remains A4.11.
+- No Act II reveal, AI-identity reveal, multiplayer, leaderboards, or procedural investigation content.
+- No new Service Desk tickets in this checkpoint.
+
+## Rollback baseline
+
+A4.10.2.1 remains the immediate rollback baseline:
+
+`BLACKBOX-v0.4.0-A4.10.2.1-Boot-Hotfix-QA-GitHub.zip`
+
+SHA-256: `74ba00dedcde7958d3eaf9c280f7eb6ce5e15b74b849fef45867293fd8165d1f`
+
+---
+
+# BLACKBOX v0.4.0 A4.10.3.0 QA — Opening Experience & Audio Foundation
+
+Built directly from the accepted A4.10.2.1 boot-hotfix baseline. This checkpoint introduces the first integrated opening/recovery sequence while keeping Service Desk, missions, BLACKBOX intrusion, NightWire/Range, ThreatDesk, save data, and world behavior unchanged.
+
+## A4.10.3.0 scope
+
+- Adds a first-run **NEXUS Recovery Environment** sequence for normal identities.
+- Existing normal identities that have never seen intro version 1 receive it once on their next Continue; future launches go directly to NEXUS.
+- New identities receive the opening immediately after alias creation.
+- Development/QA NightWire identities bypass the narrative opening so Range testing remains fast.
+- Adds persistent `ui.introVersionSeen` state without changing **SAVE_VERSION 15 / WORLD_SCHEMA 10**. Older saves normalize safely to version `0` and are not wiped.
+- Adds a restrained recovery-console script with `USER PROFILE: UNVERIFIED`, `SESSION RESTORE: PARTIAL`, limited network access, BLACKBOX detection, an ambiguous origin-check failure, and `DO NOT DISCONNECT.`
+- Ends with a short NEXUS Operations session brief that establishes the intended mindset: notice patterns, learn the environment before making assumptions, and remember that not everything unusual is important.
+- Adds **Skip Startup** and an intro-local **Sound On/Off** control.
+- Adds **Start → System Tools → Startup Record** so the sequence can be replayed later without changing story, mission, Service Desk, or BLACKBOX state.
+- Reuses the existing Web Audio system and adds only four related cues: `boot_tick`, `boot_warn`, `intro_ambience`, and `nexus_ready`.
+- Reuses the existing `blackbox_boot` signature when BLACKBOX is detected so the intro fits the game's existing sonic language.
+- Preserves the existing iOS AudioContext recovery path; the intro does not create a second audio engine.
+- Respects reduced-motion preferences by shortening presentation delays while retaining the same information and controls.
+
+## Design intent
+
+The first-play interpretation should be a partially recovered corporate/security workstation session, not an obvious AI/simulation reveal. The opening uses ambiguous system language that can gain a second meaning later, but avoids neural-model terminology, sentience claims, horror stingers, or an omniscient narrator. NEXUS remains clean and utilitarian; BLACKBOX keeps the slightly rougher low-frequency/noise signature already established by `blackbox_boot`.
+
+## Physical-device acceptance
+
+1. Continue a normal identity that has not seen intro version 1 and confirm the recovery sequence appears before the desktop.
+2. Confirm startup text remains readable in iPhone portrait with no horizontal overflow.
+3. Confirm boot checks make subtle matched sounds when sound is enabled.
+4. Confirm warning lines use a restrained different cue and BLACKBOX detection uses the familiar BLACKBOX boot signature.
+5. Toggle **SOUND ON/OFF** during the sequence and confirm audio changes without interrupting progression.
+6. Tap **SKIP STARTUP** during boot and confirm NEXUS opens normally and the intro does not autoplay again after reload.
+7. Create a new identity and confirm the intro runs after alias creation.
+8. Confirm the QA NightWire identity still enters the desktop directly.
+9. Open **Start → System Tools → Startup Record**, replay the opening, and confirm replay does not modify missions, tickets, Range, BLACKBOX sessions, credits, or world state.
+10. Confirm **CONTINUE TO NEXUS** transitions cleanly and normal notifications appear afterward.
+11. Reload and confirm completed intro state persists with A4.10.2.1 gameplay/save data intact.
+12. Recheck one mission, INC-0008, NightWire Range, local CMD, and BLACKBOX boot for shared UI/audio regressions.
+
+## Deferred intentionally
+
+- No A4.10.4 world registry/background-noise systems yet.
+- No Free Investigation clue graph or Findings UI yet.
+- No Act II reveal or explicit explanation of the player's identity.
+- No background music; sound remains contextual cues plus restrained electrical ambience.
+- Intro copy/timing can receive a later A4.10.3.x physical-QA polish pass.
+
+## Automated verification
+
+- **37/37 automated suites pass** in the working tree, including the new opening-state/audio/static regression and all prior campaign, Service Desk, mission, NightWire/Range, learning, save, terminal, and UI suites.
+- **94/94 JavaScript/test modules pass `node --check`** before packaging.
+- Local HTTP smoke checks confirm the new versioned index and opening-intro module are served from the repo root.
 - The final ZIP is re-extracted and the full suite is rerun from packaged bytes before delivery.
 
 ## Rollback baseline
 
-A4.10.1.1 remains the immediate rollback baseline:
+A4.10.2.1 remains the immediate rollback baseline:
 
-`BLACKBOX-v0.4.0-A4.10.1.1-NEXUS-Desktop-Remote-Tool-Consistency-QA-GitHub.zip`
+`BLACKBOX-v0.4.0-A4.10.2.1-Boot-Hotfix-QA-GitHub.zip`
 
-SHA-256: `868bc047f513832decd2ce99be09b8ad1528f3596d29b5d13078a307813b909f`
+SHA-256: `74ba00dedcde7958d3eaf9c280f7eb6ce5e15b74b849fef45867293fd8165d1f`

@@ -437,6 +437,7 @@ function normalize(save){
   save.ui.terminalInputMode=["auto","blackbox","system"].includes(terminalInputMode)?terminalInputMode:"auto";
   const nexusInputMode=asString(save.ui.nexusInputMode,d.ui.nexusInputMode);
   save.ui.nexusInputMode=["auto","nexus","system"].includes(nexusInputMode)?nexusInputMode:"auto";
+  save.ui.introVersionSeen=asNumber(save.ui.introVersionSeen,d.ui.introVersionSeen,{integer:true,min:0,max:999});
   return save;
 }
 
