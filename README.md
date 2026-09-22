@@ -1,3 +1,39 @@
+# BLACKBOX v0.4.0 A4.10.3.2 QA — Opening Intro Readability / Contrast Hotfix
+
+Built directly from the physically accepted A4.10.3.1 mobile-viewport hotfix after iPhone Safari QA confirmed the layout fix and identified only a text-legibility issue against the dark recovery-console presentation.
+
+## A4.10.3.2 scope
+
+- Brightens normal recovery-console text and phase labels without changing font sizing, spacing, timing, layout, or transcript behavior.
+- Raises contrast for OK/AVAILABLE green, DEGRADED/UNVERIFIED/PARTIAL amber, BLACKBOX green, the final `DO NOT DISCONNECT.` line, Session Brief body text, and **CONTINUE TO NEXUS**.
+- Keeps the existing dark NEXUS recovery palette rather than turning the intro into a bright UI.
+- **Does not reduce, soften, remove, or otherwise alter the established CRT/scanline treatment.**
+- Does not change intro copy, audio, startup timing, persistence, mobile viewport behavior, Service Desk, missions, BLACKBOX mechanics, Range/NightWire, learning state, SAVE_VERSION 15, or WORLD_SCHEMA 10.
+- Updates visible build identity to **A4.10.3.2 QA**.
+
+## Physical iPhone acceptance
+
+1. Replay **Startup Record** or use an identity that has not completed intro version 1.
+2. Confirm normal boot lines are easier to read while the screen remains dark and atmospheric.
+3. Confirm green OK/AVAILABLE states and amber warning states are clearly distinguishable at normal phone brightness.
+4. Confirm the Session Brief paragraphs and **CONTINUE TO NEXUS** are comfortably readable.
+5. Confirm the CRT/scanline appearance is unchanged from A4.10.3.1.
+6. Confirm the A4.10.3.1 viewport fix remains intact: no whole-page scrolling is required to reach the Session Brief/Continue handoff.
+
+## Automated verification
+
+- **39/39 automated suites pass**, including the new readability/scanline-preservation regression and every previous campaign, Service Desk, mission, NightWire/Range, learning, save, terminal, opening, and mobile-viewport regression.
+- **96/96 JavaScript/test modules pass `node --check`**.
+- The final ZIP is re-extracted and the full suite is rerun from packaged bytes before delivery.
+
+## Immediate rollback baseline
+
+`BLACKBOX-v0.4.0-A4.10.3.1-Opening-Intro-Mobile-Viewport-Hotfix-QA-GitHub.zip`
+
+SHA-256: `c68b8c534426f7b04104f6bf8a66d6b1c4e18441c421effa0a4a7fad39914769`
+
+---
+
 # BLACKBOX v0.4.0 A4.10.3.1 QA — Opening Intro Mobile Viewport Hotfix
 
 Built directly from A4.10.3.0 after physical iPhone Safari QA showed the recovery transcript expanding the intro shell beyond the visible viewport. The result was outer-page scrolling: later boot lines such as `STATUS ............... AVAILABLE` could drift away from the handoff while **CONTINUE TO NEXUS** remained much farther down the page.

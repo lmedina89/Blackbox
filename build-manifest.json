@@ -1,6 +1,6 @@
 {
-  "name": "Opening Intro Mobile Viewport Hotfix QA",
-  "version": "0.4.0-alpha.4.10.3.1-qa",
+  "name": "Opening Intro Readability / Contrast Hotfix QA",
+  "version": "0.4.0-alpha.4.10.3.2-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -35,6 +35,10 @@
     "legacyTrainingLabs": 3
   },
   "features": [
+    "39/39 automated suites pass and 96 JavaScript/test modules pass syntax checks for the A4.10.3.2 package",
+    "A4.10.3.2 raises opening-intro text contrast across normal, OK, warning, BLACKBOX, final-line, Session Brief and Continue states while preserving the dark recovery-console palette",
+    "the established CRT/scanline treatment is intentionally unchanged; no scanline opacity, spacing, overlay or terminal visual effect was reduced",
+    "A4.10.3.2 is presentation-only and leaves intro copy/timing/audio/state, the A4.10.3.1 mobile viewport fix, Service Desk, missions, BLACKBOX, Range/NightWire, learning, SAVE_VERSION 15 and WORLD_SCHEMA 10 unchanged",
     "38/38 automated suites pass and 95 JavaScript/test modules pass syntax checks for the A4.10.3.1 package",
     "A4.10.3.1 clamps the phone opening-intro shell to the fixed overlay height so transcript growth cannot create outer-page scrolling",
     "the phone recovery console is now a shrinkable flex region and the transcript owns any required internal touch scrolling",
@@ -338,10 +342,10 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.10.3.1 Opening Intro Mobile Viewport Hotfix: iPhone startup now stays within one visible overlay, with transcript scrolling isolated from the Session Brief/Continue handoff",
+  "foundationMilestone": "A4.10.3.2 Opening Intro Readability / Contrast Hotfix: brighter recovery and briefing text on phone while preserving the established CRT/scanline treatment unchanged",
   "immediateBaseline": {
-    "version": "0.4.0-A4.10.3.0-QA",
-    "archive": "BLACKBOX-v0.4.0-A4.10.3.0-Opening-Experience-Audio-Foundation-QA-GitHub.zip",
-    "sha256": "813ab421b81c17bd2513e98761702d9427fc05e5b769927c1d120017fb894276"
+    "version": "0.4.0-A4.10.3.1-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.10.3.1-Opening-Intro-Mobile-Viewport-Hotfix-QA-GitHub.zip",
+    "sha256": "c68b8c534426f7b04104f6bf8a66d6b1c4e18441c421effa0a4a7fad39914769"
   }
 }
