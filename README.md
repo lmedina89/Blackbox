@@ -1,3 +1,33 @@
+# BLACKBOX v0.4.0 A4.10.3.1 QA — Opening Intro Mobile Viewport Hotfix
+
+Built directly from A4.10.3.0 after physical iPhone Safari QA showed the recovery transcript expanding the intro shell beyond the visible viewport. The result was outer-page scrolling: later boot lines such as `STATUS ............... AVAILABLE` could drift away from the handoff while **CONTINUE TO NEXUS** remained much farther down the page.
+
+## A4.10.3.1 scope
+
+- Clamps the phone opening-intro shell to the actual fixed overlay instead of allowing its `min-height` to grow with transcript content.
+- Makes the recovery console a shrinkable flex region and keeps the boot transcript as the dedicated internal scroll surface.
+- Keeps the Session Brief as a bounded footer region, so the final recovery lines and **CONTINUE TO NEXUS** remain in the same phone viewport.
+- Retains iOS momentum scrolling inside the transcript/briefing if a short viewport genuinely needs it.
+- Changes presentation only: intro copy, timing, audio, persistence, skip/replay behavior, Service Desk, missions, BLACKBOX, Range/NightWire, learning state, SAVE_VERSION 15, and WORLD_SCHEMA 10 are unchanged.
+- Updates visible build identity to **A4.10.3.1 QA**.
+
+## Physical iPhone acceptance
+
+1. Replay **Startup Record** or use an identity that has not completed intro version 1.
+2. Let the sequence run through `STATUS ............... AVAILABLE`, `ORIGIN CHECK ......... NO RESPONSE`, and `DO NOT DISCONNECT.`
+3. Confirm the browser page itself does **not** need to be scrolled to reach the Session Brief.
+4. Confirm **CONTINUE TO NEXUS** is visible in the same viewport once the brief appears.
+5. If the transcript exceeds available space, confirm only the transcript region scrolls and the Session Brief remains anchored below it.
+6. Confirm sound toggle, Skip Startup, replay, and normal NEXUS handoff still work.
+
+## Automated verification
+
+- **38/38 automated suites pass**, including the focused mobile-intro viewport regression and all prior campaign, Service Desk, mission, NightWire/Range, learning, save, terminal, and opening regressions.
+- **95/95 JavaScript/test modules pass `node --check`**.
+- The final archive is re-extracted and the same full suite is rerun from packaged bytes before delivery.
+
+---
+
 # BLACKBOX v0.4.0 A4.10.3.0 QA — Opening Experience & Audio Foundation
 
 Built directly from the physically accepted A4.10.2.1 boot-hotfix baseline. This checkpoint adds the first-run NEXUS recovery/startup experience as an isolated presentation layer while leaving Service Desk, missions, BLACKBOX intrusion, NightWire/Range, and the learning architecture unchanged.

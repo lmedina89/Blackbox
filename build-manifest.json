@@ -1,6 +1,6 @@
 {
-  "name": "Opening Experience & Audio Foundation QA",
-  "version": "0.4.0-alpha.4.10.3.0-qa",
+  "name": "Opening Intro Mobile Viewport Hotfix QA",
+  "version": "0.4.0-alpha.4.10.3.1-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -35,6 +35,11 @@
     "legacyTrainingLabs": 3
   },
   "features": [
+    "38/38 automated suites pass and 95 JavaScript/test modules pass syntax checks for the A4.10.3.1 package",
+    "A4.10.3.1 clamps the phone opening-intro shell to the fixed overlay height so transcript growth cannot create outer-page scrolling",
+    "the phone recovery console is now a shrinkable flex region and the transcript owns any required internal touch scrolling",
+    "the Session Brief remains a bounded footer region so CONTINUE TO NEXUS stays in the same visible phone viewport after the boot sequence",
+    "A4.10.3.1 is presentation-only and keeps intro content/audio/state plus Service Desk, missions, BLACKBOX, Range/NightWire, learning, SAVE_VERSION 15 and WORLD_SCHEMA 10 unchanged",
     "A4.10.3.0 adds a first-run NEXUS Recovery Environment opening for normal identities while QA NightWire identities bypass it for fast testing",
     "intro progress persists as ui.introVersionSeen with SAVE_VERSION 15 / WORLD_SCHEMA 10 unchanged and older saves normalized additively",
     "the opening uses ambiguous recovery language and a brief NEXUS Operations framing message without revealing the hidden player identity",
@@ -333,10 +338,10 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.10.3.0 Opening Experience & Audio Foundation: BLACKBOX now has a restrained first-run NEXUS recovery sequence with coherent existing-system audio, replay/skip behavior, and no hidden-identity reveal",
+  "foundationMilestone": "A4.10.3.1 Opening Intro Mobile Viewport Hotfix: iPhone startup now stays within one visible overlay, with transcript scrolling isolated from the Session Brief/Continue handoff",
   "immediateBaseline": {
-    "version": "0.4.0-A4.10.2.1-QA",
-    "archive": "BLACKBOX-v0.4.0-A4.10.2.1-Boot-Hotfix-QA-GitHub.zip",
-    "sha256": "74ba00dedcde7958d3eaf9c280f7eb6ce5e15b74b849fef45867293fd8165d1f"
+    "version": "0.4.0-A4.10.3.0-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.10.3.0-Opening-Experience-Audio-Foundation-QA-GitHub.zip",
+    "sha256": "813ab421b81c17bd2513e98761702d9427fc05e5b769927c1d120017fb894276"
   }
 }
