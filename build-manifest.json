@@ -1,6 +1,6 @@
 {
   "name": "Opening Intro Readability / Contrast Hotfix QA",
-  "version": "0.4.0-alpha.4.10.3.2-qa",
+  "version": "0.4.0-alpha.4.10.3.3-qa",
   "saveVersion": 15,
   "worldSchema": 10,
   "baseline": {
@@ -35,6 +35,12 @@
     "legacyTrainingLabs": 3
   },
   "features": [
+    "40/40 automated suites pass and 97 JavaScript/test modules pass syntax checks for the A4.10.3.3 package",
+    "A4.10.3.3 routes Service Desk Work Notes through the established NEXUS PERSONAL KEYBOARD on touch devices while preserving the existing Notepad keyboard unchanged",
+    "Service Desk Work Notes default to custom NEXUS input on coarse pointers, suppress native mobile keyboard focus with readonly plus inputmode none, and expose SYSTEM KEYBOARD only as an explicit fallback",
+    "the Service Desk NEXUS keyboard starts collapsed, expands when Work Notes are tapped, and keeps SAVE NOTE as the existing persistence boundary",
+    "the player-facing BLACKBOX terminal banner removes the internal QA suffix and restores all four banner rows to the same 44-character width",
+    "A4.10.3.3 leaves SAVE_VERSION 15, WORLD_SCHEMA 10, Service Desk scoring/verification, mission logic, intro behavior/audio, BLACKBOX command semantics, and CRT scanlines unchanged",
     "39/39 automated suites pass and 96 JavaScript/test modules pass syntax checks for the A4.10.3.2 package",
     "A4.10.3.2 raises opening-intro text contrast across normal, OK, warning, BLACKBOX, final-line, Session Brief and Continue states while preserving the dark recovery-console palette",
     "the established CRT/scanline treatment is intentionally unchanged; no scanline opacity, spacing, overlay or terminal visual effect was reduced",
@@ -247,6 +253,9 @@
     "IPv6"
   ],
   "verification": [
+    "A4.10.3.3 full working-tree verification passes 40/40 automated suites and 97/97 JavaScript/test syntax checks before packaging",
+    "A4.10.3.3 static regression guards Service Desk NEXUS keyboard controls, native-keyboard suppression, explicit SYSTEM KEYBOARD fallback, unchanged Work Notes save semantics, and fixed-width terminal banner identity",
+    "physical iPhone Safari acceptance remains required for Work Notes custom-keyboard interaction and explicit native-keyboard fallback",
     "A4.10.1 regression completes the application-service case with healthy network reachability, stopped Northstar Inventory Agent, bounded service repair, and structured Case Review telemetry",
     "A4.10.1 storage regression proves unrelated small cleanups remain below the authored free-space threshold while removing Temporary report exports restores sufficient capacity",
     "A4.10.1 least-privilege regression proves DOMAIN-ADMINS can create effective share access but cannot satisfy ticket verification; ENG-PROJECT-R is required and persists through save normalization",
@@ -342,10 +351,10 @@
     "version": "0.3.0-RC7",
     "sha256": "cd05d8fb6994ebf6e9b00a11d25dcfe814ac29c3770e70e5d002a265d216254e"
   },
-  "foundationMilestone": "A4.10.3.2 Opening Intro Readability / Contrast Hotfix: brighter recovery and briefing text on phone while preserving the established CRT/scanline treatment unchanged",
+  "foundationMilestone": "A4.10.3.3 Mobile Input Consistency / Terminal Banner Hotfix: Service Desk Work Notes adopt the NEXUS personal keyboard on touch devices and the BLACKBOX terminal banner hides the QA suffix while restoring rail alignment",
   "immediateBaseline": {
-    "version": "0.4.0-A4.10.3.1-QA",
-    "archive": "BLACKBOX-v0.4.0-A4.10.3.1-Opening-Intro-Mobile-Viewport-Hotfix-QA-GitHub.zip",
-    "sha256": "c68b8c534426f7b04104f6bf8a66d6b1c4e18441c421effa0a4a7fad39914769"
+    "version": "0.4.0-A4.10.3.2-QA",
+    "archive": "BLACKBOX-v0.4.0-A4.10.3.2-Opening-Intro-Readability-Contrast-Hotfix-QA-GitHub.zip",
+    "sha256": "48180ccd45e70ca4bd7653ccff67c88e36e8c8e4bd34875eff1910b7e6c07c30"
   }
 }

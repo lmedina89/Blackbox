@@ -137,7 +137,7 @@
   .terminal-key{font-size:14px}
   .terminal-keyboard-brand{font-size:10px}
   .terminal-input-controls button{font-size:11px}
-  .terminal-form-custom .terminal-input,.notepad-custom-input{user-select:none;-webkit-user-select:none}
+  .terminal-form-custom .terminal-input,.notepad-custom-input,.nexus-custom-input{user-select:none;-webkit-user-select:none}
 }
 
 @media (orientation:landscape) and (max-height:520px) and (pointer:coarse){

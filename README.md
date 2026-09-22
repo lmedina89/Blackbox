@@ -1,3 +1,40 @@
+# BLACKBOX v0.4.0 A4.10.3.3 QA — Mobile Input Consistency / Terminal Banner Hotfix
+
+Built directly from A4.10.3.2 after physical iPhone Safari QA found two remaining presentation/input inconsistencies: Service Desk Work Notes invoked the native iOS keyboard instead of the established NEXUS keyboard, and the BLACKBOX terminal version line exposed the internal QA suffix and pushed its right rail out of alignment.
+
+## A4.10.3.3 scope
+
+- Service Desk **Work Notes** now use the same beige **NEXUS PERSONAL KEYBOARD / MODEL N95** interaction model already proven in Notepad on touch devices.
+- Touch Work Notes default to NEXUS input, keep the real textarea readonly with `inputmode=none`, and suppress the native mobile keyboard until the player explicitly chooses **SYSTEM KEYBOARD**.
+- The Service Desk keyboard starts collapsed so it does not consume ticket space; tapping Work Notes opens it, and **SHOW/HIDE KEYS** remains available.
+- Save semantics are unchanged: custom-keyboard typing edits the Work Notes field, while **SAVE NOTE** remains the persistence boundary.
+- The player-facing BLACKBOX terminal banner now shows `INTERACTIVE SHELL 0.4.0-A4.10.3.3` without the internal `-QA` suffix; the shortened line restores the right rail to the same 44-character width as the rest of the banner.
+- Internal/package QA identity remains intact elsewhere for build tracking.
+- No save/schema bump, mission change, Service Desk scoring change, intro behavior change, scanline change, or BLACKBOX command-semantic change.
+
+## Physical QA checklist
+
+1. Open **Service Desk**, accept/select an in-progress ticket, and tap **Work Notes**.
+2. Confirm the iOS keyboard does **not** appear and the NEXUS personal keyboard opens instead.
+3. Type letters, numbers, punctuation, spaces and a newline; test Backspace, Shift/Caps and cursor arrows.
+4. Tap **SAVE NOTE**, move away from the ticket and return; confirm the note persists.
+5. Tap **SYSTEM KEYBOARD** and confirm the iOS keyboard opens only then. Switch back to **NEXUS KEYS** and confirm the custom keyboard returns.
+6. Open BLACKBOX and confirm the terminal banner has no `QA` text and all left/right rails align.
+7. Recheck Notepad and the BLACKBOX secure keyboard to confirm their existing behavior is unchanged.
+
+## Automated verification
+
+- **40/40 automated suites pass**, including the new Service Desk input-consistency / terminal-banner regression and every previous campaign, Service Desk, mission, NightWire/Range, learning, save, terminal, opening, and mobile regression.
+- **97/97 JavaScript/test modules pass `node --check`**.
+- The final ZIP is re-extracted and the complete verification set is rerun from packaged bytes before delivery.
+
+## Immediate rollback baseline
+
+`BLACKBOX-v0.4.0-A4.10.3.2-Opening-Intro-Readability-Contrast-Hotfix-QA-GitHub.zip`  
+SHA-256: `48180ccd45e70ca4bd7653ccff67c88e36e8c8e4bd34875eff1910b7e6c07c30`
+
+---
+
 # BLACKBOX v0.4.0 A4.10.3.2 QA — Opening Intro Readability / Contrast Hotfix
 
 Built directly from the physically accepted A4.10.3.1 mobile-viewport hotfix after iPhone Safari QA confirmed the layout fix and identified only a text-legibility issue against the dark recovery-console presentation.
